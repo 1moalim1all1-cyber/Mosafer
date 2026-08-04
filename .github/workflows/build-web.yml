@@ -1,0 +1,60 @@
+name: بناء ونشر نسخة الويب
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Flutter Web
+    runs-on: ubuntu-latest
+    steps:
+      - name: تحميل الكود
+        uses: actions/checkout@v4
+
+      - name: تثبيت Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: تفعيل دعم الويب
+        run: flutter config --enable-web
+
+      - name: تثبيت المكتبات
+        run: flutter pub get
+
+      - name: توليد ملفات الترجمة
+        run: flutter gen-l10n
+
+      # اسم الـ Repository لازم يتطابق مع --base-href هنا عشان الروابط
+      # تشتغل صح تحت GitHub Pages (اللي بتنشر على مسار فرعي زي
+      # username.github.io/Mosafer/ مش على الجذر مباشرة)
+      - name: بناء نسخة الويب
+        run: flutter build web --release --base-href "/Mosafer/"
+
+      - name: تجهيز صفحات GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    name: نشر على GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: نشر
+        id: deployment
+        uses: actions/deploy-pages@v4

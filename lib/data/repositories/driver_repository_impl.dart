@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
@@ -27,33 +27,33 @@ class DriverRepositoryImpl implements DriverRepository {
   @override
   Future<void> submitDriverDocuments({
     required String uid,
-    required File nationalIdImage,
-    required File licenseImage,
-    required File vehicleLicenseImage,
-    required File vehicleImage,
-    required File selfieImage,
+    required Uint8List nationalIdBytes,
+    required Uint8List licenseBytes,
+    required Uint8List vehicleLicenseBytes,
+    required Uint8List vehicleBytes,
+    required Uint8List selfieBytes,
     required VehicleInfo vehicle,
   }) async {
     // الرفع بالتوازي أسرع من رفع الصور واحدة ورا التانية
     final results = await Future.wait([
-      _cloudinary.uploadImage(
-        imageFile: nationalIdImage,
+      _cloudinary.uploadImageBytes(
+        bytes: nationalIdBytes,
         folder: AppConstants.cloudinaryNationalIdFolder,
       ),
-      _cloudinary.uploadImage(
-        imageFile: licenseImage,
+      _cloudinary.uploadImageBytes(
+        bytes: licenseBytes,
         folder: AppConstants.cloudinaryLicenseFolder,
       ),
-      _cloudinary.uploadImage(
-        imageFile: vehicleLicenseImage,
+      _cloudinary.uploadImageBytes(
+        bytes: vehicleLicenseBytes,
         folder: AppConstants.cloudinaryLicenseFolder,
       ),
-      _cloudinary.uploadImage(
-        imageFile: vehicleImage,
+      _cloudinary.uploadImageBytes(
+        bytes: vehicleBytes,
         folder: AppConstants.cloudinaryVehicleFolder,
       ),
-      _cloudinary.uploadImage(
-        imageFile: selfieImage,
+      _cloudinary.uploadImageBytes(
+        bytes: selfieBytes,
         folder: AppConstants.cloudinaryProfileFolder,
       ),
     ]);

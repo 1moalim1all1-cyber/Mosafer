@@ -95,3 +95,42 @@ git push -u origin main
 1. دوس على العملية اللي فشلت
 2. دوس على خطوة "بناء APK" (اللي جنبها ❌)
 3. انسخ رسالة الخطأ **كاملة** من آخر الصفحة وابعتهالي، وهساعدك نحلها فورًا
+
+---
+
+# بديل أبسط بكتير: نسخة الويب (تشتغل في المتصفح)
+
+نسخة الويب مالهاش علاقة خالص بمشاكل Android/Gradle - أسهل وأسرع تجربة.
+
+## المرحلة الإضافية: سجّل تطبيق ويب في Firebase
+1. نفس صفحة **Project settings** في Firebase Console
+2. تحت **Your apps** → دوس أيقونة **</>** (Web)
+3. اكتب اسم زي `Mosafer Web` ودوس **Register app**
+4. هيديك القيم دي: `apiKey`, `appId`, `messagingSenderId`, `projectId`,
+   `authDomain`, `storageBucket`
+5. افتح `lib/firebase_options.template.dart` (لو لسه معملتوش)، املأ **قسم
+   web** بالقيم دي (بالإضافة لقسم android لو محتاجه)، واحفظه
+   `lib/firebase_options.dart`
+
+## فعّل GitHub Pages في الـ Repository
+1. من صفحة الـ Repository على GitHub → **Settings**
+2. من القائمة الجانبية → **Pages**
+3. تحت **Build and deployment** → **Source**: اختار **GitHub Actions**
+
+## ادفع الكود
+```bash
+git add .
+git commit -m "نسخة الويب"
+git push
+```
+
+## تابع النشر
+1. تبويب **Actions** → هتلاقي عملية اسمها **"بناء ونشر نسخة الويب"**
+2. لما تخلص بعلامة ✅، روح لـ **Settings → Pages** تاني، هتلاقي رابط
+   الموقع فوق (زي `https://1moalim1all1-cyber.github.io/Mosafer/`)
+3. افتح الرابط في أي متصفح — التطبيق هيشتغل مباشرة من غير تثبيت أي حاجة
+
+## ملحوظة
+بعض الميزات (زي الإشعارات الحقيقية Push على الموبايل) خاصة بتطبيق
+الموبايل بس. نسخة الويب مثالية للتجربة السريعة ومعاينة الشاشات والتدفق
+العام، مش بديل كامل عن الـ APK للاستخدام الفعلي.

@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,11 +21,11 @@ class DriverDocumentsScreen extends ConsumerStatefulWidget {
 }
 
 class _DriverDocumentsScreenState extends ConsumerState<DriverDocumentsScreen> {
-  File? _nationalId;
-  File? _license;
-  File? _vehicleLicense;
-  File? _vehicleImage;
-  File? _selfie;
+  Uint8List? _nationalId;
+  Uint8List? _license;
+  Uint8List? _vehicleLicense;
+  Uint8List? _vehicleImage;
+  Uint8List? _selfie;
 
   final _makeController = TextEditingController();
   final _modelController = TextEditingController();
@@ -68,11 +68,11 @@ class _DriverDocumentsScreenState extends ConsumerState<DriverDocumentsScreen> {
     try {
       await ref.read(driverRepositoryProvider).submitDriverDocuments(
             uid: user.uid,
-            nationalIdImage: _nationalId!,
-            licenseImage: _license!,
-            vehicleLicenseImage: _vehicleLicense!,
-            vehicleImage: _vehicleImage!,
-            selfieImage: _selfie!,
+            nationalIdBytes: _nationalId!,
+            licenseBytes: _license!,
+            vehicleLicenseBytes: _vehicleLicense!,
+            vehicleBytes: _vehicleImage!,
+            selfieBytes: _selfie!,
             vehicle: VehicleInfo(
               make: _makeController.text.trim(),
               model: _modelController.text.trim(),
@@ -116,36 +116,36 @@ class _DriverDocumentsScreenState extends ConsumerState<DriverDocumentsScreen> {
             DocumentUploadTile(
               label: 'بطاقة الرقم القومي',
               hint: 'الوجهين في صورة واحدة واضحة',
-              selectedFile: _nationalId,
-              onPicked: (f) => setState(() => _nationalId = f),
+              selectedBytes: _nationalId,
+              onPicked: (bytes, name) => setState(() => _nationalId = bytes),
             ),
             const SizedBox(height: 12),
             DocumentUploadTile(
               label: 'رخصة القيادة',
               hint: 'سارية الصلاحية',
-              selectedFile: _license,
-              onPicked: (f) => setState(() => _license = f),
+              selectedBytes: _license,
+              onPicked: (bytes, name) => setState(() => _license = bytes),
             ),
             const SizedBox(height: 12),
             DocumentUploadTile(
               label: 'رخصة السيارة',
               hint: 'استمارة السيارة سارية',
-              selectedFile: _vehicleLicense,
-              onPicked: (f) => setState(() => _vehicleLicense = f),
+              selectedBytes: _vehicleLicense,
+              onPicked: (bytes, name) => setState(() => _vehicleLicense = bytes),
             ),
             const SizedBox(height: 12),
             DocumentUploadTile(
               label: 'صورة السيارة',
               hint: 'من برّه، واضحة اللوحة',
-              selectedFile: _vehicleImage,
-              onPicked: (f) => setState(() => _vehicleImage = f),
+              selectedBytes: _vehicleImage,
+              onPicked: (bytes, name) => setState(() => _vehicleImage = bytes),
             ),
             const SizedBox(height: 12),
             DocumentUploadTile(
               label: 'صورة شخصية للتحقق',
               hint: 'سيلفي واضح لوجهك',
-              selectedFile: _selfie,
-              onPicked: (f) => setState(() => _selfie = f),
+              selectedBytes: _selfie,
+              onPicked: (bytes, name) => setState(() => _selfie = bytes),
             ),
 
             const SizedBox(height: 28),

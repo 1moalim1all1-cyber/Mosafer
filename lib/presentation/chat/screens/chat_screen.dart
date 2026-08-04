@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -93,9 +92,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     ref.read(chatImageUploadingProvider.notifier).state = true;
     try {
-      final url = await CloudinaryService.instance.uploadImage(
-        imageFile: File(picked.path),
+      final bytes = await picked.readAsBytes();
+      final url = await CloudinaryService.instance.uploadImageBytes(
+        bytes: bytes,
         folder: 'mosafer/chat/${widget.chatId}',
+        filename: picked.name,
       );
       await ref.read(chatRepositoryProvider).sendImageMessage(
             chatId: widget.chatId,

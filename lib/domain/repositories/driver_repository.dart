@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import '../entities/driver_entity.dart';
 
 abstract class DriverRepository {
@@ -6,11 +6,11 @@ abstract class DriverRepository {
   /// في Firestore بحالة "pending" بانتظار مراجعة الإدارة.
   Future<void> submitDriverDocuments({
     required String uid,
-    required File nationalIdImage,
-    required File licenseImage,
-    required File vehicleLicenseImage,
-    required File vehicleImage,
-    required File selfieImage,
+    required Uint8List nationalIdBytes,
+    required Uint8List licenseBytes,
+    required Uint8List vehicleLicenseBytes,
+    required Uint8List vehicleBytes,
+    required Uint8List selfieBytes,
     required VehicleInfo vehicle,
   });
 

@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -7,14 +7,14 @@ import '../../../core/theme/app_colors.dart';
 class DocumentUploadTile extends StatelessWidget {
   final String label;
   final String hint;
-  final File? selectedFile;
-  final ValueChanged<File> onPicked;
+  final Uint8List? selectedBytes;
+  final void Function(Uint8List bytes, String filename) onPicked;
 
   const DocumentUploadTile({
     super.key,
     required this.label,
     required this.hint,
-    required this.selectedFile,
+    required this.selectedBytes,
     required this.onPicked,
   });
 
@@ -24,12 +24,15 @@ class DocumentUploadTile extends StatelessWidget {
       source: ImageSource.gallery,
       imageQuality: 85,
     );
-    if (picked != null) onPicked(File(picked.path));
+    if (picked != null) {
+      final bytes = await picked.readAsBytes();
+      onPicked(bytes, picked.name);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isSelected = selectedFile != null;
+    final isSelected = selectedBytes != null;
 
     return InkWell(
       onTap: _pickImage,
@@ -48,7 +51,7 @@ class DocumentUploadTile extends StatelessWidget {
             if (isSelected)
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
-                child: Image.file(selectedFile!, width: 56, height: 56, fit: BoxFit.cover),
+                child: Image.memory(selectedBytes!, width: 56, height: 56, fit: BoxFit.cover),
               )
             else
               Container(
