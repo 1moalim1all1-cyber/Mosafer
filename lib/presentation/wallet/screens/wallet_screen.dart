@@ -7,6 +7,7 @@ import '../widgets/wallet_transaction_tile.dart';
 import '../../shared/widgets/app_button.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/routing/app_router.dart';
+import '../../shared/widgets/app_bottom_nav.dart';
 
 class WalletScreen extends ConsumerWidget {
   const WalletScreen({super.key});
@@ -18,6 +19,7 @@ class WalletScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('المحفظة')),
+      bottomNavigationBar: const AppBottomNav(currentIndex: 2),
       body: Column(
         children: [
           Container(

@@ -13,6 +13,7 @@ import '../../../domain/entities/booking_entity.dart';
 import '../../../domain/entities/rating_entity.dart';
 import '../../../domain/entities/trip_entity.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../shared/widgets/app_bottom_nav.dart';
 
 class MyBookingsScreen extends ConsumerWidget {
   const MyBookingsScreen({super.key});
@@ -26,6 +27,7 @@ class MyBookingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('رحلاتي')),
+      bottomNavigationBar: const AppBottomNav(currentIndex: 1),
       body: bookingsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => const Center(child: Text('حصل خطأ في تحميل رحلاتك')),

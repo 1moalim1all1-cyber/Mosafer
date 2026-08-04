@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../providers/trip_providers.dart';
 import '../../auth/providers/auth_providers.dart';
 import '../../shared/widgets/app_button.dart';
+import '../../shared/widgets/app_bottom_nav.dart';
 import '../../notifications/providers/notification_providers.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_colors.dart';
@@ -68,6 +69,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: const AppBottomNav(currentIndex: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(

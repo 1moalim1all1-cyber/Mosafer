@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../theme/app_colors.dart';
+import '../../presentation/shared/widgets/app_bottom_nav.dart';
 import '../../presentation/auth/screens/splash_screen.dart';
 import '../../presentation/onboarding/screens/onboarding_screen.dart';
 import '../../presentation/auth/screens/role_selection_screen.dart';
@@ -283,6 +284,7 @@ class _ProfilePlaceholder extends ConsumerWidget {
     final user = ref.watch(currentUserProvider);
     return Scaffold(
       appBar: AppBar(title: const Text('الملف الشخصي')),
+      bottomNavigationBar: const AppBottomNav(currentIndex: 3),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

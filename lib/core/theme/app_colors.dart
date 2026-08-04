@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 
-/// نظام ألوان "مسافر" — هوية بصرية عصرية وجذابة: تيل عميق (ثقة + حركة)
-/// + كورال دافئ (طاقة + دعوة للفعل)، بعيدة عن كحلي الشكل الرسمي القديم
-/// وعن ألوان المنافسين المباشرين (أسود Uber، أخضر Careem، أزرق BlaBlaCar).
+/// نظام ألوان "مسافر" — هوية فاخرة عصرية: أسود عميق (فخامة وثقة) +
+/// ذهبي دافئ (تميّز وقيمة) + بني كخلفية ثانوية (دفء وثبات)، بإحساس
+/// خدمة نقل راقية بدل الشكل الابتدائي القديم.
 class AppColors {
   AppColors._();
 
   // ---- الألوان الأساسية (Brand) ----
-  static const Color primary = Color(0xFF0D5C63); // تيل عميق
-  static const Color primaryLight = Color(0xFF15807F);
-  static const Color primaryDark = Color(0xFF083D42);
+  static const Color primary = Color(0xFF16130F); // أسود دافئ (مش أسود خالص)
+  static const Color primaryLight = Color(0xFF2A241C);
+  static const Color primaryDark = Color(0xFF0A0805);
 
-  static const Color accent = Color(0xFFFF6B4A); // كورال دافئ
-  static const Color accentLight = Color(0xFFFF8C6E);
-  static const Color accentDark = Color(0xFFE0492C);
+  static const Color accent = Color(0xFFC9A052); // ذهبي فاخر
+  static const Color accentLight = Color(0xFFDCC080);
+  static const Color accentDark = Color(0xFFA9813A);
+
+  // لون ثالث بني للخلفيات والتفاصيل الثانوية
+  static const Color tertiary = Color(0xFF6B4B32);
+  static const Color tertiaryLight = Color(0xFF8A6A48);
 
   // ---- ألوان الميزات الخاصة (لازم تكون مميزة بصريًا وواضحة من نظرة واحدة) ----
   static const Color returnEmptyTrip = Color(0xFF2E9E6C); // أخضر - "راجع فاضي"
@@ -26,11 +30,11 @@ class AppColors {
   static const Color info = Color(0xFF3B82C4);
 
   // ---- الوضع الفاتح (Light Mode) ----
-  static const Color lightBackground = Color(0xFFF7F8FA);
+  static const Color lightBackground = Color(0xFFFAF7F2); // كريمي دافئ
   static const Color lightSurface = Color(0xFFFFFFFF);
   static const Color lightTextPrimary = Color(0xFF1A1D23);
   static const Color lightTextSecondary = Color(0xFF6B7280);
-  static const Color lightBorder = Color(0xFFE5E7EB);
+  static const Color lightBorder = Color(0xFFE8E0D3);
 
   // ---- الوضع الداكن (Dark Mode) ----
   static const Color darkBackground = Color(0xFF0D1117);
