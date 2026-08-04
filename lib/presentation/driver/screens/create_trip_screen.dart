@@ -1,3 +1,4 @@
+import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../providers/driver_providers.dart';
 import '../../trips/providers/trip_providers.dart';
+import '../../trips/screens/location_picker_screen.dart';
 import '../../auth/providers/auth_providers.dart';
 import '../../shared/widgets/app_text_field.dart';
 import '../../shared/widgets/app_button.dart';
@@ -23,6 +25,8 @@ class CreateTripScreen extends ConsumerStatefulWidget {
 class _CreateTripScreenState extends ConsumerState<CreateTripScreen> {
   String? _originCity;
   String? _destinationCity;
+  LatLng? _originPoint;
+  LatLng? _destinationPoint;
   DateTime _departureTime = DateTime.now().add(const Duration(hours: 2));
 
   final _priceController = TextEditingController();
@@ -31,6 +35,27 @@ class _CreateTripScreenState extends ConsumerState<CreateTripScreen> {
 
   bool _isReturnEmptyTrip = false;
   bool _isWomenOnly = false;
+
+  Future<void> _pickLocation({required bool isOrigin}) async {
+    final initial = isOrigin ? _originPoint : _destinationPoint;
+    final result = await Navigator.of(context).push<PickedLocation>(
+      MaterialPageRoute(
+        builder: (_) => LocationPickerScreen(
+          title: isOrigin ? 'حدد نقطة الانطلاق بالظبط' : 'حدد نقطة الوصول بالظبط',
+          initialLocation: initial,
+        ),
+      ),
+    );
+    if (result == null) return;
+    setState(() {
+      final point = LatLng(result.lat, result.lng);
+      if (isOrigin) {
+        _originPoint = point;
+      } else {
+        _destinationPoint = point;
+      }
+    });
+  }
 
   Future<void> _pickDateTime() async {
     final date = await showDatePicker(
@@ -63,6 +88,11 @@ class _CreateTripScreenState extends ConsumerState<CreateTripScreen> {
           'نقطة الانطلاق والوصول لازم يكونوا مختلفين';
       return;
     }
+    if (_originPoint == null || _destinationPoint == null) {
+      ref.read(createTripErrorProvider.notifier).state =
+          'حدد نقطتي الانطلاق والوصول بالظبط من الخريطة';
+      return;
+    }
     final price = double.tryParse(_priceController.text);
     final seats = int.tryParse(_seatsController.text);
     if (price == null || price <= 0) {
@@ -81,21 +111,18 @@ class _CreateTripScreenState extends ConsumerState<CreateTripScreen> {
     ref.read(createTripErrorProvider.notifier).state = null;
 
     try {
-      // ملحوظة: إحداثيات المدن (lat/lng) هتتحط 0 مؤقتًا هنا - التكامل الكامل
-      // مع اختيار نقطة على خريطة OpenStreetMap هيتضاف في مرحلة صقل تجربة
-      // إنشاء الرحلة، الأولوية دلوقتي كانت إتمام تدفق النشر والحجز بالكامل أولاً.
       final trip = TripEntity(
         id: '',
         driverId: user.uid,
         status: TripStatus.active,
         originCity: _originCity!,
         originGovernorate: _originCity!,
-        originLat: 0,
-        originLng: 0,
+        originLat: _originPoint!.latitude,
+        originLng: _originPoint!.longitude,
         destinationCity: _destinationCity!,
         destinationGovernorate: _destinationCity!,
-        destinationLat: 0,
-        destinationLng: 0,
+        destinationLat: _destinationPoint!.latitude,
+        destinationLng: _destinationPoint!.longitude,
         departureTime: _departureTime,
         estimatedDurationMinutes: int.tryParse(_durationController.text) ?? 60,
         pricePerSeat: price,
@@ -141,7 +168,12 @@ class _CreateTripScreenState extends ConsumerState<CreateTripScreen> {
                   .toList(),
               onChanged: (v) => setState(() => _originCity = v),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            _MapPickButton(
+              isSelected: _originPoint != null,
+              onTap: () => _pickLocation(isOrigin: true),
+            ),
+            const SizedBox(height: 16),
             DropdownButtonFormField<String>(
               initialValue: _destinationCity,
               decoration: const InputDecoration(labelText: 'إلى'),
@@ -150,7 +182,12 @@ class _CreateTripScreenState extends ConsumerState<CreateTripScreen> {
                   .toList(),
               onChanged: (v) => setState(() => _destinationCity = v),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+            _MapPickButton(
+              isSelected: _destinationPoint != null,
+              onTap: () => _pickLocation(isOrigin: false),
+            ),
+            const SizedBox(height: 16),
             InkWell(
               onTap: _pickDateTime,
               child: InputDecorator(
@@ -240,6 +277,49 @@ class _CreateTripScreenState extends ConsumerState<CreateTripScreen> {
         value: value,
         activeThumbColor: color,
         onChanged: onChanged,
+      ),
+    );
+  }
+}
+
+class _MapPickButton extends StatelessWidget {
+  final bool isSelected;
+  final VoidCallback onTap;
+  const _MapPickButton({required this.isSelected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.success.withValues(alpha: 0.08)
+              : AppColors.lightBackground,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? AppColors.success : AppColors.lightBorder,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.check_circle : Icons.map_outlined,
+              size: 18,
+              color: isSelected ? AppColors.success : AppColors.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              isSelected ? 'اتحدد بالظبط من الخريطة ✓' : 'حدد الموقع بالظبط من الخريطة',
+              style: TextStyle(
+                fontSize: 13,
+                color: isSelected ? AppColors.success : AppColors.primary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

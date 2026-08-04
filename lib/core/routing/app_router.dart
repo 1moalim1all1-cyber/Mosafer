@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../presentation/auth/screens/splash_screen.dart';
+import '../../presentation/onboarding/screens/onboarding_screen.dart';
 import '../../presentation/auth/screens/role_selection_screen.dart';
 import '../../presentation/auth/screens/register_screen.dart';
 import '../../presentation/auth/screens/login_screen.dart';
@@ -38,6 +39,7 @@ class AppRoutes {
   AppRoutes._();
 
   static const splash = '/';
+  static const onboarding = '/onboarding';
   static const roleSelection = '/role-selection';
   static const login = '/login';
   static const register = '/register';
@@ -92,6 +94,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final currentUser = authState.valueOrNull;
       final isLoggedIn = currentUser != null;
       final isAuthRoute = [
+        AppRoutes.onboarding,
         AppRoutes.login,
         AppRoutes.register,
         AppRoutes.roleSelection,
@@ -118,6 +121,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.splash,
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.onboarding,
+        builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(
         path: AppRoutes.roleSelection,

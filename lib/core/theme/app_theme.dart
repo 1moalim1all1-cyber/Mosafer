@@ -2,6 +2,44 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_typography.dart';
 
+/// انتقال ناعم موحّد (تلاشي + انزلاق خفيف لأعلى) بيتطبّق تلقائيًا على
+/// كل شاشة في التطبيق عن طريق ThemeData.pageTransitionsTheme - مفيش
+/// داعي نعدّل كل شاشة لوحدها، التغيير هنا بيغطي كل التطبيق مرة واحدة.
+class _SmoothPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _SmoothPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+    return FadeTransition(
+      opacity: curved,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.04),
+          end: Offset.zero,
+        ).animate(curved),
+        child: child,
+      ),
+    );
+  }
+}
+
+final PageTransitionsTheme appPageTransitionsTheme = PageTransitionsTheme(
+  builders: {
+    TargetPlatform.android: const _SmoothPageTransitionsBuilder(),
+    TargetPlatform.iOS: const _SmoothPageTransitionsBuilder(),
+    TargetPlatform.windows: const _SmoothPageTransitionsBuilder(),
+    TargetPlatform.macOS: const _SmoothPageTransitionsBuilder(),
+    TargetPlatform.linux: const _SmoothPageTransitionsBuilder(),
+  },
+);
+
 class AppTheme {
   AppTheme._();
 
@@ -15,6 +53,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       scaffoldBackgroundColor: AppColors.lightBackground,
+      pageTransitionsTheme: appPageTransitionsTheme,
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         secondary: AppColors.accent,
@@ -34,7 +73,9 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: AppColors.lightSurface,
-        elevation: 0,
+        elevation: 3,
+        shadowColor: AppColors.primary.withValues(alpha: 0.12),
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusM),
           side: const BorderSide(color: AppColors.lightBorder),
@@ -44,6 +85,8 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
+          elevation: 4,
+          shadowColor: AppColors.primary.withValues(alpha: 0.35),
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radiusM),
@@ -70,6 +113,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.darkBackground,
+      pageTransitionsTheme: appPageTransitionsTheme,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.accent,
         secondary: AppColors.primaryLight,
@@ -89,7 +133,9 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: AppColors.darkSurface,
-        elevation: 0,
+        elevation: 3,
+        shadowColor: Colors.black.withValues(alpha: 0.4),
+        surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusM),
           side: const BorderSide(color: AppColors.darkBorder),
@@ -99,6 +145,8 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.accent,
           foregroundColor: Colors.white,
+          elevation: 4,
+          shadowColor: AppColors.accent.withValues(alpha: 0.35),
           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radiusM),

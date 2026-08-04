@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../providers/trip_providers.dart';
 import '../../auth/providers/auth_providers.dart';
@@ -252,6 +254,11 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
           _infoRow(context, Icons.timer_outlined,
               '${trip.estimatedDurationMinutes} دقيقة تقريبًا'),
 
+          if (trip.originLat != 0 && trip.destinationLat != 0) ...[
+            const SizedBox(height: 16),
+            _TripRouteMap(trip: trip),
+          ],
+
           const SizedBox(height: 24),
           const Divider(),
           const SizedBox(height: 16),
@@ -395,6 +402,66 @@ class _PaymentMethodChip extends StatelessWidget {
             Text(label, style: Theme.of(context).textTheme.bodySmall,
                 textAlign: TextAlign.center),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// معاينة ثابتة (غير تفاعلية) لمسار الرحلة على خريطة OpenStreetMap،
+/// بتعرض نقطتي الانطلاق والوصول بالظبط زي ما السائق حددهم وقت الإنشاء.
+class _TripRouteMap extends StatelessWidget {
+  final TripEntity trip;
+  const _TripRouteMap({required this.trip});
+
+  @override
+  Widget build(BuildContext context) {
+    final origin = LatLng(trip.originLat, trip.originLng);
+    final destination = LatLng(trip.destinationLat, trip.destinationLng);
+    final centerLat = (trip.originLat + trip.destinationLat) / 2;
+    final centerLng = (trip.originLng + trip.destinationLng) / 2;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: SizedBox(
+        height: 200,
+        child: IgnorePointer(
+          // خريطة عرض بس - مش تفاعلية هنا، لو الراكب عايز يتفاعل معاها
+          // يقدر نضيف زرار "افتح كخريطة كاملة" لاحقًا
+          child: FlutterMap(
+            options: MapOptions(
+              initialCenter: LatLng(centerLat, centerLng),
+              initialZoom: 7,
+              interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.mosafer.app',
+              ),
+              PolylineLayer(
+                polylines: [
+                  Polyline(points: [origin, destination], strokeWidth: 3, color: AppColors.accent),
+                ],
+              ),
+              MarkerLayer(
+                markers: [
+                  Marker(
+                    point: origin,
+                    width: 36,
+                    height: 36,
+                    child: const Icon(Icons.trip_origin, color: AppColors.success, size: 28),
+                  ),
+                  Marker(
+                    point: destination,
+                    width: 36,
+                    height: 36,
+                    child: const Icon(Icons.location_on, color: AppColors.error, size: 32),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
