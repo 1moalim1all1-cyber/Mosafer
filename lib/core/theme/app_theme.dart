@@ -46,6 +46,88 @@ class AppTheme {
   static const double radiusS = 8;
   static const double radiusM = 14;
   static const double radiusL = 20;
+  static const double radiusButton = 12;
+
+  /// نمط زرار موحّد بيغطي كل الحالات المطلوبة (Default, Hover, Pressed/Active,
+  /// Focus, Disabled) - مبني على WidgetStateProperty عشان يشتغل صح على
+  /// الويب (فأرة) والموبايل (لمس) في نفس الوقت من نفس الكود.
+  static ButtonStyle _filledButtonStyle({
+    required Color base,
+    required Color hover,
+    required Color foreground,
+  }) {
+    return ButtonStyle(
+      backgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) return AppColors.disabled;
+        if (states.contains(WidgetState.pressed)) return hover;
+        if (states.contains(WidgetState.hovered)) return hover;
+        return base;
+      }),
+      foregroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) return AppColors.lightTextSecondary;
+        return foreground;
+      }),
+      elevation: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) return 0;
+        if (states.contains(WidgetState.pressed)) return 1;
+        if (states.contains(WidgetState.hovered)) return 6;
+        return 3;
+      }),
+      shadowColor: WidgetStateProperty.all(base.withValues(alpha: 0.35)),
+      overlayColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.focused)) return Colors.white.withValues(alpha: 0.12);
+        return null;
+      }),
+      padding: WidgetStateProperty.all(
+        const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      ),
+      shape: WidgetStateProperty.all(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusButton)),
+      ),
+      // إطار تركيز واضح (Focus Ring) لتصفح لوحة المفاتيح على الويب
+      side: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.focused)) {
+          return BorderSide(color: base.withValues(alpha: 0.5), width: 2);
+        }
+        return null;
+      }),
+    );
+  }
+
+  /// نمط الزرار الثانوي (Secondary): خلفية بيضاء، حدود وخط بلون أساسي،
+  /// وHover بخلفية زرقاء فاتحة شفافة.
+  static ButtonStyle _outlinedButtonStyle({
+    required Color base,
+    required Color hoverBackground,
+  }) {
+    return ButtonStyle(
+      backgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) return Colors.transparent;
+        if (states.contains(WidgetState.pressed)) return hoverBackground;
+        if (states.contains(WidgetState.hovered)) return hoverBackground;
+        return Colors.transparent;
+      }),
+      foregroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) return AppColors.disabled;
+        return base;
+      }),
+      side: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) {
+          return const BorderSide(color: AppColors.disabled, width: 1.5);
+        }
+        if (states.contains(WidgetState.focused)) {
+          return BorderSide(color: base, width: 2.5);
+        }
+        return BorderSide(color: base, width: 1.5);
+      }),
+      padding: WidgetStateProperty.all(
+        const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+      ),
+      shape: WidgetStateProperty.all(
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(radiusButton)),
+      ),
+    );
+  }
 
   static ThemeData light({required bool isArabic}) {
     final textTheme = AppTypography.textTheme(isArabic);
@@ -56,7 +138,7 @@ class AppTheme {
       pageTransitionsTheme: appPageTransitionsTheme,
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
-        secondary: AppColors.accent,
+        secondary: AppColors.tertiary,
         error: AppColors.error,
         surface: AppColors.lightSurface,
       ),
@@ -73,8 +155,8 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: AppColors.lightSurface,
-        elevation: 3,
-        shadowColor: AppColors.primary.withValues(alpha: 0.12),
+        elevation: 2,
+        shadowColor: AppColors.lightTextPrimary.withValues(alpha: 0.08),
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusM),
@@ -82,24 +164,58 @@ class AppTheme {
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          elevation: 4,
-          shadowColor: AppColors.primary.withValues(alpha: 0.35),
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(radiusM),
-          ),
-          textStyle: textTheme.labelLarge,
+        style: _filledButtonStyle(
+          base: AppColors.primary,
+          hover: AppColors.primaryDark,
+          foreground: Colors.white,
+        ).copyWith(textStyle: WidgetStateProperty.all(textTheme.labelLarge)),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: _outlinedButtonStyle(
+          base: AppColors.primary,
+          hoverBackground: AppColors.primaryLight.withValues(alpha: 0.12),
+        ).copyWith(textStyle: WidgetStateProperty.all(textTheme.labelLarge)),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: ButtonStyle(
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.disabled)) return AppColors.disabled;
+            if (states.contains(WidgetState.hovered)) return AppColors.primaryDark;
+            return AppColors.primary;
+          }),
+          overlayColor: WidgetStateProperty.all(AppColors.primaryLight.withValues(alpha: 0.1)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.lightSurface,
+        labelStyle: const TextStyle(color: AppColors.lightTextSecondary),
+        hintStyle: const TextStyle(color: AppColors.disabled),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusM),
           borderSide: const BorderSide(color: AppColors.lightBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusM),
+          borderSide: const BorderSide(color: AppColors.lightBorder),
+        ),
+        // إطار تركيز واضح بلون أساسي وسمك أكبر - المستخدم يعرف فورًا
+        // إنه في الحقل ده دلوقتي
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusM),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusM),
+          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusM),
+          borderSide: const BorderSide(color: AppColors.error, width: 2),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusM),
+          borderSide: const BorderSide(color: AppColors.disabled),
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -115,8 +231,8 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.darkBackground,
       pageTransitionsTheme: appPageTransitionsTheme,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.accent,
-        secondary: AppColors.primaryLight,
+        primary: AppColors.primaryLight,
+        secondary: AppColors.tertiaryLight,
         error: AppColors.error,
         surface: AppColors.darkSurface,
       ),
@@ -133,7 +249,7 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: AppColors.darkSurface,
-        elevation: 3,
+        elevation: 2,
         shadowColor: Colors.black.withValues(alpha: 0.4),
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
@@ -142,18 +258,47 @@ class AppTheme {
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.accent,
-          foregroundColor: Colors.white,
-          elevation: 4,
-          shadowColor: AppColors.accent.withValues(alpha: 0.35),
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(radiusM),
-          ),
-          textStyle: textTheme.labelLarge,
+        style: _filledButtonStyle(
+          base: AppColors.primaryLight,
+          hover: AppColors.primary,
+          foreground: AppColors.darkBackground,
+        ).copyWith(textStyle: WidgetStateProperty.all(textTheme.labelLarge)),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: _outlinedButtonStyle(
+          base: AppColors.primaryLight,
+          hoverBackground: AppColors.primaryLight.withValues(alpha: 0.15),
+        ).copyWith(textStyle: WidgetStateProperty.all(textTheme.labelLarge)),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.darkSurface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusM),
+          borderSide: const BorderSide(color: AppColors.darkBorder),
         ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(radiusM),
+          borderSide: const BorderSide(color: AppColors.primaryLight, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
   }
+
+  // ---- أنماط أزرار إضافية جاهزة للاستخدام المباشر (Danger / Success) ----
+  // مش جزء من الـ Theme العام (عشان معظم الأزرار الافتراضية أساسي/ثانوي)،
+  // لكن متاحة لأي شاشة تحتاج زرار "احذف" أو "تأكيد" بلون واضح دلاليًا.
+  static ButtonStyle dangerButtonStyle() => _filledButtonStyle(
+        base: AppColors.error,
+        hover: const Color(0xFFB91C1C),
+        foreground: Colors.white,
+      );
+
+  static ButtonStyle successButtonStyle() => _filledButtonStyle(
+        base: AppColors.success,
+        hover: const Color(0xFF15803D),
+        foreground: Colors.white,
+      );
 }
