@@ -13,6 +13,8 @@ import '../../../domain/entities/booking_entity.dart';
 import '../../../domain/entities/rating_entity.dart';
 import '../../../domain/entities/trip_entity.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../shared/widgets/app_button.dart';
+import '../../shared/widgets/skeleton_loading.dart';
 import '../../shared/widgets/app_bottom_nav.dart';
 
 class MyBookingsScreen extends ConsumerWidget {
@@ -29,11 +31,46 @@ class MyBookingsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('رحلاتي')),
       bottomNavigationBar: const AppBottomNav(currentIndex: 1),
       body: bookingsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('حصل خطأ في تحميل رحلاتك')),
+        loading: () => const TripListSkeleton(),
+        error: (_, __) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.wifi_off_outlined, size: 48, color: AppColors.error),
+                const SizedBox(height: 12),
+                const Text('حصل خطأ في تحميل رحلاتك'),
+                const SizedBox(height: 6),
+                const Text('تأكد من اتصال الإنترنت وحاول تاني',
+                    style: TextStyle(color: AppColors.lightTextSecondary)),
+              ],
+            ),
+          ),
+        ),
         data: (bookings) {
           if (bookings.isEmpty) {
-            return const Center(child: Text('لسه معملتش أي حجز'));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.list_alt_outlined, size: 48),
+                    const SizedBox(height: 12),
+                    const Text('لسه معملتش أي حجز'),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: 200,
+                      child: AppButton(
+                        label: 'ابحث عن رحلة',
+                        onPressed: () => context.go('/home'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
           return ListView.builder(
             padding: const EdgeInsets.all(16),

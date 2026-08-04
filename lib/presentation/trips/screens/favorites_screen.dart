@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/favorites_providers.dart';
 import '../providers/trip_providers.dart';
 import '../widgets/trip_card.dart';
+import '../../shared/widgets/app_button.dart';
 
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key});
@@ -20,7 +21,27 @@ class FavoritesScreen extends ConsumerWidget {
         error: (_, __) => const Center(child: Text('حصل خطأ')),
         data: (ids) {
           if (ids.isEmpty) {
-            return const Center(child: Text('لسه مضفتش أي رحلة للمفضلة'));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.favorite_border, size: 48),
+                    const SizedBox(height: 12),
+                    const Text('لسه مضفتش أي رحلة للمفضلة'),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: 200,
+                      child: AppButton(
+                        label: 'ابحث عن رحلة',
+                        onPressed: () => context.go('/home'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
           return ListView.builder(
             padding: const EdgeInsets.all(16),

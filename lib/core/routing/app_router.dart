@@ -121,6 +121,15 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         return AppRoutes.home;
       }
 
+      // حماية مسارات السائق - راكب عادي مستحيل يفتحها حتى بالرابط المباشر
+      // (كان ده ثغرة حقيقية: أي حد يقدر يكتب /driver/create-trip يدويًا
+      // في شريط العنوان ويدخل، حتى لو مش سائق أصلًا)
+      final isDriverRoute = state.matchedLocation.startsWith('/driver');
+      if (isDriverRoute &&
+          (currentUser == null || !(currentUser.isDriver || currentUser.isAdmin))) {
+        return AppRoutes.home;
+      }
+
       return null;
     },
     routes: [
@@ -408,7 +417,28 @@ class _ProfilePlaceholder extends ConsumerWidget {
             OutlinedButton.icon(
               icon: const Icon(Icons.logout),
               label: const Text('تسجيل الخروج'),
-              onPressed: () => ref.read(authRepositoryProvider).logout(),
+              onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text('تسجيل الخروج'),
+                    content: const Text('متأكد إنك عايز تسجّل خروج من حسابك؟'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: const Text('إلغاء'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: const Text('تسجيل الخروج'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true) {
+                  await ref.read(authRepositoryProvider).logout();
+                }
+              },
             ),
           ],
         ),
