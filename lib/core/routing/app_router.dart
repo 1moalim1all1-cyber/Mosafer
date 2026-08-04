@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../theme/app_colors.dart';
 import '../../presentation/auth/screens/splash_screen.dart';
 import '../../presentation/onboarding/screens/onboarding_screen.dart';
 import '../../presentation/auth/screens/role_selection_screen.dart';
