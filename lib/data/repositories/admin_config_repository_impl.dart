@@ -143,6 +143,8 @@ class AdminConfigRepositoryImpl implements AdminConfigRepository {
         instagramUrl: data['instagramUrl'],
         whatsappNumber: data['whatsappNumber'],
         supportEmail: data['supportEmail'] ?? '',
+        welcomeBonusAmount: (data['welcomeBonusAmount'] ?? 20).toDouble(),
+        referralBonusAmount: (data['referralBonusAmount'] ?? 15).toDouble(),
       );
     });
   }
@@ -157,6 +159,8 @@ class AdminConfigRepositoryImpl implements AdminConfigRepository {
       'instagramUrl': settings.instagramUrl,
       'whatsappNumber': settings.whatsappNumber,
       'supportEmail': settings.supportEmail,
+      'welcomeBonusAmount': settings.welcomeBonusAmount,
+      'referralBonusAmount': settings.referralBonusAmount,
     }, SetOptions(merge: true));
   }
 

@@ -94,7 +94,7 @@ class TripRepositoryImpl implements TripRepository {
       isWomenOnly: trip.isWomenOnly,
       carType: trip.carType,
     );
-    final doc = await _tripsRef.add(model.toMap());
+    final doc = await _tripsRef.add(model.toCreateMap());
     return doc.id;
   }
 
@@ -138,5 +138,27 @@ class TripRepositoryImpl implements TripRepository {
         .snapshots()
         .map((snap) =>
             snap.docs.map((d) => TripModel.fromMap(d.id, d.data())).toList());
+  }
+
+  @override
+  Future<void> updateLiveLocation({
+    required String tripId,
+    required double lat,
+    required double lng,
+  }) async {
+    await _tripsRef.doc(tripId).update({
+      'driverLiveLat': lat,
+      'driverLiveLng': lng,
+      'driverLiveUpdatedAt': Timestamp.now(),
+    });
+  }
+
+  @override
+  Future<void> stopLiveLocation(String tripId) async {
+    await _tripsRef.doc(tripId).update({
+      'driverLiveLat': null,
+      'driverLiveLng': null,
+      'driverLiveUpdatedAt': null,
+    });
   }
 }

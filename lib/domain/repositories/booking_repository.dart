@@ -11,6 +11,7 @@ abstract class BookingRepository {
     required int seatsBooked,
     required double totalPrice,
     required PaymentMethod paymentMethod,
+    String? couponCode,
   });
 
   Future<void> cancelBooking(String bookingId, {required String tripId, required int seatsToRestore});

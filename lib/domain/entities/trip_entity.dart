@@ -29,6 +29,12 @@ class TripEntity extends Equatable {
   final bool isWomenOnly; // رحلات السيدات فقط
   final String carType;
 
+  // موقع السائق الحي أثناء الرحلة (زي كريم) - null يعني السائق مش بيشارك
+  // موقعه دلوقتي (لسه مبدأش، أو وقف المشاركة)
+  final double? driverLiveLat;
+  final double? driverLiveLng;
+  final DateTime? driverLiveUpdatedAt;
+
   const TripEntity({
     required this.id,
     required this.driverId,
@@ -50,10 +56,20 @@ class TripEntity extends Equatable {
     this.isReturnEmptyTrip = false,
     this.isWomenOnly = false,
     required this.carType,
+    this.driverLiveLat,
+    this.driverLiveLng,
+    this.driverLiveUpdatedAt,
   });
 
   bool get hasAvailableSeats => availableSeats > 0;
   bool get isBookable => status == TripStatus.active && hasAvailableSeats;
+
+  /// بنعتبر الموقع "حي" لو اتحدّث خلال آخر 60 ثانية - بعد كده نعتبره
+  /// قديم (السائق قفل التطبيق أو وقعت شبكته) ونخفيه من خريطة الراكب.
+  bool get hasFreshLiveLocation {
+    if (driverLiveLat == null || driverLiveUpdatedAt == null) return false;
+    return DateTime.now().difference(driverLiveUpdatedAt!).inSeconds < 60;
+  }
 
   @override
   List<Object?> get props => [

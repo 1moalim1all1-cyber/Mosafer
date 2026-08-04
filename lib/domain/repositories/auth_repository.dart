@@ -15,6 +15,7 @@ abstract class AuthRepository {
     required String password,
     required UserRole role,
     required Gender gender,
+    String? referralCode, // كود دعوة اختياري يدخله المستخدم وقت التسجيل
   });
 
   Future<UserEntity> loginWithEmail({

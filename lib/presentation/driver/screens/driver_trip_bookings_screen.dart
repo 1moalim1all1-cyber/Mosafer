@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../bookings/providers/booking_providers.dart';
 import '../../auth/providers/auth_providers.dart';
 import '../../chat/providers/chat_providers.dart';
+import '../widgets/live_location_sharing_button.dart';
 import '../../ratings/providers/rating_providers.dart';
 import '../../ratings/widgets/rating_dialog.dart';
 import '../../../domain/entities/booking_entity.dart';
@@ -104,7 +105,11 @@ class DriverTripBookingsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: bookingsAsync.when(
+      body: Column(
+        children: [
+          LiveLocationSharingButton(tripId: tripId),
+          Expanded(
+            child: bookingsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => const Center(child: Text('حصل خطأ في تحميل الطلبات')),
         data: (bookings) {
@@ -135,6 +140,9 @@ class DriverTripBookingsScreen extends ConsumerWidget {
             },
           );
         },
+            ),
+          ),
+        ],
       ),
     );
   }

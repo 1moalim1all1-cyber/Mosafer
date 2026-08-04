@@ -61,6 +61,7 @@ class BookingRepositoryImpl implements BookingRepository {
     required int seatsBooked,
     required double totalPrice,
     required PaymentMethod paymentMethod,
+    String? couponCode,
   }) {
     return _callFunction<String>(
       'createBooking',
@@ -68,6 +69,7 @@ class BookingRepositoryImpl implements BookingRepository {
         'tripId': tripId,
         'seatsBooked': seatsBooked,
         'paymentMethod': paymentMethod.name,
+        if (couponCode != null && couponCode.isNotEmpty) 'couponCode': couponCode,
       },
       (result) => result['bookingId'] as String,
     );

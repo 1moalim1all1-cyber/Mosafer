@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -285,6 +286,51 @@ class _ProfilePlaceholder extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            if (user != null && user.referralCode.isNotEmpty) ...[
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [AppColors.primary, AppColors.primaryLight],
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    const Text('ادعُ صديقك واكسبوا مكافأة سوا',
+                        style: TextStyle(color: Colors.white70, fontSize: 13)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          user.referralCode,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 2,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        IconButton(
+                          icon: const Icon(Icons.copy, color: Colors.white, size: 18),
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: user.referralCode));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('اتنسخ الكود')),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
             if (user?.isDriver == true) ...[
               ElevatedButton.icon(
                 icon: const Icon(Icons.dashboard_outlined),

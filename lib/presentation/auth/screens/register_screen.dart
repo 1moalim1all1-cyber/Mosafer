@@ -23,6 +23,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _referralCodeController = TextEditingController();
 
   String _phoneNumber = '';
   Gender _gender = Gender.male;
@@ -31,6 +32,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   void dispose() {
     _nameController.dispose();
     _passwordController.dispose();
+    _referralCodeController.dispose();
     super.dispose();
   }
 
@@ -54,6 +56,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             password: _passwordController.text,
             role: role,
             gender: _gender,
+            referralCode: _referralCodeController.text.trim().isEmpty
+                ? null
+                : _referralCodeController.text.trim(),
           );
 
       if (!mounted) return;
@@ -139,6 +144,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 20),
+                Text('كود دعوة (اختياري)', style: Theme.of(context).textTheme.labelLarge),
+                const SizedBox(height: 8),
+                AppTextField(
+                  controller: _referralCodeController,
+                  label: 'لو صاحبك بعتلك كود، اكتبه هنا',
                 ),
                 if (error != null) ...[
                   const SizedBox(height: 16),

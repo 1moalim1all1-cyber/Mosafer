@@ -73,6 +73,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const _SocialProofBanner(),
+            const SizedBox(height: 16),
             _buildCitySelector(
               label: 'من',
               value: params.originCity,
@@ -222,6 +224,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         activeThumbColor: color,
         onChanged: onChanged,
       ),
+    );
+  }
+}
+
+/// بانر ثقة اجتماعية بسيط - بيبني ثقة فورية لأي زائر جديد للتطبيق.
+/// لو العداد لسه صفر أو بيتحمّل، البانر بيختفي تمامًا (مفيش داعي نعرض
+/// "0 رحلة" ده بيأثر بالسلب على الانطباع الأول عكس المطلوب).
+class _SocialProofBanner extends ConsumerWidget {
+  const _SocialProofBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final countAsync = ref.watch(totalCompletedTripsCountProvider);
+
+    return countAsync.maybeWhen(
+      data: (count) {
+        if (count < 5) return const SizedBox.shrink();
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: AppColors.accent.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppColors.accent.withValues(alpha: 0.25)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.groups_outlined, color: AppColors.accent, size: 20),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'أكتر من $count رحلة اتعملت على مسافر - انضم للركّاب والسائقين',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.accentDark,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }

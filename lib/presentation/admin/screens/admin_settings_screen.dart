@@ -16,6 +16,8 @@ class AdminSettingsScreen extends ConsumerStatefulWidget {
 class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
   final _commissionController = TextEditingController();
   final _commissionEmptyController = TextEditingController();
+  final _welcomeBonusController = TextEditingController();
+  final _referralBonusController = TextEditingController();
   final _facebookController = TextEditingController();
   final _instagramController = TextEditingController();
   final _whatsappController = TextEditingController();
@@ -28,6 +30,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
     if (_initialized) return;
     _commissionController.text = settings.commissionStandardPercent.toString();
     _commissionEmptyController.text = settings.commissionReturnEmptyPercent.toString();
+    _welcomeBonusController.text = settings.welcomeBonusAmount.toString();
+    _referralBonusController.text = settings.referralBonusAmount.toString();
     _facebookController.text = settings.facebookUrl ?? '';
     _instagramController.text = settings.instagramUrl ?? '';
     _whatsappController.text = settings.whatsappNumber ?? '';
@@ -42,6 +46,8 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
         commissionStandardPercent: double.tryParse(_commissionController.text) ?? 10,
         commissionReturnEmptyPercent:
             double.tryParse(_commissionEmptyController.text) ?? 5,
+        welcomeBonusAmount: double.tryParse(_welcomeBonusController.text) ?? 20,
+        referralBonusAmount: double.tryParse(_referralBonusController.text) ?? 15,
         facebookUrl: _facebookController.text.trim(),
         instagramUrl: _instagramController.text.trim(),
         whatsappNumber: _whatsappController.text.trim(),
@@ -84,6 +90,20 @@ class _AdminSettingsScreenState extends ConsumerState<AdminSettingsScreen> {
                 AppTextField(
                   controller: _commissionEmptyController,
                   label: 'عمولة "راجع فاضي" (%)',
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 24),
+                Text('برامج التسويق', style: Theme.of(context).textTheme.titleLarge),
+                const SizedBox(height: 12),
+                AppTextField(
+                  controller: _welcomeBonusController,
+                  label: 'رصيد ترحيبي لكل مستخدم جديد (ج.م)',
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 12),
+                AppTextField(
+                  controller: _referralBonusController,
+                  label: 'مكافأة دعوة صديق - لكل طرف (ج.م)',
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 24),

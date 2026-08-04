@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../providers/trip_providers.dart';
 import '../../auth/providers/auth_providers.dart';
@@ -35,6 +36,64 @@ class TripDetailsScreen extends ConsumerStatefulWidget {
 class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
   int _seatsToBook = 1;
   PaymentMethod _paymentMethod = PaymentMethod.cash;
+  final _couponController = TextEditingController();
+  String? _couponMessage;
+  double _couponDiscount = 0;
+
+  double _finalTotal(TripEntity trip) {
+    final original = trip.pricePerSeat * _seatsToBook;
+    return (original - _couponDiscount).clamp(0, original);
+  }
+
+  Future<void> _applyCoupon(TripEntity trip) async {
+    final code = _couponController.text.trim().toUpperCase();
+    if (code.isEmpty) return;
+
+    setState(() {
+      _couponMessage = null;
+      _couponDiscount = 0;
+    });
+
+    try {
+      final snap = await FirebaseFirestore.instance
+          .collection('coupons')
+          .where('code', isEqualTo: code)
+          .limit(1)
+          .get();
+
+      if (snap.docs.isEmpty) {
+        setState(() => _couponMessage = 'الكود ده مش موجود');
+        return;
+      }
+
+      final coupon = snap.docs.first.data();
+      final isActive = coupon['isActive'] == true;
+      final expiresAt = coupon['expiresAt'];
+      final notExpired = expiresAt == null ||
+          (expiresAt as Timestamp).toDate().isAfter(DateTime.now());
+      final usedCount = (coupon['usedCount'] ?? 0) as int;
+      final maxUses = (coupon['maxUses'] ?? 0) as int;
+      final notExhausted = usedCount < maxUses;
+
+      if (!isActive || !notExpired || !notExhausted) {
+        setState(() => _couponMessage = 'الكود ده منتهي أو مش متاح دلوقتي');
+        return;
+      }
+
+      final original = trip.pricePerSeat * _seatsToBook;
+      final discountType = coupon['discountType'] ?? 'percentage';
+      final value = (coupon['value'] ?? 0).toDouble();
+      final discount =
+          discountType == 'percentage' ? original * (value / 100) : value;
+
+      setState(() {
+        _couponDiscount = discount.clamp(0, original);
+        _couponMessage = 'تم تطبيق الخصم! وفّرت ${_couponDiscount.toStringAsFixed(0)} ج.م';
+      });
+    } catch (_) {
+      setState(() => _couponMessage = 'حصل خطأ، حاول تاني');
+    }
+  }
 
   Future<void> _confirmBooking(TripEntity trip) async {
     final currentUser = ref.read(currentUserProvider);
@@ -51,6 +110,9 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
             seatsBooked: _seatsToBook,
             totalPrice: trip.pricePerSeat * _seatsToBook,
             paymentMethod: _paymentMethod,
+            couponCode: _couponController.text.trim().isEmpty
+                ? null
+                : _couponController.text.trim(),
           );
 
       if (!mounted) return;
@@ -287,13 +349,43 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
             ],
           ),
 
+          const SizedBox(height: 16),
+          Text('كوبون خصم (اختياري)', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _couponController,
+                  textCapitalization: TextCapitalization.characters,
+                  decoration: const InputDecoration(hintText: 'اكتب كود الكوبون'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              OutlinedButton(
+                onPressed: () => _applyCoupon(trip),
+                child: const Text('تطبيق'),
+              ),
+            ],
+          ),
+          if (_couponMessage != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              _couponMessage!,
+              style: TextStyle(
+                color: _couponDiscount > 0 ? AppColors.success : AppColors.error,
+                fontSize: 13,
+              ),
+            ),
+          ],
+
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('الإجمالي', style: Theme.of(context).textTheme.titleMedium),
               Text(
-                '${(trip.pricePerSeat * _seatsToBook).toStringAsFixed(0)} ج.م',
+                '${_finalTotal(trip).toStringAsFixed(0)} ج.م',
                 style: Theme.of(context)
                     .textTheme
                     .headlineMedium
@@ -420,50 +512,105 @@ class _TripRouteMap extends StatelessWidget {
     final destination = LatLng(trip.destinationLat, trip.destinationLng);
     final centerLat = (trip.originLat + trip.destinationLat) / 2;
     final centerLng = (trip.originLng + trip.destinationLng) / 2;
+    final hasLiveDriver = trip.hasFreshLiveLocation;
+    final driverPoint = hasLiveDriver
+        ? LatLng(trip.driverLiveLat!, trip.driverLiveLng!)
+        : null;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: SizedBox(
-        height: 200,
-        child: IgnorePointer(
-          // خريطة عرض بس - مش تفاعلية هنا، لو الراكب عايز يتفاعل معاها
-          // يقدر نضيف زرار "افتح كخريطة كاملة" لاحقًا
-          child: FlutterMap(
-            options: MapOptions(
-              initialCenter: LatLng(centerLat, centerLng),
-              initialZoom: 7,
-              interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (hasLiveDriver)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(
+                    color: AppColors.success,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'السائق بيشارك موقعه الحي دلوقتي',
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: AppColors.success, fontWeight: FontWeight.w600),
+                ),
+              ],
             ),
-            children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.mosafer.app',
-              ),
-              PolylineLayer(
-                polylines: [
-                  Polyline(points: [origin, destination], strokeWidth: 3, color: AppColors.accent),
+          ),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: SizedBox(
+            height: 200,
+            child: IgnorePointer(
+              // خريطة عرض بس - مش تفاعلية هنا، لو الراكب عايز يتفاعل معاها
+              // يقدر نضيف زرار "افتح كخريطة كاملة" لاحقًا
+              child: FlutterMap(
+                options: MapOptions(
+                  initialCenter: driverPoint ?? LatLng(centerLat, centerLng),
+                  initialZoom: hasLiveDriver ? 12 : 7,
+                  interactionOptions: const InteractionOptions(flags: InteractiveFlag.none),
+                ),
+                children: [
+                  TileLayer(
+                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.mosafer.app',
+                  ),
+                  PolylineLayer(
+                    polylines: [
+                      Polyline(points: [origin, destination], strokeWidth: 3, color: AppColors.accent),
+                    ],
+                  ),
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: origin,
+                        width: 36,
+                        height: 36,
+                        child: const Icon(Icons.trip_origin, color: AppColors.success, size: 28),
+                      ),
+                      Marker(
+                        point: destination,
+                        width: 36,
+                        height: 36,
+                        child: const Icon(Icons.location_on, color: AppColors.error, size: 32),
+                      ),
+                      // موقع السائق الحي - زي أيقونة كريم بالظبط، بتتحدث
+                      // تلقائيًا لحظيًا مع كل تحديث من Firestore
+                      if (driverPoint != null)
+                        Marker(
+                          point: driverPoint,
+                          width: 44,
+                          height: 44,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppColors.primary,
+                              border: Border.all(color: Colors.white, width: 2.5),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withValues(alpha: 0.4),
+                                  blurRadius: 8,
+                                ),
+                              ],
+                            ),
+                            child: const Icon(Icons.directions_car, color: Colors.white, size: 22),
+                          ),
+                        ),
+                    ],
+                  ),
                 ],
               ),
-              MarkerLayer(
-                markers: [
-                  Marker(
-                    point: origin,
-                    width: 36,
-                    height: 36,
-                    child: const Icon(Icons.trip_origin, color: AppColors.success, size: 28),
-                  ),
-                  Marker(
-                    point: destination,
-                    width: 36,
-                    height: 36,
-                    child: const Icon(Icons.location_on, color: AppColors.error, size: 32),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

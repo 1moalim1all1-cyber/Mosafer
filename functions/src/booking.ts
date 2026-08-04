@@ -15,10 +15,11 @@ export const createBooking = functions.onCall(async (request) => {
     throw new functions.HttpsError("unauthenticated", "لازم تسجّل دخول الأول");
   }
 
-  const { tripId, seatsBooked, paymentMethod } = request.data as {
+  const { tripId, seatsBooked, paymentMethod, couponCode } = request.data as {
     tripId: string;
     seatsBooked: number;
     paymentMethod: PaymentMethod;
+    couponCode?: string;
   };
 
   if (!tripId || !seatsBooked || seatsBooked < 1) {
@@ -28,11 +29,22 @@ export const createBooking = functions.onCall(async (request) => {
   const tripRef = db.collection(COLLECTIONS.trips).doc(tripId);
   const bookingRef = db.collection(COLLECTIONS.bookings).doc();
   const walletRef = db.collection(COLLECTIONS.wallets).doc(uid);
+  const couponsRef = db.collection("coupons");
 
   const bookingId = await db.runTransaction(async (tx) => {
     const tripSnap = await tx.get(tripRef);
     if (!tripSnap.exists) {
       throw new functions.HttpsError("not-found", "الرحلة دي مش موجودة");
+    }
+
+    // لازم كل القراءات تحصل قبل أي كتابة في نفس الـ Transaction، فبنقرا
+    // الكوبون هنا لو موجود (حتى لو الدفع نقدي، عشان لو الدفع بالمحفظة
+    // كمان نكون جاهزين نستخدم قيمة الخصم في حساب الرصيد المطلوب خصمه).
+    let couponSnap: FirebaseFirestore.QuerySnapshot | null = null;
+    if (couponCode && couponCode.trim().length > 0) {
+      couponSnap = await tx.get(
+        couponsRef.where("code", "==", couponCode.trim().toUpperCase()).limit(1)
+      );
     }
 
     const trip = tripSnap.data()!;
@@ -67,7 +79,37 @@ export const createBooking = functions.onCall(async (request) => {
       );
     }
 
-    const totalPrice = (trip.pricePerSeat as number) * seatsBooked;
+    const originalPrice = (trip.pricePerSeat as number) * seatsBooked;
+    let totalPrice = originalPrice;
+    let appliedCouponId: string | null = null;
+    let appliedCouponCode: string | null = null;
+
+    // ---- تطبيق الكوبون (لو موجود وصالح) ----
+    if (couponSnap && !couponSnap.empty) {
+      const couponDoc = couponSnap.docs[0];
+      const coupon = couponDoc.data();
+      const isActive = coupon.isActive === true;
+      const notExpired =
+        !coupon.expiresAt || coupon.expiresAt.toDate() > new Date();
+      const notExhausted = (coupon.usedCount ?? 0) < (coupon.maxUses ?? 0);
+
+      if (isActive && notExpired && notExhausted) {
+        const discount =
+          coupon.discountType === "percentage"
+            ? originalPrice * ((coupon.value as number) / 100)
+            : (coupon.value as number);
+        totalPrice = Math.max(0, originalPrice - discount);
+        appliedCouponId = couponDoc.id;
+        appliedCouponCode = coupon.code;
+
+        tx.update(couponDoc.ref, {
+          usedCount: admin.firestore.FieldValue.increment(1),
+        });
+      }
+      // لو الكوبون مش صالح (منتهي/مستهلك/متوقف)، بنكمل الحجز عادي
+      // بالسعر الأصلي من غير ما نفشل الحجز كله بسبب كوبون غلط.
+    }
+
     let paymentStatus: "pending" | "paid" = "pending";
 
     if (paymentMethod === "wallet") {
@@ -110,6 +152,9 @@ export const createBooking = functions.onCall(async (request) => {
       seatsBooked,
       status: "pending",
       totalPrice,
+      originalPrice,
+      couponCode: appliedCouponCode,
+      couponId: appliedCouponId,
       paymentMethod,
       paymentStatus,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -312,6 +357,14 @@ export const markTripCompleted = functions.onCall(async (request) => {
 
   await db.runTransaction(async (tx) => {
     tx.update(tripRef, { status: "completed" });
+
+    // زيادة العداد الاجتماعي العام (يظهر في الصفحة الرئيسية للمستخدمين)
+    const statsRef = db.collection("stats").doc("public");
+    tx.set(
+      statsRef,
+      { completedTripsCount: admin.firestore.FieldValue.increment(1) },
+      { merge: true }
+    );
 
     // زيادة عدد الرحلات المكتملة للسائق نفسه
     const driverRef = db.collection(COLLECTIONS.users).doc(uid);

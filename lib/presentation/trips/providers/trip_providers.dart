@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../domain/entities/trip_entity.dart';
 import '../../../domain/entities/trip_search_params.dart';
@@ -64,4 +65,17 @@ final activeGovernorateNamesProvider = Provider.autoDispose<List<String>>((ref) 
     },
     orElse: () => EgyptGovernorates.list,
   );
+});
+
+/// عداد اجتماعي بسيط للصفحة الرئيسية - إجمالي الرحلات المكتملة على
+/// المنصة. بيقرا من وثيقة عامة stats/public بدل استعلام مباشر على
+/// bookings (اللي محمية بقواعد أمان تمنع أي مستخدم عادي يشوف حجوزات
+/// غيره)، والعداد ده بيتحدّث تلقائيًا من Cloud Function وقت إنهاء
+/// أي رحلة (markTripCompleted).
+final totalCompletedTripsCountProvider = StreamProvider.autoDispose<int>((ref) {
+  return FirebaseFirestore.instance
+      .collection('stats')
+      .doc('public')
+      .snapshots()
+      .map((doc) => (doc.data()?['completedTripsCount'] ?? 0) as int);
 });

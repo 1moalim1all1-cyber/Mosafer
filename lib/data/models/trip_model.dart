@@ -23,6 +23,9 @@ class TripModel extends TripEntity {
     super.isReturnEmptyTrip,
     super.isWomenOnly,
     required super.carType,
+    super.driverLiveLat,
+    super.driverLiveLng,
+    super.driverLiveUpdatedAt,
   });
 
   factory TripModel.fromMap(String id, Map<String, dynamic> map) {
@@ -52,6 +55,11 @@ class TripModel extends TripEntity {
       isReturnEmptyTrip: map['isReturnEmptyTrip'] ?? false,
       isWomenOnly: map['isWomenOnly'] ?? false,
       carType: map['carType'] ?? '',
+      driverLiveLat: map['driverLiveLat'] != null ? (map['driverLiveLat']).toDouble() : null,
+      driverLiveLng: map['driverLiveLng'] != null ? (map['driverLiveLng']).toDouble() : null,
+      driverLiveUpdatedAt: map['driverLiveUpdatedAt'] != null
+          ? (map['driverLiveUpdatedAt'] as Timestamp).toDate()
+          : null,
     );
   }
 
@@ -78,7 +86,12 @@ class TripModel extends TripEntity {
       'isReturnEmptyTrip': isReturnEmptyTrip,
       'isWomenOnly': isWomenOnly,
       'carType': carType,
-      'createdAt': FieldValue.serverTimestamp(),
     };
   }
+
+  /// Map خاص بإنشاء رحلة جديدة بس - فيه createdAt (مايتكررش عند التعديل)
+  Map<String, dynamic> toCreateMap() => {
+        ...toMap(),
+        'createdAt': FieldValue.serverTimestamp(),
+      };
 }

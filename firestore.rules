@@ -178,6 +178,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    // ---- Stats (عداد اجتماعي عام - قراءة مفتوحة، الكتابة عبر
+    // Cloud Functions فقط بصلاحيات Admin SDK) ----
+    match /stats/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // ---- Reports (بلاغات) ----
     match /reports/{reportId} {
       allow read: if isAdmin();

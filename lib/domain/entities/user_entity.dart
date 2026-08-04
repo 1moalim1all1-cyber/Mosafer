@@ -22,6 +22,8 @@ class UserEntity extends Equatable {
   final AccountStatus status;
   final String language;
   final List<String> favoriteTrips;
+  final String referralCode; // كود المستخدم بتاعه هو - يشاركه مع أصحابه
+  final String? referredByUid; // لو اتسجّل بكود صاحب معيّن
   final DateTime createdAt;
 
   const UserEntity({
@@ -40,6 +42,8 @@ class UserEntity extends Equatable {
     this.status = AccountStatus.active,
     this.language = 'ar',
     this.favoriteTrips = const [],
+    this.referralCode = '',
+    this.referredByUid,
     required this.createdAt,
   });
 

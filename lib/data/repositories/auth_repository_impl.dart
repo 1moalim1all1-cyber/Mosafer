@@ -69,6 +69,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required UserRole role,
     required Gender gender,
+    String? referralCode,
   }) async {
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
@@ -78,6 +79,24 @@ class AuthRepositoryImpl implements AuthRepository {
 
       final uid = credential.user!.uid;
       final now = DateTime.now();
+      final myReferralCode = uid.substring(0, 8).toUpperCase();
+
+      // لو المستخدم دخل كود دعوة، ندوّر على صاحب الكود ده - القراءة هنا
+      // مسموحة لأن المستخدم بقى Authenticated فعليًا (Firebase بيسجّل
+      // دخوله أوتوماتيك أول ما الحساب يتعمل).
+      String? referredByUid;
+      if (referralCode != null && referralCode.trim().isNotEmpty) {
+        final code = referralCode.trim().toUpperCase();
+        if (code != myReferralCode) {
+          final query = await _usersRef
+              .where('referralCode', isEqualTo: code)
+              .limit(1)
+              .get();
+          if (query.docs.isNotEmpty) {
+            referredByUid = query.docs.first.id;
+          }
+        }
+      }
 
       final userModel = UserModel(
         uid: uid,
@@ -86,10 +105,15 @@ class AuthRepositoryImpl implements AuthRepository {
         phone: phone.trim(),
         email: email.trim(),
         gender: gender,
+        referralCode: myReferralCode,
+        referredByUid: referredByUid,
         createdAt: now,
       );
 
-      // إنشاء وثيقة المستخدم + محفظة فارغة في عملية واحدة (Batch) لضمان الاتساق
+      // إنشاء وثيقة المستخدم + محفظة فارغة في عملية واحدة (Batch) لضمان الاتساق.
+      // الرصيد بيتحط صفر هنا دايمًا (القاعدة الأمنية بتفرض كده) - أي رصيد
+      // ترحيبي أو مكافأة دعوة بيتحط بعد كده عبر Cloud Function (onUserCreated)
+      // بصلاحيات سيرفر، مش من العميل مباشرة.
       final batch = _firestore.batch();
       batch.set(_usersRef.doc(uid), userModel.toMap());
       batch.set(

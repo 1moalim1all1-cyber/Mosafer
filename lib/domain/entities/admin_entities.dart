@@ -68,6 +68,8 @@ class AppSettingsEntity extends Equatable {
   final String? instagramUrl;
   final String? whatsappNumber;
   final String supportEmail;
+  final double welcomeBonusAmount;
+  final double referralBonusAmount;
 
   const AppSettingsEntity({
     this.commissionStandardPercent = 10,
@@ -77,6 +79,8 @@ class AppSettingsEntity extends Equatable {
     this.instagramUrl,
     this.whatsappNumber,
     this.supportEmail = '',
+    this.welcomeBonusAmount = 20,
+    this.referralBonusAmount = 15,
   });
 
   @override
@@ -88,6 +92,8 @@ class AppSettingsEntity extends Equatable {
         instagramUrl,
         whatsappNumber,
         supportEmail,
+        welcomeBonusAmount,
+        referralBonusAmount,
       ];
 }
 

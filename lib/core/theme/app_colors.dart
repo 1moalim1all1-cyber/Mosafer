@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 
-/// نظام ألوان "مسافر" — هوية بصرية مصرية دافئة ومميزة،
-/// بعيدة عن التقليد الحرفي لألوان Uber (الأسود) أو Careem (الأخضر) أو BlaBlaCar (الأزرق الفاتح).
-///
-/// الفكرة: كحلي عميق (ثقة + أمان + احترافية) + برتقالي دافئ (طاقة + سفر + دفء مصري)
+/// نظام ألوان "مسافر" — هوية بصرية عصرية وجذابة: تيل عميق (ثقة + حركة)
+/// + كورال دافئ (طاقة + دعوة للفعل)، بعيدة عن كحلي الشكل الرسمي القديم
+/// وعن ألوان المنافسين المباشرين (أسود Uber، أخضر Careem، أزرق BlaBlaCar).
 class AppColors {
   AppColors._();
 
   // ---- الألوان الأساسية (Brand) ----
-  static const Color primary = Color(0xFF0B2545); // كحلي عميق
-  static const Color primaryLight = Color(0xFF1B3A6B);
-  static const Color primaryDark = Color(0xFF061831);
+  static const Color primary = Color(0xFF0D5C63); // تيل عميق
+  static const Color primaryLight = Color(0xFF15807F);
+  static const Color primaryDark = Color(0xFF083D42);
 
-  static const Color accent = Color(0xFFFF8C42); // برتقالي دافئ
-  static const Color accentLight = Color(0xFFFFA766);
-  static const Color accentDark = Color(0xFFE06F26);
+  static const Color accent = Color(0xFFFF6B4A); // كورال دافئ
+  static const Color accentLight = Color(0xFFFF8C6E);
+  static const Color accentDark = Color(0xFFE0492C);
 
   // ---- ألوان الميزات الخاصة (لازم تكون مميزة بصريًا وواضحة من نظرة واحدة) ----
   static const Color returnEmptyTrip = Color(0xFF2E9E6C); // أخضر - "راجع فاضي"

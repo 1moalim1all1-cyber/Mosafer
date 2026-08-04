@@ -18,6 +18,8 @@ class UserModel extends UserEntity {
     super.status,
     super.language,
     super.favoriteTrips,
+    super.referralCode,
+    super.referredByUid,
     required super.createdAt,
   });
 
@@ -37,6 +39,8 @@ class UserModel extends UserEntity {
         status: e.status,
         language: e.language,
         favoriteTrips: e.favoriteTrips,
+        referralCode: e.referralCode,
+        referredByUid: e.referredByUid,
         createdAt: e.createdAt,
       );
 
@@ -66,6 +70,8 @@ class UserModel extends UserEntity {
       ),
       language: map['language'] ?? 'ar',
       favoriteTrips: List<String>.from(map['favoriteTrips'] ?? const []),
+      referralCode: map['referralCode'] ?? '',
+      referredByUid: map['referredByUid'],
       createdAt: (map['createdAt'] is Timestamp)
           ? (map['createdAt'] as Timestamp).toDate()
           : DateTime.now(),
@@ -88,6 +94,8 @@ class UserModel extends UserEntity {
       'status': status.name,
       'language': language,
       'favoriteTrips': favoriteTrips,
+      'referralCode': referralCode,
+      'referredByUid': referredByUid,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }

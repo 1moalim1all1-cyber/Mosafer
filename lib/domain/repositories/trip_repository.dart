@@ -22,4 +22,15 @@ abstract class TripRepository {
 
   /// رحلات السائق (لعرضها في لوحته)
   Stream<List<TripEntity>> watchDriverTrips(String driverId);
+
+  /// السائق بيحدّث موقعه الحي أثناء الرحلة (زي كريم) - بيتنادى كل كام
+  /// ثانية من تطبيق السائق وقت الرحلة النشطة بس.
+  Future<void> updateLiveLocation({
+    required String tripId,
+    required double lat,
+    required double lng,
+  });
+
+  /// السائق بيوقف مشاركة موقعه (بعد ما الرحلة تخلص أو يقفلها يدويًا)
+  Future<void> stopLiveLocation(String tripId);
 }
