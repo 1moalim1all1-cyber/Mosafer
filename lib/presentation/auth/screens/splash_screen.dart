@@ -11,8 +11,13 @@ class SplashScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    ref.listen(authStateChangesProvider, (previous, next) {
-      next.whenData((user) {
+    final authState = ref.watch(authStateChangesProvider);
+
+    authState.whenData((user) {
+      // بنستنى الفريم الحالي يخلص رسم نفسه الأول، وبعدين ننقل المستخدم -
+      // ده بيمنع مشاكل تنقّل وسط عملية بناء الواجهة (Build).
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
         if (user == null) {
           context.go(AppRoutes.login);
         } else {
@@ -20,7 +25,7 @@ class SplashScreen extends ConsumerWidget {
           context.go(AppRoutes.home);
         }
       });
-    }, fireImmediately: true);
+    });
 
     return const Scaffold(
       backgroundColor: AppColors.primary,
