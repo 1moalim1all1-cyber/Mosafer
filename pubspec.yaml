@@ -46,6 +46,7 @@ dependencies:
 
   # ---- أدوات مساعدة ----
   cached_network_image: ^3.4.1
+  shimmer: ^3.0.0
   image_picker: ^1.1.2
   flutter_dotenv: ^5.1.0
   equatable: ^2.0.5

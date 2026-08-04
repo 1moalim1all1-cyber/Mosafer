@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../theme/app_colors.dart';
+import '../providers/app_providers.dart';
+import '../constants/app_constants.dart';
 import '../../presentation/shared/widgets/app_bottom_nav.dart';
 import '../../presentation/auth/screens/splash_screen.dart';
 import '../../presentation/onboarding/screens/onboarding_screen.dart';
@@ -372,6 +375,34 @@ class _ProfilePlaceholder extends ConsumerWidget {
               icon: const Icon(Icons.info_outline),
               label: const Text('عن مسافر ومساعدة'),
               onPressed: () => context.push(AppRoutes.about),
+            ),
+            const SizedBox(height: 12),
+            Consumer(
+              builder: (context, ref, _) {
+                final themeMode = ref.watch(themeModeProvider);
+                final isDark = themeMode == ThemeMode.dark;
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppColors.lightBorder),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    secondary: Icon(
+                      isDark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                    ),
+                    title: const Text('الوضع الداكن'),
+                    value: isDark,
+                    onChanged: (value) async {
+                      final newMode = value ? ThemeMode.dark : ThemeMode.light;
+                      ref.read(themeModeProvider.notifier).state = newMode;
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setString(AppConstants.keyThemeMode, newMode.name);
+                    },
+                  ),
+                );
+              },
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(

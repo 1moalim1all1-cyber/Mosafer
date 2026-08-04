@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/trip_providers.dart';
 import '../widgets/trip_card.dart';
 import '../../shared/widgets/staggered_fade_in.dart';
+import '../../shared/widgets/skeleton_loading.dart';
 import '../../../core/theme/app_colors.dart';
 
 class SearchResultsScreen extends ConsumerWidget {
@@ -20,7 +21,7 @@ class SearchResultsScreen extends ConsumerWidget {
         title: Text('${params.originCity} → ${params.destinationCity}'),
       ),
       body: resultsAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const TripListSkeleton(),
         error: (error, stack) => _buildErrorState(context, ref, error),
         data: (trips) {
           if (trips.isEmpty) {

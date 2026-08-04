@@ -10,16 +10,11 @@ import 'core/theme/app_theme.dart';
 import 'core/routing/app_router.dart';
 import 'core/constants/app_constants.dart';
 import 'core/services/fcm_service.dart';
+import 'core/providers/app_providers.dart';
 import 'firebase_options.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'presentation/auth/providers/auth_providers.dart';
 import 'presentation/notifications/providers/notification_providers.dart';
-
-/// Provider للغة الحالية (يبدأ بالعربية كلغة افتراضية زي المطلوب)
-final localeProvider = StateProvider<Locale>((ref) => const Locale('ar'));
-
-/// Provider لوضع الثيم (فاتح/داكن)
-final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.system);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,14 +32,20 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // استرجاع اللغة المحفوظة من قبل (لو المستخدم غيّرها قبل كده)
+  // استرجاع اللغة ووضع الألوان المحفوظين من قبل (لو المستخدم غيّرهم قبل كده)
   final prefs = await SharedPreferences.getInstance();
   final savedLanguage = prefs.getString(AppConstants.keyLanguage) ?? 'ar';
+  final savedThemeMode = prefs.getString(AppConstants.keyThemeMode);
+  final initialThemeMode = ThemeMode.values.firstWhere(
+    (m) => m.name == savedThemeMode,
+    orElse: () => ThemeMode.system,
+  );
 
   runApp(
     ProviderScope(
       overrides: [
         localeProvider.overrideWith((ref) => Locale(savedLanguage)),
+        themeModeProvider.overrideWith((ref) => initialThemeMode),
       ],
       child: const MosaferApp(),
     ),
