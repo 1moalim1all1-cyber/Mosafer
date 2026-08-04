@@ -10,6 +10,7 @@ import '../../shared/widgets/app_text_field.dart';
 import '../../shared/widgets/app_button.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/utils/phone_auth_helper.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -21,7 +22,6 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   String _phoneNumber = '';
@@ -30,15 +30,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   @override
   void dispose() {
     _nameController.dispose();
-    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_phoneNumber.isEmpty) {
-      ref.read(authErrorProvider.notifier).state = 'من فضلك أدخل رقم الهاتف';
+    if (_phoneNumber.isEmpty || _phoneNumber.length < 8) {
+      ref.read(authErrorProvider.notifier).state = 'من فضلك أدخل رقم هاتف صحيح';
       return;
     }
 
@@ -50,7 +49,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     try {
       await ref.read(authRepositoryProvider).registerWithEmail(
             fullName: _nameController.text,
-            email: _emailController.text,
+            email: syntheticEmailFromPhone(_phoneNumber),
             phone: _phoneNumber,
             password: _passwordController.text,
             role: role,
@@ -66,7 +65,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         context.go(AppRoutes.home);
       }
     } on AuthException catch (e) {
-      ref.read(authErrorProvider.notifier).state = e.message;
+      final message = e.message.contains('مستخدم بالفعل')
+          ? 'رقم الهاتف ده مسجّل بحساب بالفعل، جرّب تسجّل الدخول'
+          : e.message;
+      ref.read(authErrorProvider.notifier).state = message;
     } finally {
       if (mounted) ref.read(authLoadingProvider.notifier).state = false;
     }
@@ -106,15 +108,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   initialCountryCode: 'EG',
                   decoration: const InputDecoration(border: OutlineInputBorder()),
                   onChanged: (phone) => _phoneNumber = phone.completeNumber,
-                ),
-                const SizedBox(height: 16),
-                AppTextField(
-                  controller: _emailController,
-                  label: 'البريد الإلكتروني',
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (v) => (v == null || !v.contains('@'))
-                      ? 'أدخل بريد إلكتروني صحيح'
-                      : null,
                 ),
                 const SizedBox(height: 16),
                 AppTextField(

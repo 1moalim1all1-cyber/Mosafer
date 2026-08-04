@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../providers/notification_providers.dart';
 import '../../auth/providers/auth_providers.dart';
+import '../../shared/widgets/staggered_fade_in.dart';
 import '../../../domain/entities/notification_entity.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -65,7 +66,9 @@ class NotificationsScreen extends ConsumerWidget {
             separatorBuilder: (_, __) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final n = notifications[index];
-              return ListTile(
+              return StaggeredFadeIn(
+                index: index,
+                child: ListTile(
                 onTap: () {
                   if (!n.isRead && user != null) {
                     ref.read(notificationRepositoryProvider).markAsRead(user.uid, n.id);
@@ -86,6 +89,7 @@ class NotificationsScreen extends ConsumerWidget {
                 trailing: Text(
                   dateFormat.format(n.createdAt),
                   style: Theme.of(context).textTheme.bodySmall,
+                ),
                 ),
               );
             },

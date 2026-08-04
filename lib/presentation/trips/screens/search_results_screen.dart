@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../providers/trip_providers.dart';
 import '../widgets/trip_card.dart';
+import '../../shared/widgets/staggered_fade_in.dart';
 import '../../../core/theme/app_colors.dart';
 
 class SearchResultsScreen extends ConsumerWidget {
@@ -32,9 +33,12 @@ class SearchResultsScreen extends ConsumerWidget {
               itemCount: trips.length,
               itemBuilder: (context, index) {
                 final trip = trips[index];
-                return TripCard(
-                  trip: trip,
-                  onTap: () => context.push('/trip/${trip.id}'),
+                return StaggeredFadeIn(
+                  index: index,
+                  child: TripCard(
+                    trip: trip,
+                    onTap: () => context.push('/trip/${trip.id}'),
+                  ),
                 );
               },
             ),

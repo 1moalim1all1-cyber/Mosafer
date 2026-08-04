@@ -1,104 +1,91 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/auth_providers.dart';
-import '../../../data/repositories/auth_repository_impl.dart';
-import '../../shared/widgets/app_text_field.dart';
-import '../../shared/widgets/app_button.dart';
+import '../../admin/providers/admin_providers.dart';
 import '../../../core/theme/app_colors.dart';
 
-class ForgotPasswordScreen extends ConsumerStatefulWidget {
+/// ملحوظة معمارية: بما إن التسجيل بقى برقم الموبايل (زي ما طلب المستخدم)
+/// مش بريد إلكتروني حقيقي، خدمة "استرجاع كلمة المرور عبر رابط إيميل"
+/// المدمجة في Firebase مبقتش تقدر تشتغل (البريد الداخلي المُولَّد من رقم
+/// الهاتف مش صندوق حقيقي). الحل المؤقت هنا: توجيه واضح لدعم فني بشري،
+/// لحد ما نضيف تحقق SMS OTP حقيقي في مرحلة لاحقة لو احتجناه.
+class ForgotPasswordScreen extends ConsumerWidget {
   const ForgotPasswordScreen({super.key});
 
   @override
-  ConsumerState<ForgotPasswordScreen> createState() =>
-      _ForgotPasswordScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settingsAsync = ref.watch(adminAppSettingsProvider);
 
-class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  bool _isLoading = false;
-  String? _error;
-  bool _sent = false;
-
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-    try {
-      await ref
-          .read(authRepositoryProvider)
-          .sendPasswordResetEmail(email: _emailController.text);
-      setState(() => _sent = true);
-    } on AuthException catch (e) {
-      setState(() => _error = e.message);
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('استعادة كلمة المرور')),
       body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: _sent ? _buildSuccessState(context) : _buildFormState(context),
+        padding: const EdgeInsets.all(24),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.support_agent_outlined, size: 64, color: AppColors.primary),
+              const SizedBox(height: 20),
+              Text(
+                'تواصل مع الدعم لاستعادة حسابك',
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'بما إن حسابك مسجّل برقم الهاتف، فريق الدعم هيتأكد من هويتك ويساعدك '
+                'تستعيد حسابك يدويًا لحد ما نفعّل الاستعادة الأوتوماتيكية قريبًا.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 24),
+              settingsAsync.when(
+                loading: () => const CircularProgressIndicator(),
+                error: (_, __) => const SizedBox.shrink(),
+                data: (settings) {
+                  final hasWhatsapp = (settings.whatsappNumber ?? '').isNotEmpty;
+                  final hasEmail = settings.supportEmail.isNotEmpty;
+                  if (!hasWhatsapp && !hasEmail) {
+                    return const Text(
+                      'تواصل مع فريق مسافر عبر وسائل التواصل في التطبيق',
+                      style: TextStyle(color: AppColors.lightTextSecondary),
+                    );
+                  }
+                  return Column(
+                    children: [
+                      if (hasWhatsapp)
+                        _ContactRow(icon: Icons.chat, label: settings.whatsappNumber!),
+                      if (hasEmail)
+                        _ContactRow(icon: Icons.email_outlined, label: settings.supportEmail),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
+}
 
-  Widget _buildFormState(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+class _ContactRow extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _ContactRow({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            'أدخل بريدك الإلكتروني وهنبعتلك رابط لاستعادة كلمة المرور',
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-          const SizedBox(height: 24),
-          AppTextField(
-            controller: _emailController,
-            label: 'البريد الإلكتروني',
-            keyboardType: TextInputType.emailAddress,
-            validator: (v) =>
-                (v == null || !v.contains('@')) ? 'أدخل بريد صحيح' : null,
-          ),
-          if (_error != null) ...[
-            const SizedBox(height: 12),
-            Text(_error!, style: const TextStyle(color: AppColors.error)),
-          ],
-          const SizedBox(height: 24),
-          AppButton(
-            label: 'إرسال رابط الاستعادة',
-            isLoading: _isLoading,
-            onPressed: _submit,
-          ),
+          Icon(icon, size: 18, color: AppColors.primary),
+          const SizedBox(width: 8),
+          Text(label, style: Theme.of(context).textTheme.bodyMedium),
         ],
       ),
-    );
-  }
-
-  Widget _buildSuccessState(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Icon(Icons.mark_email_read_outlined,
-            size: 64, color: AppColors.success),
-        const SizedBox(height: 16),
-        Text('اتبعت الرابط بنجاح', style: Theme.of(context).textTheme.titleLarge),
-        const SizedBox(height: 8),
-        Text(
-          'راجع بريدك الإلكتروني (${_emailController.text}) واتبع الخطوات',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-      ],
     );
   }
 }
