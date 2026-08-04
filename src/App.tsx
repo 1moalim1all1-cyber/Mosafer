@@ -29,7 +29,7 @@ import { AdminRoute, DriverRoute } from './routes/roleGuards'
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/Mosafer">
         <Routes>
           <Route
             path="/login"
