@@ -20,7 +20,7 @@ class SplashScreen extends ConsumerWidget {
           context.go(AppRoutes.home);
         }
       });
-    });
+    }, fireImmediately: true);
 
     return const Scaffold(
       backgroundColor: AppColors.primary,
