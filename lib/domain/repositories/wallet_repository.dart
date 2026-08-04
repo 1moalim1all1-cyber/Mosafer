@@ -1,4 +1,4 @@
-import 'wallet_transaction_entity.dart';
+import '../entities/wallet_transaction_entity.dart';
 
 abstract class WalletRepository {
   Stream<double> watchBalance(String uid);

@@ -19,15 +19,13 @@ class DefaultFirebaseOptions {
 
   // القيم دي من تسجيل تطبيق "ويب" (أيقونة </>) في Firebase Console
   static const FirebaseOptions web = FirebaseOptions(
-     apiKey: "AIzaSyDbrbDg3z9IDn_o6rxWkVQH3Z0oIlDDgXM",
-  authDomain: "mosafer-c43be.firebaseapp.com",
-  projectId: "mosafer-c43be",
-  storageBucket: "mosafer-c43be.firebasestorage.app",
-  messagingSenderId: "506602326195",
-  appId: "1:506602326195:web:d84d1a8b0e072bd92308c6",
-  measurementId: "G-201F285L1N"
-};
-
+    apiKey: 'ضع_قيمة_apiKey_هنا',
+    appId: 'ضع_قيمة_appId_هنا',
+    messagingSenderId: 'ضع_قيمة_messagingSenderId_هنا',
+    projectId: 'ضع_قيمة_projectId_هنا',
+    authDomain: 'ضع_قيمة_authDomain_هنا', // مثال: mosafer-xxxxx.firebaseapp.com
+    storageBucket: 'ضع_قيمة_storageBucket_هنا',
+  );
 
   // القيم دي من تسجيل تطبيق "أندرويد" في Firebase Console
   static const FirebaseOptions android = FirebaseOptions(
