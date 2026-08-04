@@ -1,0 +1,81 @@
+import { useState, type FormEvent } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Button } from '../components/ui/Button'
+import { Input } from '../components/ui/Input'
+import { useAuth } from '../contexts/AuthContext'
+import { syntheticEmailFromPhone } from '../lib/phoneAuth'
+
+export default function LoginPage() {
+  const { login } = useAuth()
+  const navigate = useNavigate()
+  const [phone, setPhone] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (phone.trim().length < 8) {
+      setError('من فضلك أدخل رقم هاتف صحيح')
+      return
+    }
+    setLoading(true)
+    setError(null)
+    try {
+      await login(syntheticEmailFromPhone(phone), password)
+      navigate('/')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'حصل خطأ، حاول تاني')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-bg px-4">
+      <div className="w-full max-w-md">
+        <div className="mb-8 flex flex-col items-center text-center">
+          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-hover shadow-lg shadow-primary/30">
+            <span className="text-4xl">🚗</span>
+          </div>
+          <h1 className="text-2xl font-bold text-text-primary">أهلاً بيك تاني</h1>
+          <p className="mt-1 text-text-secondary">سجّل دخولك وكمّل رحلتك</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <Input
+            label="رقم الهاتف"
+            type="tel"
+            placeholder="01xxxxxxxxx"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            dir="ltr"
+          />
+          <Input
+            label="كلمة المرور"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <Link to="/forgot-password" className="text-sm font-semibold text-primary hover:text-primary-hover">
+            نسيت كلمة المرور؟
+          </Link>
+
+          {error && <p className="text-sm text-danger">{error}</p>}
+
+          <Button type="submit" loading={loading}>
+            تسجيل الدخول
+          </Button>
+
+          <Link
+            to="/role-selection"
+            className="text-center text-sm font-semibold text-primary hover:text-primary-hover"
+          >
+            معندكش حساب؟ سجّل دلوقتي
+          </Link>
+        </form>
+      </div>
+    </div>
+  )
+}

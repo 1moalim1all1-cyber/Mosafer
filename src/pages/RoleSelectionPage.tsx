@@ -1,0 +1,44 @@
+import { useNavigate } from 'react-router-dom'
+
+export default function RoleSelectionPage() {
+  const navigate = useNavigate()
+
+  return (
+    <div className="mx-auto max-w-md px-4 py-10">
+      <h1 className="mb-2 text-center text-2xl font-bold text-text-primary">هتستخدم مسافر كإيه؟</h1>
+      <p className="mb-8 text-center text-text-secondary">
+        اختار الدور المناسب، ممكن تضيف الدور التاني لاحقًا من إعدادات حسابك
+      </p>
+
+      <div className="flex flex-col gap-4">
+        <button
+          onClick={() => navigate('/register?role=passenger')}
+          className="flex items-center gap-4 rounded-2xl border-2 border-border bg-white p-5 text-right transition hover:border-primary hover:bg-primary-light"
+        >
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-light text-2xl">
+            🧑
+          </div>
+          <div className="flex-1">
+            <p className="text-lg font-bold text-text-primary">راكب</p>
+            <p className="text-sm text-text-secondary">دوّر على رحلة واحجز مقعدك</p>
+          </div>
+          <span className="text-text-secondary">‹</span>
+        </button>
+
+        <button
+          onClick={() => navigate('/register?role=driver')}
+          className="flex items-center gap-4 rounded-2xl border-2 border-border bg-white p-5 text-right transition hover:border-primary hover:bg-primary-light"
+        >
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-light text-2xl">
+            🚘
+          </div>
+          <div className="flex-1">
+            <p className="text-lg font-bold text-text-primary">سائق</p>
+            <p className="text-sm text-text-secondary">شارك مقاعدك الفاضية واكسب دخل إضافي</p>
+          </div>
+          <span className="text-text-secondary">‹</span>
+        </button>
+      </div>
+    </div>
+  )
+}
