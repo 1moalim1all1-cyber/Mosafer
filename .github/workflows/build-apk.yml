@@ -18,8 +18,20 @@ jobs:
       - name: تثبيت Flutter (على سيرفر GitHub، مش جهازك)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
           channel: 'stable'
+
+      - name: توليد ملفات Gradle بأحدث نسخة متوافقة مع Flutter المثبتة
+        # بنشيل ملفات الإعداد القديمة ونخلي Flutter نفسه يولّدها من جديد،
+        # عشان نضمن توافق 100% مع نسخة Flutter اللي اتثبتت فوق - بدل ما
+        # نفرض نسخ Gradle/Kotlin/AGP يدوية ممكن تتعارض مع مكتبات زي geolocator.
+        run: |
+          rm -f android/build.gradle.kts android/settings.gradle.kts android/app/build.gradle.kts
+          rm -f android/gradle/wrapper/gradle-wrapper.properties
+          flutter create --platforms=android --org com.mosafer .
+          # نفرض applicationId/namespace ثابتين بغض النظر عن أي تخمين تاني،
+          # عشان يفضلوا متطابقين مع اللي هتسجله في Firebase Console
+          sed -i 's/applicationId = ".*"/applicationId = "com.mosafer.app"/' android/app/build.gradle.kts
+          sed -i 's/namespace = ".*"/namespace = "com.mosafer.app"/' android/app/build.gradle.kts
 
       - name: تثبيت المكتبات
         run: flutter pub get

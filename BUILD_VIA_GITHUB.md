@@ -5,9 +5,9 @@
 
 ---
 
-## المرحلة 1: جهّز ملفات Firebase (مرة واحدة بس)
+## المرحلة 1: جهّز ملف Firebase (مرة واحدة بس)
 
-### 1.1 سجّل تطبيق Android في Firebase
+### 1.1 سجّل تطبيق Android في Firebase (بدون تحميل أي ملف)
 1. روح لمشروعك على https://console.firebase.google.com
 2. من ⚙️ (جنب "Project Overview") → **Project settings**
 3. انزل لـ **Your apps** → دوس أيقونة **Android**
@@ -15,22 +15,21 @@
    ```
    com.mosafer.app
    ```
-5. سيبها تكمل، هتقولك "Download google-services.json" → حمّله
+5. دوس **Register app** واستمر، **مفيش داعي تحمّل أي ملف** — سيبها كده
+   وارجع لصفحة Project settings
 
-### 1.2 حط الملف في مكانه
-انسخ `google-services.json` اللي نزلته، وحطه هنا بالظبط:
-```
-mosafer_app/android/app/google-services.json
-```
-
-### 1.3 جهّز firebase_options.dart
-1. من نفس صفحة **Project settings** اللي إنت فيها، هتلاقي تحت
-   "SDK setup and configuration" قيم زي: `apiKey`, `appId`,
-   `messagingSenderId`, `projectId`, `storageBucket`
+### 1.2 جهّز firebase_options.dart
+1. من نفس صفحة **Project settings**، هتلاقي تحت "Your apps" التطبيق اللي
+   سجلته، دوس عليه وهتلاقي قيم زي: `apiKey`, `appId`, `messagingSenderId`,
+   `projectId`, `storageBucket`
 2. افتح `lib/firebase_options.template.dart`
 3. املأ القيم الخمسة دي مكان النصوص "ضع_قيمة_...هنا"
-4. احفظ الملف باسم جديد: `lib/firebase_options.dart` (يعني هيبقى عندك
-   الملفين: القديم Template والجديد المملوء - سيب الاتنين، مش هيأثروا)
+4. احفظ الملف باسم جديد: `lib/firebase_options.dart` (سيب الملف القديم
+   الـ Template زي ما هو، مش هيأثر على حاجة)
+
+> ملحوظة: مش محتاجين `google-services.json` خالص - `firebase_options.dart`
+> بيدي كل البيانات اللي Firebase محتاجها مباشرة، وده أبسط وأقل عرضة
+> لمشاكل توافق إصدارات Gradle.
 
 ---
 
