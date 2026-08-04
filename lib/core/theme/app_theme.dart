@@ -47,6 +47,7 @@ class AppTheme {
   static const double radiusM = 14;
   static const double radiusL = 20;
   static const double radiusButton = 12;
+  static const double radiusCard = 18; // بين 16 و20 زي المطلوب
 
   /// نمط زرار موحّد بيغطي كل الحالات المطلوبة (Default, Hover, Pressed/Active,
   /// Focus, Disabled) - مبني على WidgetStateProperty عشان يشتغل صح على
@@ -155,11 +156,13 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: AppColors.lightSurface,
-        elevation: 2,
-        shadowColor: AppColors.lightTextPrimary.withValues(alpha: 0.08),
+        elevation: 4,
+        // تقريب أقرب ما يكون لظل "0 8px 30px rgba(15,23,42,0.08)" المطلوب،
+        // بحدود نظام الظلال في Flutter (Elevation + ShadowColor)
+        shadowColor: const Color(0xFF0F172A).withValues(alpha: 0.08),
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radiusM),
+          borderRadius: BorderRadius.circular(radiusCard),
           side: const BorderSide(color: AppColors.lightBorder),
         ),
       ),
@@ -249,11 +252,11 @@ class AppTheme {
       ),
       cardTheme: CardThemeData(
         color: AppColors.darkSurface,
-        elevation: 2,
+        elevation: 4,
         shadowColor: Colors.black.withValues(alpha: 0.4),
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radiusM),
+          borderRadius: BorderRadius.circular(radiusCard),
           side: const BorderSide(color: AppColors.darkBorder),
         ),
       ),
