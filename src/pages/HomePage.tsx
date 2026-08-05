@@ -34,7 +34,10 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-bg">
       <header className="flex items-center justify-between border-b border-border bg-white px-4 py-4">
-        <h1 className="text-xl font-bold text-primary">مسافر</h1>
+        <div className="flex items-center gap-2">
+          <img src="/Mosafer/logo.jpeg" alt="مسافر" className="h-10 w-10 rounded-full object-cover" />
+          <h1 className="text-xl font-bold text-primary">مسافر</h1>
+        </div>
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/notifications')} className="relative text-xl">
             🔔

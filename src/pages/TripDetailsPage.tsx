@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { collection, query, where, limit, getDocs, Timestamp } from 'firebase/firestore'
+import { db } from '../lib/firebase'
 import { subscribeToTrip } from '../lib/trips'
 import { fetchUserProfile } from '../lib/users'
 import { createBooking } from '../lib/booking'
 import { getOrCreateChat } from '../lib/chat'
 import { subscribeFavorites, toggleFavorite } from '../lib/favorites'
+import { TripRouteMap } from '../components/TripRouteMap'
 import type { Trip } from '../types/trip'
 import type { AppUser } from '../types/user'
 import type { PaymentMethod } from '../types/booking'
@@ -25,6 +28,9 @@ export default function TripDetailsPage() {
   const [success, setSuccess] = useState(false)
   const [openingChat, setOpeningChat] = useState(false)
   const [favorites, setFavorites] = useState<string[]>([])
+  const [couponCode, setCouponCode] = useState('')
+  const [couponMessage, setCouponMessage] = useState<string | null>(null)
+  const [couponDiscount, setCouponDiscount] = useState(0)
 
   useEffect(() => {
     if (!user) return
@@ -53,12 +59,50 @@ export default function TripDetailsPage() {
     return unsubscribe
   }, [tripId])
 
+  async function applyCoupon() {
+    if (!trip || !couponCode.trim()) return
+    const code = couponCode.trim().toUpperCase()
+    setCouponMessage(null)
+    setCouponDiscount(0)
+
+    try {
+      const q = query(collection(db, 'coupons'), where('code', '==', code), limit(1))
+      const snap = await getDocs(q)
+      if (snap.empty) {
+        setCouponMessage('الكود ده مش موجود')
+        return
+      }
+      const coupon = snap.docs[0].data()
+      const isActive = coupon.isActive === true
+      const notExpired = !coupon.expiresAt || (coupon.expiresAt as Timestamp).toDate() > new Date()
+      const notExhausted = (coupon.usedCount ?? 0) < (coupon.maxUses ?? 0)
+
+      if (!isActive || !notExpired || !notExhausted) {
+        setCouponMessage('الكود ده منتهي أو مش متاح دلوقتي')
+        return
+      }
+
+      const original = trip.pricePerSeat * seats
+      const discount = coupon.discountType === 'percentage' ? original * (coupon.value / 100) : coupon.value
+      const finalDiscount = Math.min(discount, original)
+      setCouponDiscount(finalDiscount)
+      setCouponMessage(`تم تطبيق الخصم! وفّرت ${finalDiscount.toFixed(0)} ج.م`)
+    } catch {
+      setCouponMessage('حصل خطأ، حاول تاني')
+    }
+  }
+
   async function handleBook() {
     if (!trip || !user) return
     setLoading(true)
     setError(null)
     try {
-      await createBooking({ tripId: trip.id, seatsBooked: seats, paymentMethod })
+      await createBooking({
+        tripId: trip.id,
+        seatsBooked: seats,
+        paymentMethod,
+        couponCode: couponCode.trim() || undefined,
+      })
       setSuccess(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'حصل خطأ، حاول تاني')
@@ -84,7 +128,7 @@ export default function TripDetailsPage() {
   }
 
   const timeFormat = new Intl.DateTimeFormat('ar-EG', { hour: '2-digit', minute: '2-digit', weekday: 'long', day: 'numeric', month: 'long' })
-  const total = trip.pricePerSeat * seats
+  const total = Math.max(0, trip.pricePerSeat * seats - couponDiscount)
 
   if (success) {
     return (
@@ -154,6 +198,12 @@ export default function TripDetailsPage() {
           <span>⏱️ {trip.estimatedDurationMinutes} دقيقة تقريبًا</span>
         </div>
 
+        {(trip.originLat !== 0 || trip.originLng !== 0) && (
+          <div className="mb-4">
+            <TripRouteMap trip={trip} />
+          </div>
+        )}
+
         <hr className="my-4 border-border" />
 
         <div className="mb-4 flex items-center justify-between">
@@ -195,6 +245,28 @@ export default function TripDetailsPage() {
               👛 المحفظة
             </button>
           </div>
+        </div>
+
+        <div className="mb-4">
+          <p className="mb-2 font-semibold text-text-primary">كوبون خصم (اختياري)</p>
+          <div className="flex gap-3">
+            <input
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              placeholder="اكتب كود الكوبون"
+              className="flex-1 rounded-xl border-2 border-border px-4 py-2.5 focus:border-primary focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={applyCoupon}
+              className="rounded-xl border-2 border-primary px-4 py-2.5 font-semibold text-primary"
+            >
+              تطبيق
+            </button>
+          </div>
+          {couponMessage && (
+            <p className={`mt-2 text-sm ${couponDiscount > 0 ? 'text-success' : 'text-danger'}`}>{couponMessage}</p>
+          )}
         </div>
 
         <div className="mb-4 flex items-center justify-between rounded-xl bg-white p-4">

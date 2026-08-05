@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext'
 import type { AppUser } from '../types/user'
 import { Button } from '../components/ui/Button'
 import { RatingModal } from '../components/RatingModal'
+import { LiveLocationToggle } from '../components/LiveLocationToggle'
 
 interface BookingRow {
   id: string
@@ -108,6 +109,7 @@ export default function DriverTripBookingsPage() {
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">
+        {tripId && <LiveLocationToggle tripId={tripId} />}
         {bookings.length === 0 && <p className="py-12 text-center text-text-secondary">لسه مفيش حجوزات على الرحلة دي</p>}
         {bookings.map((b) => (
           <BookingCard key={b.id} booking={b} onRate={() => setRatingBooking(b)} />

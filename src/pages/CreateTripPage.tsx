@@ -1,9 +1,10 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { createTrip } from '../lib/driverActions'
+import { createTrip, subscribeDriverStatus } from '../lib/driverActions'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { LocationPicker } from '../components/LocationPicker'
 
 const GOVERNORATES = [
   'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحر الأحمر', 'البحيرة',
@@ -26,18 +27,35 @@ export default function CreateTripPage() {
   const [duration, setDuration] = useState('60')
   const [isReturnEmptyTrip, setIsReturnEmptyTrip] = useState(false)
   const [isWomenOnly, setIsWomenOnly] = useState(false)
+  const [originPoint, setOriginPoint] = useState<{ lat: number; lng: number } | null>(null)
+  const [destinationPoint, setDestinationPoint] = useState<{ lat: number; lng: number } | null>(null)
+  const [pickingLocation, setPickingLocation] = useState<'origin' | 'destination' | null>(null)
 
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [isApproved, setIsApproved] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    if (!user) return
+    return subscribeDriverStatus(user.uid, (status) => setIsApproved(status === 'approved'))
+  }, [user])
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
+    if (isApproved === false) {
+      setError('حسابك لسه مش معتمد، مينفعش تنشر رحلة دلوقتي')
+      return
+    }
     if (!origin || !destination) {
       setError('اختار نقطة الانطلاق والوصول')
       return
     }
     if (origin === destination) {
       setError('نقطة الانطلاق والوصول لازم يكونوا مختلفين')
+      return
+    }
+    if (!originPoint || !destinationPoint) {
+      setError('حدد نقطتي الانطلاق والوصول بالظبط من الخريطة عشان الراكب يقدر يلاقيك بسهولة')
       return
     }
     if (!date || !time) {
@@ -64,12 +82,12 @@ export default function CreateTripPage() {
         status: 'active',
         originCity: origin,
         originGovernorate: origin,
-        originLat: 0,
-        originLng: 0,
+        originLat: originPoint.lat,
+        originLng: originPoint.lng,
         destinationCity: destination,
         destinationGovernorate: destination,
-        destinationLat: 0,
-        destinationLng: 0,
+        destinationLat: destinationPoint.lat,
+        destinationLng: destinationPoint.lng,
         departureTime: new Date(`${date}T${time}`),
         estimatedDurationMinutes: Number(duration),
         pricePerSeat: priceNum,
@@ -91,6 +109,17 @@ export default function CreateTripPage() {
     <div className="mx-auto max-w-lg px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold text-text-primary">إنشاء رحلة جديدة</h1>
 
+      {isApproved === false && (
+        <div className="mb-6 rounded-xl border border-warning/40 bg-warning/10 p-4 text-center">
+          <p className="mb-3 text-text-primary">
+            حسابك لسه تحت المراجعة، مش هتقدر تنشر أي رحلة لحد ما فريق مسافر يعتمد مستنداتك
+          </p>
+          <Button onClick={() => navigate('/driver/pending-approval')} fullWidth={false}>
+            تفاصيل حالة الاعتماد
+          </Button>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
           <label className="mb-1.5 block text-sm font-semibold text-text-primary">من</label>
@@ -106,6 +135,15 @@ export default function CreateTripPage() {
               </option>
             ))}
           </select>
+          <button
+            type="button"
+            onClick={() => setPickingLocation('origin')}
+            className={`mt-2 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
+              originPoint ? 'border-success/40 bg-success/5 text-success' : 'border-border text-text-secondary'
+            }`}
+          >
+            {originPoint ? '✅ اتحدد بالظبط من الخريطة' : '🗺️ حدد الموقع بالظبط من الخريطة'}
+          </button>
         </div>
 
         <div>
@@ -122,6 +160,15 @@ export default function CreateTripPage() {
               </option>
             ))}
           </select>
+          <button
+            type="button"
+            onClick={() => setPickingLocation('destination')}
+            className={`mt-2 flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
+              destinationPoint ? 'border-success/40 bg-success/5 text-success' : 'border-border text-text-secondary'
+            }`}
+          >
+            {destinationPoint ? '✅ اتحدد بالظبط من الخريطة' : '🗺️ حدد الموقع بالظبط من الخريطة'}
+          </button>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -147,10 +194,24 @@ export default function CreateTripPage() {
 
         {error && <p className="text-sm text-danger">{error}</p>}
 
-        <Button type="submit" loading={loading}>
+        <Button type="submit" loading={loading} disabled={isApproved === false}>
           نشر الرحلة
         </Button>
       </form>
+
+      {pickingLocation && (
+        <LocationPicker
+          title={pickingLocation === 'origin' ? 'حدد نقطة الانطلاق بالظبط' : 'حدد نقطة الوصول بالظبط'}
+          initialLat={pickingLocation === 'origin' ? originPoint?.lat : destinationPoint?.lat}
+          initialLng={pickingLocation === 'origin' ? originPoint?.lng : destinationPoint?.lng}
+          onClose={() => setPickingLocation(null)}
+          onConfirm={(lat, lng) => {
+            if (pickingLocation === 'origin') setOriginPoint({ lat, lng })
+            else setDestinationPoint({ lat, lng })
+            setPickingLocation(null)
+          }}
+        />
+      )}
     </div>
   )
 }

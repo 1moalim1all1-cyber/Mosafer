@@ -9,6 +9,8 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  getDoc,
+  setDoc,
 } from 'firebase/firestore'
 import { httpsCallable, FunctionsError } from 'firebase/functions'
 import { db, functions } from './firebase'
@@ -175,4 +177,31 @@ export async function resolveWalletRequest(userId: string, txId: string, approve
     if (err instanceof FunctionsError) throw new Error(err.message)
     throw new Error('حصل خطأ، حاول تاني')
   }
+}
+
+// ---- إعدادات النظام العامة ----
+export interface AppSettings {
+  commissionStandardPercent: number
+  commissionReturnEmptyPercent: number
+  welcomeBonusAmount: number
+  referralBonusAmount: number
+  whatsappNumber: string
+  supportEmail: string
+}
+
+export async function fetchAppSettings(): Promise<AppSettings> {
+  const snap = await getDoc(doc(db, 'appSettings', 'general'))
+  const data = snap.exists() ? snap.data() : {}
+  return {
+    commissionStandardPercent: data.commissionStandardPercent ?? 10,
+    commissionReturnEmptyPercent: data.commissionReturnEmptyPercent ?? 5,
+    welcomeBonusAmount: data.welcomeBonusAmount ?? 20,
+    referralBonusAmount: data.referralBonusAmount ?? 15,
+    whatsappNumber: data.whatsappNumber ?? '',
+    supportEmail: data.supportEmail ?? '',
+  }
+}
+
+export async function updateAppSettings(settings: AppSettings) {
+  await setDoc(doc(db, 'appSettings', 'general'), settings, { merge: true })
 }

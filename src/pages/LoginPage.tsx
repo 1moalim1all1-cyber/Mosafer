@@ -35,9 +35,11 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-bg px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-hover shadow-lg shadow-primary/30">
-            <span className="text-4xl">🚗</span>
-          </div>
+          <img
+            src="/Mosafer/logo.jpeg"
+            alt="مسافر"
+            className="mb-4 h-24 w-24 rounded-full object-cover shadow-lg shadow-primary/30"
+          />
           <h1 className="text-2xl font-bold text-text-primary">أهلاً بيك تاني</h1>
           <p className="mt-1 text-text-secondary">سجّل دخولك وكمّل رحلتك</p>
         </div>
@@ -50,12 +52,14 @@ export default function LoginPage() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             dir="ltr"
+            autoComplete="tel"
           />
           <Input
             label="كلمة المرور"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
           />
 
           <Link to="/forgot-password" className="text-sm font-semibold text-primary hover:text-primary-hover">

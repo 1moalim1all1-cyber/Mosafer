@@ -27,9 +27,6 @@ jobs:
 
       - run: npm ci
       - run: npm run build
-        env:
-          VITE_CLOUDINARY_CLOUD_NAME: ${{ secrets.VITE_CLOUDINARY_CLOUD_NAME }}
-          VITE_CLOUDINARY_UPLOAD_PRESET: ${{ secrets.VITE_CLOUDINARY_UPLOAD_PRESET }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

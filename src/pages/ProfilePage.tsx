@@ -66,8 +66,11 @@ export default function ProfilePage() {
           <Button variant="secondary" onClick={() => navigate('/favorites')}>
             المفضلة
           </Button>
-          <Button variant="secondary" onClick={() => navigate('/page/about')}>
+          <Button variant="secondary" onClick={() => navigate('/about-help')}>
             عن مسافر ومساعدة
+          </Button>
+          <Button variant="secondary" onClick={() => navigate('/support')}>
+            الدعم والشكاوى
           </Button>
           <Button variant="danger" onClick={handleLogout}>
             تسجيل الخروج

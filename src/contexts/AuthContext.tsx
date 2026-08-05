@@ -144,6 +144,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await batch.commit()
 
       await updateProfile(credential.user, { displayName: input.fullName.trim() })
+
+      // مهم جدًا: بنحط بيانات المستخدم في الحالة المحلية هنا مباشرة، بدل
+      // ما نستنى onAuthStateChanged يعيد قراءتها من Firestore - لأنه ممكن
+      // يكون شغّل ده قبل ما batch.commit() فوق يخلص فعليًا (سباق بين
+      // العمليتين)، وده كان بيخلي صفحة السائق الجديد أو البروفايل تفضل
+      // فاضية أو ترفضه بالغلط فور التسجيل مباشرة.
+      setUser({
+        uid,
+        role: input.role,
+        fullName: input.fullName.trim(),
+        phone: input.phone.trim(),
+        email: input.email.trim(),
+        gender: input.gender,
+        profileImageUrl: null,
+        isPhoneVerified: false,
+        isEmailVerified: false,
+        trustScore: 0,
+        totalTrips: 0,
+        avgRating: 0,
+        status: 'active',
+        language: 'ar',
+        favoriteTrips: [],
+        referralCode: myReferralCode,
+        referredByUid,
+        createdAt: now.toDate(),
+      })
     } catch (err) {
       const code = (err as { code?: string }).code ?? ''
       throw new Error(mapFirebaseError(code))

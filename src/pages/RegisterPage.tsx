@@ -62,7 +62,7 @@ export default function RegisterPage() {
       </h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Input label="الاسم بالكامل" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+        <Input label="الاسم بالكامل" value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" />
         <Input
           label="رقم الهاتف"
           type="tel"
@@ -70,12 +70,14 @@ export default function RegisterPage() {
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           dir="ltr"
+          autoComplete="tel"
         />
         <Input
           label="كلمة المرور"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          autoComplete="new-password"
         />
 
         <div>

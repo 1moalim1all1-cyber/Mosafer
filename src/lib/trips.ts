@@ -6,6 +6,7 @@ import {
   getDocs,
   doc,
   onSnapshot,
+  updateDoc,
   Timestamp,
   type DocumentData,
 } from 'firebase/firestore'
@@ -82,5 +83,22 @@ export async function searchTrips(params: TripSearchParams, requesterGender: 'ma
 export function subscribeToTrip(tripId: string, callback: (trip: Trip | null) => void) {
   return onSnapshot(doc(db, 'trips', tripId), (snap) => {
     callback(snap.exists() ? mapTripDoc(snap.id, snap.data()) : null)
+  })
+}
+
+/** السائق بيحدّث موقعه الحي أثناء الرحلة - زي كريم بالظبط */
+export async function updateTripLiveLocation(tripId: string, lat: number, lng: number) {
+  await updateDoc(doc(db, 'trips', tripId), {
+    driverLiveLat: lat,
+    driverLiveLng: lng,
+    driverLiveUpdatedAt: Timestamp.now(),
+  })
+}
+
+export async function stopTripLiveLocation(tripId: string) {
+  await updateDoc(doc(db, 'trips', tripId), {
+    driverLiveLat: null,
+    driverLiveLng: null,
+    driverLiveUpdatedAt: null,
   })
 }

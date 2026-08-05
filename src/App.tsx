@@ -20,9 +20,13 @@ import AdminDriverQueuePage from './pages/AdminDriverQueuePage'
 import AdminWalletRequestsPage from './pages/AdminWalletRequestsPage'
 import AdminGovernoratesPage from './pages/AdminGovernoratesPage'
 import AdminCouponsPage from './pages/AdminCouponsPage'
+import AdminSettingsPage from './pages/AdminSettingsPage'
 import NotificationsPage from './pages/NotificationsPage'
 import ChatPage from './pages/ChatPage'
 import FavoritesPage from './pages/FavoritesPage'
+import SupportPage from './pages/SupportPage'
+import AboutHelpPage from './pages/AboutHelpPage'
+import FaqPage from './pages/FaqPage'
 import StaticPageView from './pages/StaticPageView'
 import { AdminRoute, DriverRoute } from './routes/roleGuards'
 
@@ -227,6 +231,26 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/admin/settings"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <AdminSettingsPage />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/support"
+            element={
+              <ProtectedRoute>
+                <SupportPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/about-help" element={<AboutHelpPage />} />
+          <Route path="/faq" element={<FaqPage />} />
           <Route path="/page/:pageId" element={<StaticPageView />} />
         </Routes>
       </BrowserRouter>

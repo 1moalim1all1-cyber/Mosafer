@@ -15,6 +15,7 @@ export default function AdminDashboardPage() {
     { path: '/admin/wallet-requests', icon: '👛', label: 'طلبات المحفظة' },
     { path: '/admin/governorates', icon: '🗺️', label: 'إدارة المحافظات' },
     { path: '/admin/coupons', icon: '🏷️', label: 'إدارة الكوبونات' },
+    { path: '/admin/settings', icon: '⚙️', label: 'الإعدادات العامة' },
   ]
 
   return (

@@ -1,0 +1,13 @@
+{
+  "name": "مسافر | Mosafer",
+  "short_name": "مسافر",
+  "start_url": "/Mosafer/",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#1E40AF",
+  "description": "مسافر - منصة مشاركة الرحلات بين المحافظات المصرية",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/Mosafer/logo.jpeg", "sizes": "512x512", "type": "image/jpeg" }
+  ]
+}
