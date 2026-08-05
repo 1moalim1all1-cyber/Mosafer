@@ -92,6 +92,33 @@ export default function AdminSettingsPage() {
           />
         </div>
 
+        <h2 className="mb-3 font-bold text-text-primary">استقبال الإيداعات</h2>
+        <p className="mb-3 text-sm text-text-secondary">
+          الرقم ده هيظهر للمستخدمين لما يحبوا يودّعوا رصيد - هيحوّلوا عليه بره التطبيق (فودافون كاش/إنستاباي)
+        </p>
+        <div className="mb-6 flex flex-col gap-3">
+          <div>
+            <label className="mb-1.5 block text-sm font-semibold text-text-primary">وسيلة الاستقبال</label>
+            <select
+              value={settings.depositMethodName}
+              onChange={(e) => setSettings({ ...settings, depositMethodName: e.target.value })}
+              className="w-full rounded-xl border-2 border-border bg-white px-4 py-3 focus:border-primary focus:outline-none"
+            >
+              <option value="فودافون كاش">فودافون كاش</option>
+              <option value="إنستاباي">إنستاباي</option>
+              <option value="اتصالات كاش">اتصالات كاش</option>
+              <option value="أورنج كاش">أورنج كاش</option>
+              <option value="تحويل بنكي">تحويل بنكي</option>
+            </select>
+          </div>
+          <Input
+            label="الرقم أو الحساب"
+            value={settings.depositPhoneNumber}
+            onChange={(e) => setSettings({ ...settings, depositPhoneNumber: e.target.value })}
+            dir="ltr"
+          />
+        </div>
+
         {saved && <p className="mb-4 text-sm font-semibold text-success">✅ تم الحفظ</p>}
 
         <Button onClick={handleSave} loading={saving}>

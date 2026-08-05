@@ -3,6 +3,7 @@ import {
   query,
   where,
   orderBy,
+  limit,
   getDocs,
   doc,
   onSnapshot,
@@ -83,6 +84,29 @@ export async function searchTrips(params: TripSearchParams, requesterGender: 'ma
 export function subscribeToTrip(tripId: string, callback: (trip: Trip | null) => void) {
   return onSnapshot(doc(db, 'trips', tripId), (snap) => {
     callback(snap.exists() ? mapTripDoc(snap.id, snap.data()) : null)
+  })
+}
+
+/**
+ * كل الرحلات المتاحة دلوقتي (من غير فلترة مكان/تاريخ) - بتتعرض في
+ * الصفحة الرئيسية عشان المستخدم يقدر يتصفّح على طول من غير ما يبحث،
+ * زي أي تطبيق سفر بيعرض عروض/رحلات جاهزة من أول ما تفتحه.
+ */
+export function subscribeAvailableTrips(
+  requesterGender: 'male' | 'female',
+  callback: (trips: Trip[]) => void,
+  count = 15,
+) {
+  const constraints = [where('status', '==', 'active'), orderBy('departureTime')]
+  if (requesterGender === 'male') {
+    constraints.splice(1, 0, where('isWomenOnly', '==', false))
+  }
+  const q = query(collection(db, 'trips'), ...constraints, limit(count))
+  return onSnapshot(q, (snap) => {
+    const trips = snap.docs
+      .map((d) => mapTripDoc(d.id, d.data()))
+      .filter((t) => t.departureTime.getTime() > Date.now() - 60 * 60 * 1000) // نستبعد الرحلات اللي فاتت من ساعة
+    callback(trips)
   })
 }
 

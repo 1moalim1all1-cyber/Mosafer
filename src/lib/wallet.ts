@@ -7,6 +7,9 @@ export interface WalletTransaction {
   amount: number
   balanceAfter?: number | null
   status: 'pending' | 'completed' | 'rejected'
+  method?: string | null
+  accountNumber?: string | null
+  senderNumber?: string | null
   createdAt: Date
 }
 
@@ -29,6 +32,9 @@ export function subscribeWalletTransactions(uid: string, callback: (txs: WalletT
           amount: data.amount ?? 0,
           balanceAfter: data.balanceAfter ?? null,
           status: data.status ?? 'pending',
+          method: data.method ?? null,
+          accountNumber: data.accountNumber ?? null,
+          senderNumber: data.senderNumber ?? null,
           createdAt: created?.toDate ? created.toDate() : new Date(),
         }
       }),
@@ -36,19 +42,31 @@ export function subscribeWalletTransactions(uid: string, callback: (txs: WalletT
   })
 }
 
-export async function requestDeposit(uid: string, amount: number) {
+/**
+ * طلب إيداع - المستخدم بيكون حوّل الفلوس بالفعل بره التطبيق (فودافون
+ * كاش/إنستاباي) على رقم الإدارة، وبيسجّل هنا المبلغ ورقمه هو (اللي
+ * حوّل منه) عشان الإدارة تتأكد وتقفل الطلب.
+ */
+export async function requestDeposit(uid: string, amount: number, senderNumber: string) {
   await addDoc(collection(db, 'wallets', uid, 'walletTransactions'), {
     type: 'deposit',
     amount,
+    senderNumber,
     status: 'pending',
     createdAt: Timestamp.now(),
   })
 }
 
-export async function requestWithdraw(uid: string, amount: number) {
+/**
+ * طلب سحب - المستخدم بيحدد الطريقة والرقم/الحساب اللي عايز يستلم عليه،
+ * عشان الإدارة تقدر تبعتله الفلوس مباشرة من غير ما تدوّر عليه.
+ */
+export async function requestWithdraw(uid: string, amount: number, method: string, accountNumber: string) {
   await addDoc(collection(db, 'wallets', uid, 'walletTransactions'), {
     type: 'withdraw',
     amount,
+    method,
+    accountNumber,
     status: 'pending',
     createdAt: Timestamp.now(),
   })

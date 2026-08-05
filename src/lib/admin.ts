@@ -135,6 +135,9 @@ export interface WalletRequestRow {
   txId: string
   type: 'deposit' | 'withdraw'
   amount: number
+  method?: string | null
+  accountNumber?: string | null
+  senderNumber?: string | null
   createdAt: Date
 }
 
@@ -150,6 +153,9 @@ export function subscribePendingWalletRequests(callback: (items: WalletRequestRo
           txId: d.id,
           type: data.type,
           amount: data.amount ?? 0,
+          method: data.method ?? null,
+          accountNumber: data.accountNumber ?? null,
+          senderNumber: data.senderNumber ?? null,
           createdAt: created?.toDate ? created.toDate() : new Date(),
         }
       }),
@@ -198,6 +204,8 @@ export interface AppSettings {
   referralBonusAmount: number
   whatsappNumber: string
   supportEmail: string
+  depositMethodName: string
+  depositPhoneNumber: string
 }
 
 export async function fetchAppSettings(): Promise<AppSettings> {
@@ -210,6 +218,8 @@ export async function fetchAppSettings(): Promise<AppSettings> {
     referralBonusAmount: data.referralBonusAmount ?? 15,
     whatsappNumber: data.whatsappNumber ?? '',
     supportEmail: data.supportEmail ?? '',
+    depositMethodName: data.depositMethodName ?? 'فودافون كاش',
+    depositPhoneNumber: data.depositPhoneNumber ?? '',
   }
 }
 

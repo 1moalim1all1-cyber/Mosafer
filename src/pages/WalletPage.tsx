@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { subscribeWalletBalance, subscribeWalletTransactions, requestDeposit, requestWithdraw, type WalletTransaction } from '../lib/wallet'
+import {
+  subscribeWalletBalance,
+  subscribeWalletTransactions,
+  requestDeposit,
+  requestWithdraw,
+  type WalletTransaction,
+} from '../lib/wallet'
+import { fetchAppSettings, type AppSettings } from '../lib/admin'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { BottomNav } from '../components/BottomNav'
@@ -14,13 +21,23 @@ const TYPE_LABELS: Record<WalletTransaction['type'], { label: string; icon: stri
   commission: { label: 'عمولة المنصة', icon: '%' },
 }
 
+const WITHDRAW_METHODS = ['فودافون كاش', 'إنستاباي', 'اتصالات كاش', 'أورنج كاش', 'تحويل بنكي']
+
 export default function WalletPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [balance, setBalance] = useState(0)
   const [transactions, setTransactions] = useState<WalletTransaction[]>([])
+  const [settings, setSettings] = useState<AppSettings | null>(null)
   const [showModal, setShowModal] = useState<'deposit' | 'withdraw' | null>(null)
-  const [amount, setAmount] = useState('')
+
+  const [depositAmount, setDepositAmount] = useState('')
+  const [senderNumber, setSenderNumber] = useState('')
+
+  const [withdrawAmount, setWithdrawAmount] = useState('')
+  const [withdrawMethod, setWithdrawMethod] = useState(WITHDRAW_METHODS[0])
+  const [accountNumber, setAccountNumber] = useState('')
+
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
@@ -28,18 +45,30 @@ export default function WalletPage() {
     if (!user) return
     const unsub1 = subscribeWalletBalance(user.uid, setBalance)
     const unsub2 = subscribeWalletTransactions(user.uid, setTransactions)
+    fetchAppSettings().then(setSettings)
     return () => {
       unsub1()
       unsub2()
     }
   }, [user])
 
-  async function handleSubmit() {
-    if (!user || !amount || Number(amount) <= 0) return
+  async function handleDeposit() {
+    if (!user || !depositAmount || Number(depositAmount) <= 0 || !senderNumber.trim()) return
     setLoading(true)
     try {
-      if (showModal === 'deposit') await requestDeposit(user.uid, Number(amount))
-      else await requestWithdraw(user.uid, Number(amount))
+      await requestDeposit(user.uid, Number(depositAmount), senderNumber.trim())
+      setSubmitted(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleWithdraw() {
+    if (!user || !withdrawAmount || Number(withdrawAmount) <= 0 || !accountNumber.trim()) return
+    if (Number(withdrawAmount) > balance) return
+    setLoading(true)
+    try {
+      await requestWithdraw(user.uid, Number(withdrawAmount), withdrawMethod, accountNumber.trim())
       setSubmitted(true)
     } finally {
       setLoading(false)
@@ -48,8 +77,11 @@ export default function WalletPage() {
 
   function closeModal() {
     setShowModal(null)
-    setAmount('')
     setSubmitted(false)
+    setDepositAmount('')
+    setSenderNumber('')
+    setWithdrawAmount('')
+    setAccountNumber('')
   }
 
   return (
@@ -87,20 +119,31 @@ export default function WalletPage() {
           const isCredit = tx.type === 'deposit' || tx.type === 'refund'
           const color = tx.status === 'pending' ? 'text-warning' : isCredit ? 'text-success' : 'text-danger'
           return (
-            <div key={tx.id} className="mb-2 flex items-center justify-between rounded-xl border border-border bg-white p-4">
-              <div className="flex items-center gap-3">
-                <span className="text-xl">{TYPE_LABELS[tx.type].icon}</span>
-                <div>
-                  <p className="font-semibold text-text-primary">{TYPE_LABELS[tx.type].label}</p>
-                  <p className="text-xs text-text-secondary">
-                    {tx.status === 'pending' ? 'بانتظار الموافقة' : new Intl.DateTimeFormat('ar-EG').format(tx.createdAt)}
-                  </p>
+            <div key={tx.id} className="mb-2 rounded-xl border border-border bg-white p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">{TYPE_LABELS[tx.type].icon}</span>
+                  <div>
+                    <p className="font-semibold text-text-primary">{TYPE_LABELS[tx.type].label}</p>
+                    <p className="text-xs text-text-secondary">
+                      {tx.status === 'pending'
+                        ? 'بانتظار الموافقة'
+                        : new Intl.DateTimeFormat('ar-EG').format(tx.createdAt)}
+                    </p>
+                  </div>
                 </div>
+                <span className={`font-bold ${color}`}>
+                  {isCredit ? '+' : '-'}
+                  {tx.amount.toFixed(0)} ج.م
+                </span>
               </div>
-              <span className={`font-bold ${color}`}>
-                {isCredit ? '+' : '-'}
-                {tx.amount.toFixed(0)} ج.م
-              </span>
+              {(tx.method || tx.accountNumber || tx.senderNumber) && (
+                <div className="mt-2 border-t border-border pt-2 text-xs text-text-secondary">
+                  {tx.method && <span>{tx.method} · </span>}
+                  {tx.accountNumber && <span dir="ltr">{tx.accountNumber}</span>}
+                  {tx.senderNumber && <span dir="ltr">حوّلت من: {tx.senderNumber}</span>}
+                </div>
+              )}
             </div>
           )
         })}
@@ -108,33 +151,128 @@ export default function WalletPage() {
 
       <BottomNav />
 
-      {showModal && (
+      {showModal === 'deposit' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-sm rounded-2xl bg-white p-6">
             {submitted ? (
               <div className="text-center">
-                <div className="mb-2 text-4xl">✅</div>
-                <h3 className="mb-2 text-lg font-bold text-text-primary">تم إرسال طلبك بنجاح</h3>
-                <p className="mb-4 text-sm text-text-secondary">هيتراجع الطلب وتوصلك النتيجة في سجل العمليات</p>
-                <Button onClick={closeModal} fullWidth={false}>
-                  تمام
-                </Button>
+                <p className="mb-2 text-4xl">✅</p>
+                <p className="mb-2 font-bold text-text-primary">تم إرسال طلبك بنجاح</p>
+                <p className="text-sm text-text-secondary">هنتأكد من التحويل ونضيف الرصيد في أقرب وقت</p>
+                <div className="mt-4">
+                  <Button onClick={closeModal} fullWidth={false}>
+                    تمام
+                  </Button>
+                </div>
               </div>
             ) : (
               <>
-                <h3 className="mb-4 text-lg font-bold text-text-primary">
-                  {showModal === 'deposit' ? 'إيداع في المحفظة' : 'سحب من المحفظة'}
-                </h3>
-                <p className="mb-4 rounded-lg bg-primary-light p-3 text-sm text-primary">
-                  الطلب هيتراجع من فريق مسافر ويتحول لرصيدك بعد التأكيد اليدوي
-                </p>
-                <Input label="المبلغ (ج.م)" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+                <h3 className="mb-4 text-lg font-bold text-text-primary">إيداع في المحفظة</h3>
+                {settings?.depositPhoneNumber ? (
+                  <div className="mb-4 rounded-xl bg-primary-light p-4 text-center">
+                    <p className="mb-1 text-sm text-text-secondary">حوّل المبلغ الأول على</p>
+                    <p className="text-lg font-bold text-primary">{settings.depositMethodName}</p>
+                    <p dir="ltr" className="text-xl font-bold text-primary">
+                      {settings.depositPhoneNumber}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="mb-4 text-sm text-danger">لسه الإدارة معملتش إعداد رقم استقبال الإيداعات</p>
+                )}
+                <div className="flex flex-col gap-3">
+                  <Input
+                    label="المبلغ اللي حوّلته (ج.م)"
+                    type="number"
+                    value={depositAmount}
+                    onChange={(e) => setDepositAmount(e.target.value)}
+                  />
+                  <Input
+                    label="رقمك اللي حوّلت منه"
+                    value={senderNumber}
+                    onChange={(e) => setSenderNumber(e.target.value)}
+                    dir="ltr"
+                    hint="عشان نتأكد من التحويل بسرعة"
+                  />
+                </div>
                 <div className="mt-4 flex gap-3">
                   <Button variant="secondary" onClick={closeModal} fullWidth>
                     إلغاء
                   </Button>
-                  <Button onClick={handleSubmit} loading={loading} fullWidth>
-                    إرسال
+                  <Button
+                    onClick={handleDeposit}
+                    loading={loading}
+                    disabled={!depositAmount || !senderNumber.trim()}
+                    fullWidth
+                  >
+                    تأكيد إني حوّلت
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showModal === 'withdraw' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6">
+            {submitted ? (
+              <div className="text-center">
+                <p className="mb-2 text-4xl">✅</p>
+                <p className="mb-2 font-bold text-text-primary">تم إرسال طلب السحب</p>
+                <p className="text-sm text-text-secondary">هيتراجع الطلب والفلوس هتوصلك على الرقم اللي كتبته</p>
+                <div className="mt-4">
+                  <Button onClick={closeModal} fullWidth={false}>
+                    تمام
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h3 className="mb-4 text-lg font-bold text-text-primary">سحب من المحفظة</h3>
+                <p className="mb-4 text-sm text-text-secondary">رصيدك المتاح: {balance.toFixed(0)} ج.م</p>
+                <div className="flex flex-col gap-3">
+                  <Input
+                    label="المبلغ (ج.م)"
+                    type="number"
+                    value={withdrawAmount}
+                    onChange={(e) => setWithdrawAmount(e.target.value)}
+                  />
+                  <div>
+                    <label className="mb-1.5 block text-sm font-semibold text-text-primary">هتستلم إزاي؟</label>
+                    <select
+                      value={withdrawMethod}
+                      onChange={(e) => setWithdrawMethod(e.target.value)}
+                      className="w-full rounded-xl border-2 border-border bg-white px-4 py-3 focus:border-primary focus:outline-none"
+                    >
+                      {WITHDRAW_METHODS.map((m) => (
+                        <option key={m} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <Input
+                    label={withdrawMethod === 'تحويل بنكي' ? 'رقم الحساب / IBAN' : 'رقم الموبايل اللي هتستلم عليه'}
+                    value={accountNumber}
+                    onChange={(e) => setAccountNumber(e.target.value)}
+                    dir="ltr"
+                  />
+                </div>
+                {Number(withdrawAmount) > balance && (
+                  <p className="mt-2 text-sm text-danger">المبلغ أكبر من رصيدك المتاح</p>
+                )}
+                <div className="mt-4 flex gap-3">
+                  <Button variant="secondary" onClick={closeModal} fullWidth>
+                    إلغاء
+                  </Button>
+                  <Button
+                    onClick={handleWithdraw}
+                    loading={loading}
+                    disabled={!withdrawAmount || !accountNumber.trim() || Number(withdrawAmount) > balance}
+                    fullWidth
+                  >
+                    إرسال طلب السحب
                   </Button>
                 </div>
               </>

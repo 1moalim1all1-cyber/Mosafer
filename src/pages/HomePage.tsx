@@ -2,8 +2,11 @@ import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { Button } from '../components/ui/Button'
 import { BottomNav } from '../components/BottomNav'
+import { TripCard } from '../components/TripCard'
 import { useAuth } from '../contexts/AuthContext'
 import { subscribeUnreadCount } from '../lib/notifications'
+import { subscribeAvailableTrips } from '../lib/trips'
+import type { Trip } from '../types/trip'
 
 const GOVERNORATES = [
   'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحر الأحمر', 'البحيرة',
@@ -20,10 +23,22 @@ export default function HomePage() {
   const [destination, setDestination] = useState('')
   const [seats, setSeats] = useState(1)
   const [unread, setUnread] = useState(0)
+  const [availableTrips, setAvailableTrips] = useState<Trip[]>([])
+  const [tripsLoading, setTripsLoading] = useState(true)
 
   useEffect(() => {
     if (!user) return
     return subscribeUnreadCount(user.uid, setUnread)
+  }, [user])
+
+  useEffect(() => {
+    if (!user) return
+    setTripsLoading(true)
+    const unsubscribe = subscribeAvailableTrips(user.gender, (trips) => {
+      setAvailableTrips(trips)
+      setTripsLoading(false)
+    })
+    return unsubscribe
   }, [user])
 
   function handleSearch() {
@@ -113,6 +128,22 @@ export default function HomePage() {
             ابحث عن رحلة
           </Button>
         </div>
+
+        <h2 className="mb-4 mt-8 text-xl font-bold text-text-primary">رحلات متاحة دلوقتي</h2>
+
+        {tripsLoading && (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-40 animate-pulse rounded-2xl bg-white" />
+            ))}
+          </div>
+        )}
+
+        {!tripsLoading && availableTrips.length === 0 && (
+          <p className="py-8 text-center text-text-secondary">مفيش رحلات متاحة دلوقتي، جرّب تاني بعد شوية</p>
+        )}
+
+        {!tripsLoading && availableTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)}
       </main>
       <BottomNav />
     </div>

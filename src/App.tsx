@@ -29,11 +29,15 @@ import AboutHelpPage from './pages/AboutHelpPage'
 import FaqPage from './pages/FaqPage'
 import StaticPageView from './pages/StaticPageView'
 import { AdminRoute, DriverRoute } from './routes/roleGuards'
+import { WhatsAppButton } from './components/WhatsAppButton'
+import { PageTransition } from './components/PageTransition'
 
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter basename="/Mosafer">
+        <WhatsAppButton />
+        <PageTransition>
         <Routes>
           <Route
             path="/login"
@@ -252,7 +256,8 @@ export default function App() {
           <Route path="/about-help" element={<AboutHelpPage />} />
           <Route path="/faq" element={<FaqPage />} />
           <Route path="/page/:pageId" element={<StaticPageView />} />
-        </Routes>
+          </Routes>
+        </PageTransition>
       </BrowserRouter>
     </AuthProvider>
   )
