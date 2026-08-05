@@ -53,6 +53,14 @@ function BookingCard({ booking, onRate }: { booking: BookingRow; onRate: () => v
       <p className="mb-3 text-sm text-text-secondary">
         {booking.seatsBooked} مقاعد · {booking.totalPrice.toFixed(0)} ج.م
       </p>
+      {booking.status === 'confirmed' && passenger?.phone && (
+        <a
+          href={`tel:${passenger.phone}`}
+          className="mb-3 flex items-center justify-center gap-2 rounded-xl border border-success/40 bg-success/5 py-2.5 text-sm font-semibold text-success"
+        >
+          📞 اتصل بالراكب
+        </a>
+      )}
       {booking.status === 'pending' && (
         <div className="flex gap-3">
           <Button variant="secondary" onClick={() => respond(false)} loading={loading}>

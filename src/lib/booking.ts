@@ -24,8 +24,10 @@ export async function createBooking(params: {
   seatsBooked: number
   paymentMethod: PaymentMethod
   couponCode?: string
+  pickupLat?: number
+  pickupLng?: number
 }): Promise<string> {
-  const { tripId, seatsBooked, paymentMethod, couponCode } = params
+  const { tripId, seatsBooked, paymentMethod, couponCode, pickupLat, pickupLng } = params
   const uid = auth.currentUser?.uid
   if (!uid) throw new Error('لازم تسجّل دخول الأول')
 
@@ -130,6 +132,8 @@ export async function createBooking(params: {
         couponCode: appliedCouponCode,
         paymentMethod,
         paymentStatus,
+        pickupLat: pickupLat ?? null,
+        pickupLng: pickupLng ?? null,
         createdAt: serverTimestamp(),
       })
     })

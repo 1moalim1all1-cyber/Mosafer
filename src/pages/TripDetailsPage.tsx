@@ -8,6 +8,7 @@ import { createBooking } from '../lib/booking'
 import { getOrCreateChat } from '../lib/chat'
 import { subscribeFavorites, toggleFavorite } from '../lib/favorites'
 import { TripRouteMap } from '../components/TripRouteMap'
+import { LocationPicker } from '../components/LocationPicker'
 import type { Trip } from '../types/trip'
 import type { AppUser } from '../types/user'
 import type { PaymentMethod } from '../types/booking'
@@ -31,6 +32,9 @@ export default function TripDetailsPage() {
   const [couponCode, setCouponCode] = useState('')
   const [couponMessage, setCouponMessage] = useState<string | null>(null)
   const [couponDiscount, setCouponDiscount] = useState(0)
+  const [pickupPoint, setPickupPoint] = useState<{ lat: number; lng: number } | null>(null)
+  const [pickingLocation, setPickingLocation] = useState(false)
+  const [confirmedBookingId, setConfirmedBookingId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -94,15 +98,22 @@ export default function TripDetailsPage() {
 
   async function handleBook() {
     if (!trip || !user) return
+    if (!pickupPoint) {
+      setError('حدد نقطة استلامك بالظبط عشان السائق يلاقيك بسهولة')
+      return
+    }
     setLoading(true)
     setError(null)
     try {
-      await createBooking({
+      const bookingId = await createBooking({
         tripId: trip.id,
         seatsBooked: seats,
         paymentMethod,
         couponCode: couponCode.trim() || undefined,
+        pickupLat: pickupPoint.lat,
+        pickupLng: pickupPoint.lng,
       })
+      setConfirmedBookingId(bookingId)
       setSuccess(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'حصل خطأ، حاول تاني')
@@ -136,9 +147,16 @@ export default function TripDetailsPage() {
         <div className="text-5xl">🎉</div>
         <h1 className="text-2xl font-bold text-text-primary">تم الحجز بنجاح</h1>
         <p className="text-text-secondary">حجزك بانتظار موافقة السائق، هتوصلك إشعار فور ما يتم التأكيد</p>
-        <Button onClick={() => navigate('/')} fullWidth={false}>
-          الرجوع للرئيسية
-        </Button>
+        <div className="flex gap-3">
+          <Button variant="secondary" onClick={() => navigate('/')} fullWidth={false}>
+            الرئيسية
+          </Button>
+          {confirmedBookingId && (
+            <Button onClick={() => navigate(`/track/${confirmedBookingId}`)} fullWidth={false}>
+              تتبّع السائق 🚗
+            </Button>
+          )}
+        </div>
       </div>
     )
   }
@@ -155,6 +173,11 @@ export default function TripDetailsPage() {
             <button onClick={() => toggleFavorite(user.uid, trip.id, isFavorite)} className="text-xl">
               {isFavorite ? '❤️' : '🤍'}
             </button>
+          )}
+          {driver?.phone && (
+            <a href={`tel:${driver.phone}`} className="text-xl">
+              📞
+            </a>
           )}
           <button onClick={openChat} disabled={openingChat} className="text-xl">
             💬
@@ -248,7 +271,23 @@ export default function TripDetailsPage() {
         </div>
 
         <div className="mb-4">
-          <p className="mb-2 font-semibold text-text-primary">كوبون خصم (اختياري)</p>
+        <div className="mb-4">
+          <p className="mb-2 font-semibold text-text-primary">نقطة الاستلام</p>
+          <button
+            type="button"
+            onClick={() => setPickingLocation(true)}
+            className={`flex w-full items-center gap-3 rounded-xl border-2 p-4 text-right ${
+              pickupPoint ? 'border-success/40 bg-success/5' : 'border-border bg-white'
+            }`}
+          >
+            <span className="text-xl">{pickupPoint ? '✅' : '📍'}</span>
+            <span className={pickupPoint ? 'font-semibold text-success' : 'text-text-secondary'}>
+              {pickupPoint ? 'اتحدد بالظبط - دوس عشان تغيّره' : 'حدد مكانك بالظبط عشان السائق يلاقيك بسهولة'}
+            </span>
+          </button>
+        </div>
+
+        <p className="mb-2 font-semibold text-text-primary">كوبون خصم (اختياري)</p>
           <div className="flex gap-3">
             <input
               value={couponCode}
@@ -276,10 +315,23 @@ export default function TripDetailsPage() {
 
         {error && <p className="mb-4 text-sm text-danger">{error}</p>}
 
-        <Button onClick={handleBook} loading={loading} disabled={trip.availableSeats < 1}>
+        <Button onClick={handleBook} loading={loading} disabled={trip.availableSeats < 1 || !pickupPoint}>
           احجز الآن
         </Button>
       </main>
+
+      {pickingLocation && (
+        <LocationPicker
+          title="حدد نقطة استلامك بالظبط"
+          initialLat={pickupPoint?.lat}
+          initialLng={pickupPoint?.lng}
+          onClose={() => setPickingLocation(false)}
+          onConfirm={(lat, lng) => {
+            setPickupPoint({ lat, lng })
+            setPickingLocation(false)
+          }}
+        />
+      )}
     </div>
   )
 }

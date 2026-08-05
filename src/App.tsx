@@ -27,6 +27,7 @@ import FavoritesPage from './pages/FavoritesPage'
 import SupportPage from './pages/SupportPage'
 import AboutHelpPage from './pages/AboutHelpPage'
 import FaqPage from './pages/FaqPage'
+import TrackTripPage from './pages/TrackTripPage'
 import StaticPageView from './pages/StaticPageView'
 import { AdminRoute, DriverRoute } from './routes/roleGuards'
 import { WhatsAppButton } from './components/WhatsAppButton'
@@ -255,6 +256,14 @@ export default function App() {
           />
           <Route path="/about-help" element={<AboutHelpPage />} />
           <Route path="/faq" element={<FaqPage />} />
+          <Route
+            path="/track/:bookingId"
+            element={
+              <ProtectedRoute>
+                <TrackTripPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/page/:pageId" element={<StaticPageView />} />
           </Routes>
         </PageTransition>

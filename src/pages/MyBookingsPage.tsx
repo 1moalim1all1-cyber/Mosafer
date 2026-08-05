@@ -88,6 +88,14 @@ export default function MyBookingsPage() {
                   إلغاء الحجز
                 </button>
               )}
+              {b.status === 'confirmed' && (
+                <button
+                  onClick={() => navigate(`/track/${b.id}`)}
+                  className="text-sm font-semibold text-success"
+                >
+                  🚗 تتبّع السائق
+                </button>
+              )}
               {b.status === 'completed' && (
                 <button onClick={() => openRating(b)} className="text-sm font-semibold text-warning">
                   ⭐ قيّم السائق

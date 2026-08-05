@@ -12,6 +12,8 @@ export interface Booking {
   totalPrice: number
   paymentMethod: PaymentMethod
   paymentStatus: PaymentStatus
+  pickupLat?: number | null
+  pickupLng?: number | null
   createdAt: Date
 }
 
