@@ -1,6 +1,20 @@
-import { doc, setDoc, addDoc, updateDoc, collection, query, where, orderBy, onSnapshot, getDoc } from 'firebase/firestore'
-import { httpsCallable, FunctionsError } from 'firebase/functions'
-import { db, functions } from './firebase'
+import {
+  doc,
+  setDoc,
+  addDoc,
+  updateDoc,
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  getDoc,
+  getDocs,
+  increment,
+  runTransaction,
+  serverTimestamp,
+} from 'firebase/firestore'
+import { db, auth } from './firebase'
 import { uploadImageToCloudinary } from './cloudinary'
 import type { Trip } from '../types/trip'
 import type { DriverVehicle } from '../types/booking'
@@ -88,22 +102,119 @@ export async function createTrip(trip: Omit<Trip, 'id'>): Promise<string> {
   return docRef.id
 }
 
+/**
+ * إنهاء الرحلة بالكامل من المتصفح (Firestore Transaction) - بيحوّل
+ * أرباح الحجوزات المدفوعة بالمحفظة للسائق بعد خصم العمولة، ويزوّد عدد
+ * الرحلات لكل من السائق والركاب المؤكدين.
+ */
 export async function markTripCompleted(tripId: string) {
+  const uid = auth.currentUser?.uid
+  if (!uid) throw new Error('لازم تسجّل دخول الأول')
+
+  const tripRef = doc(db, 'trips', tripId)
+
   try {
-    const callable = httpsCallable(functions, 'markTripCompleted')
-    await callable({ tripId })
+    const bookingsSnap = await getDocs(
+      query(collection(db, 'bookings'), where('tripId', '==', tripId), where('status', '==', 'confirmed')),
+    )
+    const settingsSnap = await getDoc(doc(db, 'appSettings', 'general'))
+    const settings = settingsSnap.exists() ? settingsSnap.data() : {}
+
+    await runTransaction(db, async (tx) => {
+      const tripSnap = await tx.get(tripRef)
+      if (!tripSnap.exists()) throw new Error('الرحلة دي مش موجودة')
+      const trip = tripSnap.data()
+      if (trip.driverId !== uid) throw new Error('الرحلة دي مش بتاعتك')
+
+      tx.update(tripRef, { status: 'completed' })
+
+      const driverRef = doc(db, 'users', uid)
+      tx.update(driverRef, { totalTrips: increment(1) })
+
+      const isReturnEmpty = Boolean(trip.isReturnEmptyTrip)
+      const commissionPercent = isReturnEmpty
+        ? (settings.commissionReturnEmptyPercent ?? 5)
+        : (settings.commissionStandardPercent ?? 10)
+
+      for (const bookingDoc of bookingsSnap.docs) {
+        const booking = bookingDoc.data()
+        tx.update(bookingDoc.ref, { status: 'completed' })
+
+        const passengerRef = doc(db, 'users', booking.passengerId)
+        tx.update(passengerRef, { totalTrips: increment(1) })
+
+        if (booking.paymentStatus === 'paid') {
+          const commission = (booking.totalPrice as number) * (commissionPercent / 100)
+          const earnings = (booking.totalPrice as number) - commission
+
+          const driverWalletRef = doc(db, 'wallets', uid)
+          const driverWalletSnap = await tx.get(driverWalletRef)
+          const currentBalance = (driverWalletSnap.data()?.balance ?? 0) as number
+          const newBalance = currentBalance + earnings
+          tx.update(driverWalletRef, { balance: newBalance })
+          tx.set(doc(collection(driverWalletRef, 'walletTransactions')), {
+            type: 'payment',
+            amount: earnings,
+            balanceAfter: newBalance,
+            relatedBookingId: bookingDoc.id,
+            status: 'completed',
+            createdAt: serverTimestamp(),
+          })
+        }
+      }
+    })
   } catch (err) {
-    if (err instanceof FunctionsError) throw new Error(err.message)
+    if (err instanceof Error) throw err
     throw new Error('حصل خطأ، حاول تاني')
   }
 }
 
+/** قبول أو رفض حجز - لو رفض، بيرجّع المقاعد لتاني وبيسترد الفلوس لو كانت مدفوعة */
 export async function respondToBooking(bookingId: string, accept: boolean) {
+  const bookingRef = doc(db, 'bookings', bookingId)
+
   try {
-    const callable = httpsCallable(functions, 'respondToBooking')
-    await callable({ bookingId, accept })
+    await runTransaction(db, async (tx) => {
+      const bookingSnap = await tx.get(bookingRef)
+      if (!bookingSnap.exists()) throw new Error('الحجز ده مش موجود')
+      const booking = bookingSnap.data()
+      if (booking.status !== 'pending') throw new Error('الحجز ده اترد عليه بالفعل')
+
+      if (accept) {
+        tx.update(bookingRef, { status: 'confirmed' })
+        return
+      }
+
+      tx.update(bookingRef, { status: 'rejected' })
+
+      const tripRef = doc(db, 'trips', booking.tripId)
+      const tripSnap = await tx.get(tripRef)
+      if (tripSnap.exists()) {
+        const trip = tripSnap.data()
+        tx.update(tripRef, {
+          availableSeats: (trip.availableSeats as number) + (booking.seatsBooked as number),
+          status: 'active',
+        })
+      }
+
+      if (booking.paymentStatus === 'paid') {
+        const walletRef = doc(db, 'wallets', booking.passengerId)
+        const walletSnap = await tx.get(walletRef)
+        const currentBalance = (walletSnap.data()?.balance ?? 0) as number
+        const newBalance = currentBalance + (booking.totalPrice as number)
+        tx.update(walletRef, { balance: newBalance })
+        tx.set(doc(collection(walletRef, 'walletTransactions')), {
+          type: 'refund',
+          amount: booking.totalPrice,
+          balanceAfter: newBalance,
+          relatedBookingId: bookingId,
+          status: 'completed',
+          createdAt: serverTimestamp(),
+        })
+      }
+    })
   } catch (err) {
-    if (err instanceof FunctionsError) throw new Error(err.message)
+    if (err instanceof Error) throw err
     throw new Error('حصل خطأ، حاول تاني')
   }
 }

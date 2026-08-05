@@ -11,9 +11,9 @@ import {
   deleteDoc,
   getDoc,
   setDoc,
+  runTransaction,
 } from 'firebase/firestore'
-import { httpsCallable, FunctionsError } from 'firebase/functions'
-import { db, functions } from './firebase'
+import { db } from './firebase'
 
 export interface PendingDriver {
   uid: string
@@ -48,23 +48,11 @@ export function subscribePendingDrivers(callback: (drivers: PendingDriver[]) => 
 }
 
 export async function approveDriver(driverId: string) {
-  try {
-    const callable = httpsCallable(functions, 'approveDriver')
-    await callable({ driverId })
-  } catch (err) {
-    if (err instanceof FunctionsError) throw new Error(err.message)
-    throw new Error('حصل خطأ، حاول تاني')
-  }
+  await updateDoc(doc(db, 'drivers', driverId), { verificationStatus: 'approved' })
 }
 
 export async function rejectDriver(driverId: string, reason: string) {
-  try {
-    const callable = httpsCallable(functions, 'rejectDriver')
-    await callable({ driverId, reason })
-  } catch (err) {
-    if (err instanceof FunctionsError) throw new Error(err.message)
-    throw new Error('حصل خطأ، حاول تاني')
-  }
+  await updateDoc(doc(db, 'drivers', driverId), { verificationStatus: 'rejected', rejectionReason: reason })
 }
 
 export async function fetchDashboardStats() {
@@ -170,11 +158,34 @@ export function subscribePendingWalletRequests(callback: (items: WalletRequestRo
 }
 
 export async function resolveWalletRequest(userId: string, txId: string, approve: boolean) {
+  const walletRef = doc(db, 'wallets', userId)
+  const txRef = doc(db, 'wallets', userId, 'walletTransactions', txId)
+
   try {
-    const callable = httpsCallable(functions, 'resolveWalletRequest')
-    await callable({ userId, txId, approve })
+    await runTransaction(db, async (tx) => {
+      const txSnap = await tx.get(txRef)
+      if (!txSnap.exists()) throw new Error('الطلب ده مش موجود')
+      const txData = txSnap.data()
+      if (txData.status !== 'pending') throw new Error('اترد على الطلب ده بالفعل')
+
+      if (!approve) {
+        tx.update(txRef, { status: 'rejected' })
+        return
+      }
+
+      const walletSnap = await tx.get(walletRef)
+      const currentBalance = (walletSnap.data()?.balance ?? 0) as number
+
+      if (txData.type === 'withdraw' && currentBalance < txData.amount) {
+        throw new Error('رصيد المستخدم مش كافي لإتمام السحب')
+      }
+
+      const newBalance = txData.type === 'deposit' ? currentBalance + txData.amount : currentBalance - txData.amount
+      tx.update(walletRef, { balance: newBalance })
+      tx.update(txRef, { status: 'completed', balanceAfter: newBalance })
+    })
   } catch (err) {
-    if (err instanceof FunctionsError) throw new Error(err.message)
+    if (err instanceof Error) throw err
     throw new Error('حصل خطأ، حاول تاني')
   }
 }

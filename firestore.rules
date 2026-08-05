@@ -1,0 +1,155 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function userGender() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.gender;
+    }
+
+    // ---- Users ----
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(userId);
+      allow update: if isAdmin() || isOwner(userId);
+      allow delete: if isAdmin();
+
+      match /notifications/{notificationId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // ---- Drivers ----
+    match /drivers/{driverId} {
+      allow read: if isOwner(driverId) || isAdmin();
+      allow create: if isOwner(driverId);
+      allow update: if isOwner(driverId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ---- Trips ----
+    match /trips/{tripId} {
+      allow read: if isSignedIn() &&
+        (resource.data.isWomenOnly == false || userGender() == 'female' || isAdmin());
+
+      allow create: if isSignedIn() &&
+        request.resource.data.driverId == request.auth.uid &&
+        get(/databases/$(database)/documents/drivers/$(request.auth.uid)).data.verificationStatus == 'approved';
+
+      allow update: if isSignedIn();
+      allow delete: if isOwner(resource.data.driverId) || isAdmin();
+    }
+
+    // ---- Bookings ----
+    match /bookings/{bookingId} {
+      allow read: if isSignedIn() &&
+        (resource.data.passengerId == request.auth.uid ||
+         resource.data.driverId == request.auth.uid ||
+         isAdmin());
+      allow create: if isSignedIn() && request.resource.data.passengerId == request.auth.uid;
+      allow update: if isSignedIn() &&
+        (resource.data.passengerId == request.auth.uid ||
+         resource.data.driverId == request.auth.uid ||
+         isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // ---- Wallets ----
+    match /wallets/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && request.resource.data.balance == 0;
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if false;
+
+      match /walletTransactions/{txId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) || isAdmin();
+        allow update: if isOwner(userId) || isAdmin();
+        allow delete: if isAdmin();
+      }
+    }
+
+    // ---- Config Collections ----
+    match /governorates/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /cities/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /carTypes/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /appSettings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /coupons/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+    match /pages/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /stats/{docId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+
+    // ---- Chats ----
+    match /chats/{chatId} {
+      allow read: if isSignedIn() &&
+        (resource.data.passengerId == request.auth.uid ||
+         resource.data.driverId == request.auth.uid ||
+         isAdmin());
+      allow create: if isSignedIn() &&
+        (request.resource.data.passengerId == request.auth.uid ||
+         request.resource.data.driverId == request.auth.uid);
+      allow update: if isSignedIn() &&
+        (resource.data.passengerId == request.auth.uid ||
+         resource.data.driverId == request.auth.uid);
+
+      match /messages/{messageId} {
+        allow read: if isSignedIn() &&
+          (get(/databases/$(database)/documents/chats/$(chatId)).data.passengerId == request.auth.uid ||
+           get(/databases/$(database)/documents/chats/$(chatId)).data.driverId == request.auth.uid ||
+           isAdmin());
+        allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid;
+        allow update: if isSignedIn();
+        allow delete: if isAdmin();
+      }
+    }
+
+    // ---- Ratings ----
+    match /ratings/{ratingId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.fromUserId == request.auth.uid;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ---- Reports ----
+    match /reports/{reportId} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+    }
+  }
+}
