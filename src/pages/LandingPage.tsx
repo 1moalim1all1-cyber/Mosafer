@@ -121,33 +121,47 @@ export default function LandingPage() {
       </header>
 
       {/* ---- Hero ---- */}
-      <section className="relative overflow-hidden">
-        <img src={heroImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-tertiary via-tertiary/60 to-tertiary/20" />
-        <div className="absolute inset-0 bg-gradient-to-l from-tertiary/40 via-transparent to-transparent" />
+      <section className="relative overflow-hidden bg-tertiary">
+        <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 pb-10 pt-14 sm:pt-20 lg:grid-cols-2">
+          {/* ---- عمود النص - على خلفية صلبة، بعيد تمامًا عن أي تراكب مع الصورة ---- */}
+          <div className="relative z-10">
+            <h1 className="mb-4 text-4xl font-bold leading-tight sm:text-5xl">
+              رحلتك...
+              <br />
+              تبدأ من هنا
+            </h1>
+            <p className="mb-6 max-w-md text-lg text-white/85">
+              احجز رحلتك بين جميع المحافظات بأمان وسهولة وبأفضل الأسعار
+            </p>
 
-        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-14 sm:pt-20">
-          <h1 className="mb-4 text-4xl font-bold leading-tight sm:text-5xl">
-            رحلتك...
-            <br />
-            تبدأ من هنا
-          </h1>
-          <p className="mb-6 max-w-md text-lg text-white/85">
-            احجز رحلتك بين جميع المحافظات بأمان وسهولة وبأفضل الأسعار
-          </p>
-
-          <div className="mb-8 flex flex-wrap gap-4 text-sm text-white/90">
-            <span className="flex items-center gap-1.5">
-              <Tag size={16} className="text-secondary" /> أسعار عادلة
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Zap size={16} className="text-secondary" /> سريع
-            </span>
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck size={16} className="text-secondary" /> آمن
-            </span>
+            <div className="flex flex-wrap gap-4 text-sm text-white/90">
+              <span className="flex items-center gap-1.5">
+                <Tag size={16} className="text-secondary" /> أسعار عادلة
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Zap size={16} className="text-secondary" /> سريع
+              </span>
+              <span className="flex items-center gap-1.5">
+                <ShieldCheck size={16} className="text-secondary" /> آمن
+              </span>
+            </div>
           </div>
 
+          {/* ---- عمود الصورة - عنصر بصري محتوى في مكانه، مش خلفية كاملة
+          للشاشة، عشان منعرفش أي تراكب مع النص أبدًا ---- */}
+          <div className="relative h-56 overflow-hidden rounded-3xl shadow-2xl sm:h-72 lg:h-80">
+            <img
+              src={heroImageUrl}
+              alt="مسافر"
+              className="absolute inset-0 h-full w-full object-cover"
+              style={{ objectPosition: 'center 35%' }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-tertiary/60 via-transparent to-transparent" />
+          </div>
+        </div>
+
+        {/* ---- صندوق البحث - جزء طبيعي من تدفق الصفحة، مش عائم فوقها ---- */}
+        <div className="mx-auto max-w-6xl px-4 pb-16">
           <div className="rounded-3xl bg-card p-5 text-text-primary shadow-2xl sm:p-6">
             {/* تابات نوع الرحلة */}
             <div className="mb-4 flex gap-2">
@@ -227,8 +241,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* ---- Features ---- */}
       <section className="border-t border-white/10 bg-tertiary py-14">
         <div className="mx-auto max-w-6xl px-4">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
