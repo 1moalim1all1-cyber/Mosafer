@@ -169,7 +169,7 @@ export default function LandingPage() {
         {/* ---- شريط البحث - رفيع ومدمج، مسحوب لأعلى شوية عشان يبان
         ملزّق تحت حافة الصورة مباشرة زي المرجع، مش صندوق كبير فاضي ---- */}
         <div className="relative z-10 mx-auto -mt-8 max-w-6xl px-4 pb-10 sm:-mt-10">
-          <div className="rounded-2xl bg-card p-3 text-text-primary shadow-2xl ring-1 ring-white/10 sm:p-4">
+          <div className="rounded-2xl bg-card p-3 text-text-primary shadow-2xl shadow-primary/20 ring-1 ring-primary/25 sm:p-4">
             {/* تابات نوع الرحلة - "رحلة واحدة" هي الوحيدة المدعومة فعليًا
             في النظام حاليًا، فالتابين التانيين معطّلين بوضوح "قريبًا" */}
             <div className="mb-3 flex flex-wrap gap-2">
@@ -197,13 +197,17 @@ export default function LandingPage() {
 
             <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
               <div className="order-last lg:order-first lg:w-44">
-                <Button onClick={() => navigate('/login')} icon={<Search size={16} />} className="!py-3">
+                <Button
+                  onClick={() => navigate('/login')}
+                  icon={<Search size={16} />}
+                  className="!bg-gradient-to-l !from-primary !to-secondary !py-3 !shadow-lg !shadow-primary/40 hover:!brightness-110"
+                >
                   ابحث عن رحلة
                 </Button>
               </div>
 
               <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_auto_1fr_1fr_1fr]">
-                <div className="rounded-xl border-2 border-border bg-bg px-3 py-2.5 transition hover:border-primary/50">
+                <div className="rounded-xl border border-border bg-tertiary px-3 py-2.5 transition hover:border-primary">
                   <p className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
                     <MapPin size={11} className="text-primary" /> من
                   </p>
@@ -212,27 +216,27 @@ export default function LandingPage() {
 
                 <button
                   onClick={swapLocations}
-                  className="mx-auto hidden h-9 w-9 items-center justify-center rounded-full border-2 border-border bg-bg text-primary transition hover:border-primary lg:flex"
+                  className="mx-auto hidden h-9 w-9 items-center justify-center rounded-full border border-border bg-tertiary text-primary shadow-md shadow-primary/20 transition hover:border-primary lg:flex"
                   aria-label="بدّل بين نقطة الانطلاق والوجهة"
                 >
                   <ArrowLeftRight size={16} />
                 </button>
 
-                <div className="rounded-xl border-2 border-border bg-bg px-3 py-2.5 transition hover:border-primary/50">
+                <div className="rounded-xl border border-border bg-tertiary px-3 py-2.5 transition hover:border-primary">
                   <p className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
                     <MapPin size={11} className="text-primary" /> إلى
                   </p>
                   <p className="text-sm text-text-secondary">اختار الوجهة</p>
                 </div>
 
-                <div className="rounded-xl border-2 border-border bg-bg px-3 py-2.5 transition hover:border-primary/50">
+                <div className="rounded-xl border border-border bg-tertiary px-3 py-2.5 transition hover:border-primary">
                   <p className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
                     <Calendar size={11} className="text-primary" /> تاريخ الرحلة
                   </p>
                   <p className="text-sm text-text-secondary">اختار التاريخ</p>
                 </div>
 
-                <div className="flex items-center justify-between rounded-xl border-2 border-border bg-bg px-2 py-2">
+                <div className="flex items-center justify-between rounded-xl border border-border bg-tertiary px-2 py-2">
                   <button
                     onClick={() => setSeats((s) => Math.max(1, s - 1))}
                     className="flex h-6 w-6 items-center justify-center rounded-full border border-border text-text-secondary"
