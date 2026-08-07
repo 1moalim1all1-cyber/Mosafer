@@ -30,7 +30,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen flex-col bg-bg">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
@@ -45,7 +45,7 @@ export default function ChatPage() {
             <div key={m.id} className={`mb-2 flex ${isMe ? 'justify-start' : 'justify-end'}`}>
               <div
                 className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
-                  isMe ? 'bg-primary text-white' : 'border border-border bg-white text-text-primary'
+                  isMe ? 'bg-primary text-white' : 'border border-border bg-card text-text-primary'
                 }`}
               >
                 <p>{m.text}</p>
@@ -59,7 +59,7 @@ export default function ChatPage() {
         <div ref={bottomRef} />
       </main>
 
-      <form onSubmit={handleSend} className="flex gap-3 border-t border-border bg-white p-4">
+      <form onSubmit={handleSend} className="flex gap-3 border-t border-border bg-card p-4">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}

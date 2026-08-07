@@ -55,7 +55,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center justify-between border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center justify-between border-b border-border bg-card px-4 py-4">
         <div className="flex items-center gap-2">
           <img src="/Mosafer/logo.jpeg" alt="مسافر" className="h-11 w-11 rounded-2xl object-cover shadow-md" />
           <h1 className="text-xl font-bold text-primary">مسافر</h1>
@@ -81,7 +81,7 @@ export default function HomePage() {
           <h2 className="mb-1 text-2xl font-bold">فين رايح؟</h2>
           <p className="text-sm text-white/70">شارك رحلتك مع آلاف الركاب والسائقين في مصر</p>
           {completedCount >= 5 && (
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 backdrop-blur-sm">
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-card/15 px-4 py-2 backdrop-blur-sm">
               <Users2 size={16} />
               <span className="text-sm font-semibold">أكتر من {completedCount} رحلة اتعملت على مسافر</span>
             </div>
@@ -92,13 +92,13 @@ export default function HomePage() {
       <main className="mx-auto max-w-lg px-4 pb-24 pt-6">
         <div className="-mt-14 mb-8">
 
-        <div className="flex flex-col gap-4 rounded-2xl border border-border bg-white p-5 shadow-[0_8px_30px_rgba(15,23,42,0.08)]">
+        <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-[0_8px_30px_rgba(15,23,42,0.08)]">
           <div>
             <label className="mb-1.5 block text-sm font-semibold text-text-primary">من</label>
             <select
               value={origin}
               onChange={(e) => setOrigin(e.target.value)}
-              className="w-full rounded-xl border-2 border-border bg-white px-4 py-3 text-base focus:border-primary focus:outline-none"
+              className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-base focus:border-primary focus:outline-none"
             >
               <option value="">اختار المحافظة</option>
               {GOVERNORATES.map((g) => (
@@ -114,7 +114,7 @@ export default function HomePage() {
             <select
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
-              className="w-full rounded-xl border-2 border-border bg-white px-4 py-3 text-base focus:border-primary focus:outline-none"
+              className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-base focus:border-primary focus:outline-none"
             >
               <option value="">اختار المحافظة</option>
               {GOVERNORATES.map((g) => (
@@ -155,7 +155,7 @@ export default function HomePage() {
         {tripsLoading && (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-40 animate-pulse rounded-2xl bg-white" />
+              <div key={i} className="h-40 animate-pulse rounded-2xl bg-card" />
             ))}
           </div>
         )}

@@ -31,7 +31,7 @@ export default function DriverDashboardPage() {
 
   return (
     <div className="min-h-screen bg-bg pb-24">
-      <header className="flex items-center justify-between border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center justify-between border-b border-border bg-card px-4 py-4">
         <h1 className="text-lg font-bold text-text-primary">لوحة السائق</h1>
         <button onClick={() => navigate('/')} className="text-sm font-semibold text-primary">
           الرئيسية
@@ -54,7 +54,7 @@ export default function DriverDashboardPage() {
           <button
             key={trip.id}
             onClick={() => navigate(`/driver/trip/${trip.id}/bookings`)}
-            className="mb-3 flex w-full items-center justify-between rounded-2xl border border-border bg-white p-4 text-right"
+            className="mb-3 flex w-full items-center justify-between rounded-2xl border border-border bg-card p-4 text-right"
           >
             <div>
               <p className="font-semibold text-text-primary">

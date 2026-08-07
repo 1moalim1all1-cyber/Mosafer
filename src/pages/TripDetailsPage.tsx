@@ -148,7 +148,7 @@ export default function TripDetailsPage() {
 
   return (
     <div className="min-h-screen bg-bg pb-24">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
@@ -197,7 +197,7 @@ export default function TripDetailsPage() {
         )}
 
         {driver && (
-          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-white p-4">
+          <div className="mb-4 flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-light text-2xl">
               {driver.profileImageUrl ? (
                 <img src={driver.profileImageUrl} className="h-14 w-14 rounded-full object-cover" alt="" />
@@ -281,7 +281,7 @@ export default function TripDetailsPage() {
             type="button"
             onClick={() => setPickingLocation(true)}
             className={`flex w-full items-center gap-3 rounded-xl border-2 p-4 text-right ${
-              pickupPoint ? 'border-success/40 bg-success/5' : 'border-border bg-white'
+              pickupPoint ? 'border-success/40 bg-success/5' : 'border-border bg-card'
             }`}
           >
             <span className="text-xl">{pickupPoint ? '✅' : '📍'}</span>
@@ -312,7 +312,7 @@ export default function TripDetailsPage() {
           )}
         </div>
 
-        <div className="mb-4 flex items-center justify-between rounded-xl bg-white p-4">
+        <div className="mb-4 flex items-center justify-between rounded-xl bg-card p-4">
           <span className="font-semibold text-text-primary">الإجمالي</span>
           <span className="text-xl font-bold text-primary">{total.toFixed(0)} ج.م</span>
         </div>

@@ -42,7 +42,7 @@ export default function SearchResultsPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
@@ -55,7 +55,7 @@ export default function SearchResultsPage() {
         {loading && (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-40 animate-pulse rounded-2xl bg-white" />
+              <div key={i} className="h-40 animate-pulse rounded-2xl bg-card" />
             ))}
           </div>
         )}

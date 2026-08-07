@@ -14,7 +14,7 @@ export default function StaticPageView() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>

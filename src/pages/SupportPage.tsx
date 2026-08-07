@@ -37,7 +37,7 @@ export default function SupportPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
@@ -46,7 +46,7 @@ export default function SupportPage() {
 
       <main className="mx-auto max-w-lg px-4 py-6">
         {contact && (contact.whatsappNumber || contact.supportEmail) && (
-          <div className="mb-6 rounded-2xl border border-border bg-white p-4">
+          <div className="mb-6 rounded-2xl border border-border bg-card p-4">
             <p className="mb-2 font-semibold text-text-primary">تواصل مباشر</p>
             {contact.whatsappNumber && <p className="text-text-secondary">💬 {contact.whatsappNumber}</p>}
             {contact.supportEmail && <p className="text-text-secondary">✉️ {contact.supportEmail}</p>}

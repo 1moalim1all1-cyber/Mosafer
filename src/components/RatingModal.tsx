@@ -29,7 +29,7 @@ export function RatingModal({ tripId, bookingId, fromUserId, toUserId, direction
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6">
+      <div className="w-full max-w-sm rounded-2xl bg-card p-6">
         <h3 className="mb-4 text-center text-lg font-bold text-text-primary">قيّم {otherPartyName}</h3>
         <div className="mb-4 flex justify-center gap-2">
           {[1, 2, 3, 4, 5].map((n) => (

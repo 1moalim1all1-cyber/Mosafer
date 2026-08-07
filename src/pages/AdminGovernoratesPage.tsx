@@ -18,7 +18,7 @@ export default function AdminGovernoratesPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
@@ -39,7 +39,7 @@ export default function AdminGovernoratesPage() {
         </div>
 
         {items.map((g) => (
-          <div key={g.id} className="mb-2 flex items-center justify-between rounded-xl border border-border bg-white p-4">
+          <div key={g.id} className="mb-2 flex items-center justify-between rounded-xl border border-border bg-card p-4">
             <span className="font-semibold text-text-primary">{g.name}</span>
             <div className="flex items-center gap-3">
               <label className="flex items-center gap-2 text-sm text-text-secondary">

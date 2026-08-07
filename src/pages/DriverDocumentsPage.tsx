@@ -15,7 +15,7 @@ function FileField({
   onChange: (f: File) => void
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-border bg-white p-4 hover:border-primary">
+    <label className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-border bg-card p-4 hover:border-primary">
       <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-light text-xl">
         {file ? '✅' : '📷'}
       </div>

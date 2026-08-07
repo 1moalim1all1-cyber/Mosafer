@@ -45,7 +45,7 @@ function LocateButton({ onLocate }: { onLocate: (lat: number, lng: number) => vo
     <button
       onClick={handleClick}
       disabled={loading}
-      className="absolute right-3 top-3 z-[1000] flex h-10 w-10 items-center justify-center rounded-full bg-white text-lg shadow-md"
+      className="absolute right-3 top-3 z-[1000] flex h-10 w-10 items-center justify-center rounded-full bg-card text-lg shadow-md"
     >
       {loading ? '⏳' : '📍'}
     </button>
@@ -64,7 +64,7 @@ export function LocationPicker({ title, initialLat, initialLng, onConfirm, onClo
   const [point, setPoint] = useState<[number, number]>([initialLat || EGYPT_CENTER[0], initialLng || EGYPT_CENTER[1]])
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-white">
+    <div className="fixed inset-0 z-50 flex flex-col bg-card">
       <header className="flex items-center gap-3 border-b border-border px-4 py-4">
         <button onClick={onClose} className="text-xl">
           ✕

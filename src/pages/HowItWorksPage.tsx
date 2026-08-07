@@ -20,7 +20,7 @@ export default function HowItWorksPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
@@ -31,7 +31,7 @@ export default function HowItWorksPage() {
         <h2 className="mb-4 text-lg font-bold text-text-primary">لو راكب</h2>
         <div className="mb-8 flex flex-col gap-3">
           {PASSENGER_STEPS.map((step, i) => (
-            <div key={step.title} className="flex items-start gap-4 rounded-2xl border border-border bg-white p-4">
+            <div key={step.title} className="flex items-start gap-4 rounded-2xl border border-border bg-card p-4">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-light text-primary">
                 <step.icon size={22} />
               </div>
@@ -48,7 +48,7 @@ export default function HowItWorksPage() {
         <h2 className="mb-4 text-lg font-bold text-text-primary">لو سائق</h2>
         <div className="flex flex-col gap-3">
           {DRIVER_STEPS.map((step, i) => (
-            <div key={step.title} className="flex items-start gap-4 rounded-2xl border border-border bg-white p-4">
+            <div key={step.title} className="flex items-start gap-4 rounded-2xl border border-border bg-card p-4">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-warning/10 text-warning">
                 <step.icon size={22} />
               </div>

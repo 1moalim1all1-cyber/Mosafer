@@ -126,7 +126,7 @@ export default function CreateTripPage() {
           <select
             value={origin}
             onChange={(e) => setOrigin(e.target.value)}
-            className="w-full rounded-xl border-2 border-border bg-white px-4 py-3 focus:border-primary focus:outline-none"
+            className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 focus:border-primary focus:outline-none"
           >
             <option value="">اختار المحافظة</option>
             {GOVERNORATES.map((g) => (
@@ -151,7 +151,7 @@ export default function CreateTripPage() {
           <select
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
-            className="w-full rounded-xl border-2 border-border bg-white px-4 py-3 focus:border-primary focus:outline-none"
+            className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 focus:border-primary focus:outline-none"
           >
             <option value="">اختار المحافظة</option>
             {GOVERNORATES.map((g) => (

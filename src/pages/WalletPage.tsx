@@ -86,7 +86,7 @@ export default function WalletPage() {
 
   return (
     <div className="min-h-screen bg-bg pb-24">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
@@ -100,13 +100,13 @@ export default function WalletPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setShowModal('deposit')}
-              className="flex-1 rounded-xl border-2 border-white/50 py-2.5 font-semibold hover:bg-white/10"
+              className="flex-1 rounded-xl border-2 border-white/50 py-2.5 font-semibold hover:bg-card/10"
             >
               إيداع
             </button>
             <button
               onClick={() => setShowModal('withdraw')}
-              className="flex-1 rounded-xl border-2 border-white/50 py-2.5 font-semibold hover:bg-white/10"
+              className="flex-1 rounded-xl border-2 border-white/50 py-2.5 font-semibold hover:bg-card/10"
             >
               سحب
             </button>
@@ -119,7 +119,7 @@ export default function WalletPage() {
           const isCredit = tx.type === 'deposit' || tx.type === 'refund'
           const color = tx.status === 'pending' ? 'text-warning' : isCredit ? 'text-success' : 'text-danger'
           return (
-            <div key={tx.id} className="mb-2 rounded-xl border border-border bg-white p-4">
+            <div key={tx.id} className="mb-2 rounded-xl border border-border bg-card p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="text-xl">{TYPE_LABELS[tx.type].icon}</span>
@@ -153,7 +153,7 @@ export default function WalletPage() {
 
       {showModal === 'deposit' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6">
+          <div className="w-full max-w-sm rounded-2xl bg-card p-6">
             {submitted ? (
               <div className="text-center">
                 <p className="mb-2 text-4xl">✅</p>
@@ -215,7 +215,7 @@ export default function WalletPage() {
 
       {showModal === 'withdraw' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6">
+          <div className="w-full max-w-sm rounded-2xl bg-card p-6">
             {submitted ? (
               <div className="text-center">
                 <p className="mb-2 text-4xl">✅</p>
@@ -243,7 +243,7 @@ export default function WalletPage() {
                     <select
                       value={withdrawMethod}
                       onChange={(e) => setWithdrawMethod(e.target.value)}
-                      className="w-full rounded-xl border-2 border-border bg-white px-4 py-3 focus:border-primary focus:outline-none"
+                      className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 focus:border-primary focus:outline-none"
                     >
                       {WITHDRAW_METHODS.map((m) => (
                         <option key={m} value={m}>

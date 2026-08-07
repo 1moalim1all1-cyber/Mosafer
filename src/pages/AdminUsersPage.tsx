@@ -44,14 +44,14 @@ export default function AdminUsersPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
         <h1 className="text-lg font-bold text-text-primary">إدارة المستخدمين</h1>
       </header>
 
-      <div className="sticky top-0 z-10 border-b border-border bg-white px-4 py-3">
+      <div className="sticky top-0 z-10 border-b border-border bg-card px-4 py-3">
         <div className="mb-2 flex items-center gap-2 rounded-xl border-2 border-border px-3 py-2">
           <Search size={18} className="text-text-secondary" />
           <input
@@ -80,7 +80,7 @@ export default function AdminUsersPage() {
         <p className="mb-3 text-sm text-text-secondary">{filtered.length} مستخدم</p>
 
         {filtered.map((u) => (
-          <div key={u.uid} className="mb-3 rounded-2xl border border-border bg-white p-4">
+          <div key={u.uid} className="mb-3 rounded-2xl border border-border bg-card p-4">
             <div className="mb-2 flex items-center justify-between">
               <div>
                 <p className="font-semibold text-text-primary">{u.fullName || 'بدون اسم'}</p>

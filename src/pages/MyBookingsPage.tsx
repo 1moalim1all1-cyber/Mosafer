@@ -53,7 +53,7 @@ export default function MyBookingsPage() {
 
   return (
     <div className="min-h-screen bg-bg pb-24">
-      <header className="border-b border-border bg-white px-4 py-4">
+      <header className="border-b border-border bg-card px-4 py-4">
         <h1 className="text-lg font-bold text-text-primary">رحلاتي</h1>
       </header>
 
@@ -68,7 +68,7 @@ export default function MyBookingsPage() {
         )}
 
         {bookings.map((b) => (
-          <div key={b.id} className="mb-3 rounded-2xl border border-border bg-white p-4">
+          <div key={b.id} className="mb-3 rounded-2xl border border-border bg-card p-4">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-sm text-text-secondary">{new Intl.DateTimeFormat('ar-EG').format(b.createdAt)}</span>
               <span className={`text-sm font-semibold ${STATUS_LABELS[b.status].color}`}>

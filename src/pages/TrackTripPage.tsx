@@ -79,7 +79,7 @@ export default function TrackTripPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
@@ -119,7 +119,7 @@ export default function TrackTripPage() {
         </MapContainer>
       </div>
 
-      <div className="border-t border-border bg-white p-4">
+      <div className="border-t border-border bg-card p-4">
         {!hasLiveDriver ? (
           <div className="mb-4 flex items-center gap-2 rounded-xl bg-warning/10 p-3">
             <span>⏳</span>

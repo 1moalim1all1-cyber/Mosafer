@@ -25,7 +25,7 @@ function RequestRow({ request }: { request: WalletRequestRow }) {
   }
 
   return (
-    <div className="mb-3 rounded-2xl border border-border bg-white p-4">
+    <div className="mb-3 rounded-2xl border border-border bg-card p-4">
       <div className="mb-2 flex items-center justify-between">
         <span className="font-semibold text-text-primary">{user?.fullName ?? request.userId}</span>
         <span
@@ -87,7 +87,7 @@ export default function AdminWalletRequestsPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>

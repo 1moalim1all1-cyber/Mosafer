@@ -13,7 +13,7 @@ export default function FaqPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
@@ -22,7 +22,7 @@ export default function FaqPage() {
 
       <main className="mx-auto max-w-lg px-4 py-6">
         {items.map((item, index) => (
-          <div key={index} className="mb-2 rounded-xl border border-border bg-white">
+          <div key={index} className="mb-2 rounded-xl border border-border bg-card">
             <button
               onClick={() => setOpenIndex(openIndex === index ? null : index)}
               className="flex w-full items-center justify-between p-4 text-right font-semibold text-text-primary"

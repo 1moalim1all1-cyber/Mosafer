@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fetchAppSettings, updateAppSettings, type AppSettings } from '../lib/admin'
+import { uploadImageToCloudinary } from '../lib/cloudinary'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 
@@ -9,10 +10,24 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<AppSettings | null>(null)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [uploadingHero, setUploadingHero] = useState(false)
 
   useEffect(() => {
     fetchAppSettings().then(setSettings)
   }, [])
+
+  async function handleHeroUpload(file: File) {
+    if (!settings) return
+    setUploadingHero(true)
+    try {
+      const url = await uploadImageToCloudinary(file, 'mosafer/landing')
+      setSettings({ ...settings, heroImageUrl: url })
+    } catch {
+      alert('فشل رفع الصورة، حاول تاني')
+    } finally {
+      setUploadingHero(false)
+    }
+  }
 
   async function handleSave() {
     if (!settings) return
@@ -36,7 +51,7 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
@@ -102,7 +117,7 @@ export default function AdminSettingsPage() {
             <select
               value={settings.depositMethodName}
               onChange={(e) => setSettings({ ...settings, depositMethodName: e.target.value })}
-              className="w-full rounded-xl border-2 border-border bg-white px-4 py-3 focus:border-primary focus:outline-none"
+              className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 focus:border-primary focus:outline-none"
             >
               <option value="فودافون كاش">فودافون كاش</option>
               <option value="إنستاباي">إنستاباي</option>
@@ -117,6 +132,30 @@ export default function AdminSettingsPage() {
             onChange={(e) => setSettings({ ...settings, depositPhoneNumber: e.target.value })}
             dir="ltr"
           />
+        </div>
+
+        <h2 className="mb-3 font-bold text-text-primary">صورة صفحة الهبوط الرئيسية</h2>
+        <p className="mb-3 text-sm text-text-secondary">
+          الصورة اللي بتظهر خلفية في أول صفحة يشوفها أي زائر قبل ما يسجّل دخول
+        </p>
+        <div className="mb-6">
+          {settings.heroImageUrl && (
+            <img src={settings.heroImageUrl} alt="معاينة" className="mb-3 h-40 w-full rounded-xl object-cover" />
+          )}
+          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card py-4 text-text-secondary hover:border-primary">
+            {uploadingHero ? (
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            ) : (
+              <span>📷 {settings.heroImageUrl ? 'تغيير الصورة' : 'رفع صورة'}</span>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={uploadingHero}
+              onChange={(e) => e.target.files?.[0] && handleHeroUpload(e.target.files[0])}
+            />
+          </label>
         </div>
 
         {saved && <p className="mb-4 text-sm font-semibold text-success">✅ تم الحفظ</p>}

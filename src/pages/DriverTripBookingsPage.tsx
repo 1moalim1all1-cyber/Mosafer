@@ -59,7 +59,7 @@ function BookingCard({ booking, onRate }: { booking: BookingRow; onRate: () => v
   }
 
   return (
-    <div className="mb-3 rounded-2xl border border-border bg-white p-4">
+    <div className="mb-3 rounded-2xl border border-border bg-card p-4">
       <div className="mb-2 flex items-center justify-between">
         <span className="font-semibold text-text-primary">{passenger?.fullName ?? 'راكب'}</span>
         <span className={`text-sm font-semibold ${statusLabels[booking.status]?.color}`}>
@@ -152,7 +152,7 @@ export default function DriverTripBookingsPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center justify-between border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center justify-between border-b border-border bg-card px-4 py-4">
         <h1 className="text-lg font-bold text-text-primary">طلبات الحجز</h1>
         <button onClick={handleComplete} disabled={completing} className="text-sm font-semibold text-primary">
           إنهاء الرحلة

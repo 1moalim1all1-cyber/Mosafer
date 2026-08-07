@@ -27,7 +27,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center justify-between border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center justify-between border-b border-border bg-card px-4 py-4">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="text-xl">
             ←
@@ -49,7 +49,7 @@ export default function NotificationsPage() {
             key={n.id}
             onClick={() => user && !n.isRead && markNotificationRead(user.uid, n.id)}
             className={`flex w-full items-start gap-3 border-b border-border px-4 py-4 text-right ${
-              n.isRead ? 'bg-white' : 'bg-primary-light/40'
+              n.isRead ? 'bg-card' : 'bg-primary-light/40'
             }`}
           >
             <span className="text-xl">{TYPE_ICONS[n.type] ?? '🔔'}</span>

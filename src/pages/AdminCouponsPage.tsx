@@ -29,7 +29,7 @@ export default function AdminCouponsPage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center gap-3 border-b border-border bg-white px-4 py-4">
+      <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
@@ -37,7 +37,7 @@ export default function AdminCouponsPage() {
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">
-        <div className="mb-6 rounded-2xl border border-border bg-white p-4">
+        <div className="mb-6 rounded-2xl border border-border bg-card p-4">
           <h2 className="mb-3 font-bold text-text-primary">كوبون جديد</h2>
           <div className="flex flex-col gap-3">
             <Input label="الكود" value={code} onChange={(e) => setCode(e.target.value)} />
@@ -60,7 +60,7 @@ export default function AdminCouponsPage() {
         </div>
 
         {items.map((c) => (
-          <div key={c.id} className="mb-2 flex items-center justify-between rounded-xl border border-border bg-white p-4">
+          <div key={c.id} className="mb-2 flex items-center justify-between rounded-xl border border-border bg-card p-4">
             <div>
               <p className="font-bold text-text-primary">{c.code}</p>
               <p className="text-sm text-text-secondary">

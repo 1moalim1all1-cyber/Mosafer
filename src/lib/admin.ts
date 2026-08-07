@@ -207,6 +207,7 @@ export interface AppSettings {
   supportEmail: string
   depositMethodName: string
   depositPhoneNumber: string
+  heroImageUrl: string
 }
 
 export async function fetchAppSettings(): Promise<AppSettings> {
@@ -221,6 +222,7 @@ export async function fetchAppSettings(): Promise<AppSettings> {
     supportEmail: data.supportEmail ?? '',
     depositMethodName: data.depositMethodName ?? 'فودافون كاش',
     depositPhoneNumber: data.depositPhoneNumber ?? '',
+    heroImageUrl: data.heroImageUrl ?? '',
   }
 }
 

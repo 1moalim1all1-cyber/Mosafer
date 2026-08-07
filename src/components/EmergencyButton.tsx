@@ -41,7 +41,7 @@ export function EmergencyButton() {
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 sm:items-center" onClick={() => setOpen(false)}>
           <div
-            className="w-full max-w-sm rounded-t-3xl bg-white p-6 sm:rounded-3xl"
+            className="w-full max-w-sm rounded-t-3xl bg-card p-6 sm:rounded-3xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 text-center">

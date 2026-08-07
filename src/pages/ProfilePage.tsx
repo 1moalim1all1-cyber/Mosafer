@@ -35,7 +35,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-bg pb-24">
-      <header className="border-b border-border bg-white px-4 py-4">
+      <header className="border-b border-border bg-card px-4 py-4">
         <h1 className="text-lg font-bold text-text-primary">الملف الشخصي</h1>
       </header>
 

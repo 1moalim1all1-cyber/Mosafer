@@ -2,24 +2,24 @@
 @import "tailwindcss";
 
 @theme {
-  /* نظام الألوان - نفس تدرّج اللوجو الجديد بالظبط (أزرق إلى بنفسجي) */
-  --color-primary: #4F46E5;
-  --color-primary-hover: #4338CA;
-  --color-primary-light: #E0E7FF;
-  --color-secondary: #9333EA;
-  --color-tertiary: #0F0A2E;
+  /* Dark Premium Design System - كحلي غامق + أزرق كهربائي + بنفسجي */
+  --color-primary: #1677FF;
+  --color-primary-hover: #0E63D9;
+  --color-primary-light: #14245C;
+  --color-secondary: #8B2CF5;
+  --color-tertiary: #020B2D;
 
   --color-success: #22C55E;
   --color-warning: #F59E0B;
   --color-danger: #EF4444;
 
-  --color-bg: #F8FAFC;
-  --color-card: #FFFFFF;
-  --color-border: #E5E7EB;
+  --color-bg: #050E2E;
+  --color-card: #0B1739;
+  --color-border: #1E2F5C;
 
-  --color-text-primary: #111827;
-  --color-text-secondary: #6B7280;
-  --color-disabled: #CBD5E1;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #94A3B8;
+  --color-disabled: #3A4A73;
 
   --font-cairo: 'Cairo', sans-serif;
   --font-plex: 'IBM Plex Sans Arabic', sans-serif;
