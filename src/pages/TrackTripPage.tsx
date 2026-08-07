@@ -6,6 +6,7 @@ import { subscribeBooking } from '../lib/bookings'
 import { subscribeToTrip } from '../lib/trips'
 import { fetchUserProfile } from '../lib/users'
 import { calculateDistanceKm, estimateEtaMinutes } from '../lib/geo'
+import { EmergencyButton } from '../components/EmergencyButton'
 import type { Booking } from '../types/booking'
 import type { Trip } from '../types/trip'
 import type { AppUser } from '../types/user'
@@ -83,6 +84,25 @@ export default function TrackTripPage() {
           ←
         </button>
         <h1 className="text-lg font-bold text-text-primary">تتبّع رحلتك</h1>
+        <button
+          onClick={async () => {
+            const shareText = 'بتابع رحلتي على مسافر، اتفرج على تحرّكي لحد ما أوصل'
+            const url = window.location.href
+            if (navigator.share) {
+              try {
+                await navigator.share({ title: 'مسافر', text: shareText, url })
+              } catch {
+                // المستخدم لغى المشاركة
+              }
+            } else {
+              window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + url)}`, '_blank')
+            }
+          }}
+          className="mr-auto text-xl"
+          aria-label="شارك رابط التتبّع مع حد"
+        >
+          📤
+        </button>
       </header>
 
       <div className="relative flex-1" style={{ minHeight: 320 }}>
@@ -146,6 +166,7 @@ export default function TrackTripPage() {
           </div>
         )}
       </div>
+      <EmergencyButton />
     </div>
   )
 }

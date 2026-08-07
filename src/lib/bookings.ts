@@ -16,6 +16,8 @@ function mapBookingDoc(id: string, data: Record<string, unknown>): Booking {
     paymentStatus: data.paymentStatus as Booking['paymentStatus'],
     pickupLat: (data.pickupLat as number) ?? null,
     pickupLng: (data.pickupLng as number) ?? null,
+    startPin: (data.startPin as string) ?? null,
+    pinVerified: Boolean(data.pinVerified),
     createdAt: created?.toDate ? created.toDate() : new Date(),
   }
 }

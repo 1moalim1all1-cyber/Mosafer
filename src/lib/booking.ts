@@ -134,6 +134,10 @@ export async function createBooking(params: {
         paymentStatus,
         pickupLat: pickupLat ?? null,
         pickupLng: pickupLng ?? null,
+        // كود تحقق من 4 أرقام - السائق بيطلبه من الراكب وقت الاستلام
+        // عشان يتأكد إنه فعلاً الشخص اللي حجز، زي نظام Uber بالظبط
+        startPin: String(Math.floor(1000 + Math.random() * 9000)),
+        pinVerified: false,
         createdAt: serverTimestamp(),
       })
     })

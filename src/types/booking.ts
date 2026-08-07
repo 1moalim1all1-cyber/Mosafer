@@ -14,6 +14,8 @@ export interface Booking {
   paymentStatus: PaymentStatus
   pickupLat?: number | null
   pickupLng?: number | null
+  startPin?: string | null
+  pinVerified?: boolean
   createdAt: Date
 }
 

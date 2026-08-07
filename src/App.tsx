@@ -32,6 +32,8 @@ import { ProtectedRoute, GuestOnlyRoute } from './routes/guards'
 
 
 import { AdminRoute, DriverRoute } from './routes/roleGuards'
+import { useAuth } from './contexts/AuthContext'
+import { SplashScreen } from './components/SplashScreen'
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const RoleSelectionPage = lazy(() => import('./pages/RoleSelectionPage'))
@@ -69,7 +71,23 @@ import { PageTransition } from './components/PageTransition'
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter basename="/Mosafer">
+      <AppShell />
+    </AuthProvider>
+  )
+}
+
+/**
+ * بنفصل الجزء ده عشان useAuth() لازم يتنادى جوه AuthProvider - وبيوريك
+ * شاشة البداية بملء الشاشة (اللوجو الجديد) لحد ما Firebase يتأكد هل
+ * إنت مسجّل دخول ولا لأ، بدل شاشة بيضا أو دائرة تحميل عادية.
+ */
+function AppShell() {
+  const { loading } = useAuth()
+
+  if (loading) return <SplashScreen />
+
+  return (
+    <BrowserRouter basename="/Mosafer">
         <WhatsAppButton />
         <PageTransition>
         <Suspense
@@ -320,6 +338,5 @@ export default function App() {
         </Suspense>
         </PageTransition>
       </BrowserRouter>
-    </AuthProvider>
   )
 }

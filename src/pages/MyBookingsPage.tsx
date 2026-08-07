@@ -78,6 +78,14 @@ export default function MyBookingsPage() {
             <p className="mb-3 text-text-primary">
               {b.seatsBooked} مقاعد · {b.totalPrice.toFixed(0)} ج.م
             </p>
+            {b.status === 'confirmed' && b.startPin && !b.pinVerified && (
+              <div className="mb-3 rounded-xl bg-primary-light p-3 text-center">
+                <p className="mb-1 text-xs text-text-secondary">قول الكود ده للسائق وقت ما يوصلك</p>
+                <p dir="ltr" className="text-2xl font-bold tracking-[0.3em] text-primary">
+                  {b.startPin}
+                </p>
+              </div>
+            )}
             <div className="flex items-center gap-3">
               {(b.status === 'pending' || b.status === 'confirmed') && (
                 <button

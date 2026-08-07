@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { subscribeTripBookings, respondToBooking, markTripCompleted } from '../lib/driverActions'
+import { subscribeTripBookings, respondToBooking, markTripCompleted, verifyPassengerPin } from '../lib/driverActions'
 import { fetchUserProfile } from '../lib/users'
 import { useAuth } from '../contexts/AuthContext'
 import type { AppUser } from '../types/user'
@@ -15,11 +15,15 @@ interface BookingRow {
   seatsBooked: number
   status: string
   totalPrice: number
+  pinVerified?: boolean
 }
 
 function BookingCard({ booking, onRate }: { booking: BookingRow; onRate: () => void }) {
   const [passenger, setPassenger] = useState<AppUser | null>(null)
   const [loading, setLoading] = useState(false)
+  const [pinInput, setPinInput] = useState('')
+  const [pinError, setPinError] = useState(false)
+  const [verifying, setVerifying] = useState(false)
 
   useEffect(() => {
     fetchUserProfile(booking.passengerId).then(setPassenger)
@@ -31,6 +35,18 @@ function BookingCard({ booking, onRate }: { booking: BookingRow; onRate: () => v
       await respondToBooking(booking.id, accept)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function checkPin() {
+    if (pinInput.length !== 4) return
+    setVerifying(true)
+    setPinError(false)
+    try {
+      const ok = await verifyPassengerPin(booking.id, pinInput)
+      if (!ok) setPinError(true)
+    } finally {
+      setVerifying(false)
     }
   }
 
@@ -60,6 +76,33 @@ function BookingCard({ booking, onRate }: { booking: BookingRow; onRate: () => v
         >
           📞 اتصل بالراكب
         </a>
+      )}
+      {booking.status === 'confirmed' && (
+        booking.pinVerified ? (
+          <div className="mb-3 flex items-center justify-center gap-2 rounded-xl bg-success/10 py-2.5 text-sm font-semibold text-success">
+            ✅ تم التحقق من الراكب
+          </div>
+        ) : (
+          <div className="mb-3 rounded-xl border border-border p-3">
+            <p className="mb-2 text-xs text-text-secondary">
+              اطلب من الراكب الكود اللي عنده (4 أرقام) واكتبه هنا للتأكد إنه فعلاً الشخص اللي حجز
+            </p>
+            <div className="flex gap-2">
+              <input
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                placeholder="0000"
+                inputMode="numeric"
+                dir="ltr"
+                className="w-24 rounded-lg border-2 border-border px-3 py-2 text-center text-lg font-bold tracking-widest focus:border-primary focus:outline-none"
+              />
+              <Button onClick={checkPin} loading={verifying} disabled={pinInput.length !== 4} fullWidth={false}>
+                تحقق
+              </Button>
+            </div>
+            {pinError && <p className="mt-1 text-xs text-danger">الكود غلط، اتأكد من الراكب تاني</p>}
+          </div>
+        )
       )}
       {booking.status === 'pending' && (
         <div className="flex gap-3">
