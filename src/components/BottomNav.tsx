@@ -3,7 +3,7 @@ import { Search, CarFront, PlusCircle, Wallet, UserCircle, LayoutDashboard } fro
 import { useAuth } from '../contexts/AuthContext'
 
 const PASSENGER_TABS = [
-  { path: '/', icon: Search, label: 'فين رايح؟' },
+  { path: '/', icon: Search, label: 'مسافر فين؟' },
   { path: '/my-bookings', icon: CarFront, label: 'رحلاتي' },
   { path: '/wallet', icon: Wallet, label: 'المحفظة' },
   { path: '/profile', icon: UserCircle, label: 'حسابي' },

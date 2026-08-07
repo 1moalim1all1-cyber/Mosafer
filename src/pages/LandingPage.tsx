@@ -283,9 +283,12 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {FEATURES.map((f) => (
-              <div key={f.title} className="rounded-2xl border border-white/10 bg-card/5 p-5 text-center transition hover:bg-card/10">
-                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary shadow-lg shadow-primary/20">
-                  <f.icon size={22} />
+              <div
+                key={f.title}
+                className="group rounded-2xl border border-white/10 bg-card/40 p-5 text-center transition hover:-translate-y-1 hover:border-primary/40"
+              >
+                <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-secondary shadow-lg shadow-primary/40 ring-2 ring-white/10 transition group-hover:shadow-primary/60">
+                  <f.icon size={28} strokeWidth={2.4} className="drop-shadow-md" />
                 </div>
                 <p className="mb-1 font-semibold">{f.title}</p>
                 <p className="text-xs leading-relaxed text-white/60">{f.desc}</p>

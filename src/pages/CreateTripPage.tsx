@@ -18,9 +18,13 @@ export default function CreateTripPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
+  // النهارده بصيغة YYYY-MM-DD - نفس صيغة حقل input[type=date]، عشان
+  // يتحط افتراضيًا لكن يفضل قابل للتغيير عادي لو السائق عايز تاريخ تاني
+  const todayStr = new Date().toISOString().split('T')[0]
+
   const [origin, setOrigin] = useState('')
   const [destination, setDestination] = useState('')
-  const [date, setDate] = useState('')
+  const [date, setDate] = useState(todayStr)
   const [time, setTime] = useState('')
   const [price, setPrice] = useState('')
   const [seats, setSeats] = useState('3')
@@ -172,7 +176,7 @@ export default function CreateTripPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Input label="التاريخ" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <Input label="التاريخ" type="date" value={date} min={todayStr} onChange={(e) => setDate(e.target.value)} />
           <Input label="الوقت" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
         </div>
 
