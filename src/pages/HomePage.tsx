@@ -57,7 +57,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-bg">
       <header className="flex items-center justify-between border-b border-border bg-white px-4 py-4">
         <div className="flex items-center gap-2">
-          <img src="/Mosafer/logo.jpeg" alt="مسافر" className="h-10 w-10 rounded-full object-cover" />
+          <img src="/Mosafer/logo.jpeg" alt="مسافر" className="h-11 w-11 rounded-2xl object-cover shadow-md" />
           <h1 className="text-xl font-bold text-primary">مسافر</h1>
         </div>
         <div className="flex items-center gap-3">
@@ -76,7 +76,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      <div className="bg-gradient-to-br from-primary to-primary-hover px-4 pb-10 pt-6 text-white">
+      <div className="bg-gradient-to-br from-primary to-secondary px-4 pb-10 pt-6 text-white">
         <div className="mx-auto max-w-lg">
           <h2 className="mb-1 text-2xl font-bold">فين رايح؟</h2>
           <p className="text-sm text-white/70">شارك رحلتك مع آلاف الركاب والسائقين في مصر</p>

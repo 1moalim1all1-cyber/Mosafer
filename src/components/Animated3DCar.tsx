@@ -19,7 +19,7 @@ export function Animated3DCar({ size = 140 }: { size?: number }) {
         }}
       >
         <div
-          className="flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-hover shadow-2xl"
+          className="flex items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary shadow-2xl"
           style={{ width: size, height: size }}
         >
           <CarFront size={size * 0.5} color="white" strokeWidth={1.5} />

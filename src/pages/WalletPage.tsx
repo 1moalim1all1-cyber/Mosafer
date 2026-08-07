@@ -94,7 +94,7 @@ export default function WalletPage() {
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">
-        <div className="mb-6 rounded-2xl bg-gradient-to-br from-primary to-primary-hover p-6 text-white shadow-lg shadow-primary/20">
+        <div className="mb-6 rounded-2xl bg-gradient-to-br from-primary to-secondary p-6 text-white shadow-lg shadow-primary/20">
           <p className="text-sm text-white/70">الرصيد الحالي</p>
           <p className="mb-4 text-3xl font-bold">{balance.toFixed(0)} ج.م</p>
           <div className="flex gap-3">

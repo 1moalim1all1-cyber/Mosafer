@@ -38,7 +38,7 @@ export default function LoginPage() {
           <img
             src="/Mosafer/logo.jpeg"
             alt="مسافر"
-            className="mb-4 h-24 w-24 rounded-full object-cover shadow-lg shadow-primary/30"
+            className="mb-4 h-28 w-28 rounded-2xl object-cover shadow-lg shadow-primary/30"
           />
           <h1 className="text-2xl font-bold text-text-primary">أهلاً بيك تاني</h1>
           <p className="mt-1 text-text-secondary">سجّل دخولك وكمّل رحلتك</p>

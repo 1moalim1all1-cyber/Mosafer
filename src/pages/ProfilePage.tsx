@@ -49,7 +49,7 @@ export default function ProfilePage() {
         </div>
 
         {user?.referralCode && (
-          <div className="mb-6 rounded-2xl bg-gradient-to-br from-primary to-primary-hover p-5 text-center text-white">
+          <div className="mb-6 rounded-2xl bg-gradient-to-br from-primary to-secondary p-5 text-center text-white">
             <p className="mb-2 text-sm text-white/70">ادعُ صديقك واكسبوا مكافأة سوا</p>
             <div className="flex items-center justify-center gap-2">
               <span className="text-2xl font-bold tracking-widest">{user.referralCode}</span>

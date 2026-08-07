@@ -2,10 +2,11 @@
 @import "tailwindcss";
 
 @theme {
-  /* نظام الألوان - نفس القيم المعتمدة بالضبط */
-  --color-primary: #1E40AF;
-  --color-primary-hover: #1D4ED8;
-  --color-primary-light: #DBEAFE;
+  /* نظام الألوان - نفس تدرّج اللوجو الجديد بالظبط (أزرق إلى بنفسجي) */
+  --color-primary: #4F46E5;
+  --color-primary-hover: #4338CA;
+  --color-primary-light: #E0E7FF;
+  --color-secondary: #9333EA;
 
   --color-success: #22C55E;
   --color-warning: #F59E0B;
