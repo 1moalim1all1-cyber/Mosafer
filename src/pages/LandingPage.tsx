@@ -10,7 +10,6 @@ import {
   Truck,
   MapPin,
   Calendar,
-  Users,
   Search,
   Navigation2,
   Wallet,
@@ -131,21 +130,18 @@ export default function LandingPage() {
       </header>
 
       {/* ---- Hero ---- */}
-      <section id="home" className="relative scroll-mt-20 overflow-hidden bg-tertiary">
-        {/* الصورة النضيفة الجديدة - ممتدة كخلفية كاملة، مأمونة دلوقتي
-        لأنها مفيهاش أي نص متكتوب جواها زي المرة اللي فاتت */}
+      <section id="home" className="relative scroll-mt-20 min-h-[560px] overflow-hidden bg-tertiary sm:min-h-[640px]">
+        {/* الصورة النضيفة - ممتدة كخلفية كاملة بارتفاع كافي عشان تبان كاملة */}
         <img
           src={heroImageUrl}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
-          style={{ objectPosition: 'center 40%' }}
+          style={{ objectPosition: 'center 30%' }}
         />
-        {/* تدرّج غامق من ناحية النص (يمين الشاشة في RTL) عشان يضمن
-        تباين قوي وواضح، وشفاف تدريجيًا لناحية الصورة */}
         <div className="absolute inset-0 bg-gradient-to-r from-tertiary via-tertiary/85 to-tertiary/20" />
         <div className="absolute inset-0 bg-gradient-to-t from-tertiary via-transparent to-transparent" />
 
-        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-14 sm:pt-20">
+        <div className="relative mx-auto flex min-h-[420px] max-w-6xl flex-col justify-center px-4 pt-14 sm:min-h-[480px] sm:pt-20">
           <div className="max-w-xl mr-auto">
             <h1 className="mb-4 text-4xl font-bold leading-tight sm:text-5xl">
               رحلتك...
@@ -170,13 +166,13 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* ---- صندوق البحث - جزء طبيعي من تدفق الصفحة، مش عائم فوقها ---- */}
-        <div className="relative mx-auto max-w-6xl px-4 pb-16">
-          <div className="rounded-3xl bg-card p-5 text-text-primary shadow-2xl sm:p-6">
+        {/* ---- شريط البحث - رفيع ومدمج، مسحوب لأعلى شوية عشان يبان
+        ملزّق تحت حافة الصورة مباشرة زي المرجع، مش صندوق كبير فاضي ---- */}
+        <div className="relative z-10 mx-auto -mt-8 max-w-6xl px-4 pb-10 sm:-mt-10">
+          <div className="rounded-2xl bg-card p-3 text-text-primary shadow-2xl ring-1 ring-white/10 sm:p-4">
             {/* تابات نوع الرحلة - "رحلة واحدة" هي الوحيدة المدعومة فعليًا
-            في النظام حاليًا (رحلات مجدولة بمقاعد ثابتة)، فالتابين
-            التانيين معطّلين بوضوح "قريبًا" بدل ما يوهموا المستخدم إنهم شغالين */}
-            <div className="mb-4 flex flex-wrap gap-2">
+            في النظام حاليًا، فالتابين التانيين معطّلين بوضوح "قريبًا" */}
+            <div className="mb-3 flex flex-wrap gap-2">
               {(['رحلة واحدة', 'رحلة ذهاب وعودة', 'رحلات متعددة'] as const).map((tab) => {
                 const isComingSoon = tab !== 'رحلة واحدة'
                 return (
@@ -184,78 +180,74 @@ export default function LandingPage() {
                     key={tab}
                     onClick={() => !isComingSoon && setTripTab(tab)}
                     disabled={isComingSoon}
-                    className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                    className={`flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold transition ${
                       tripTab === tab
-                        ? 'bg-gradient-to-l from-primary to-secondary text-white shadow-lg shadow-primary/30'
+                        ? 'bg-gradient-to-l from-primary to-secondary text-white'
                         : isComingSoon
-                          ? 'cursor-not-allowed bg-bg text-text-secondary/50'
-                          : 'bg-bg text-text-secondary'
+                          ? 'cursor-not-allowed text-text-secondary/40'
+                          : 'text-text-secondary'
                     }`}
                   >
                     {tab}
-                    {isComingSoon && <span className="text-[10px]">(قريبًا)</span>}
+                    {isComingSoon && <span className="text-[9px]">(قريبًا)</span>}
                   </button>
                 )
               })}
             </div>
 
-            <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_auto_1fr_1fr_1fr]">
-              <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-                  <MapPin size={14} className="text-primary" /> من
-                </label>
-                <div className="rounded-xl border-2 border-border bg-bg px-4 py-3 text-text-secondary transition hover:border-primary/50 focus-within:border-primary">
-                  اختار مكان الانطلاق
-                </div>
+            <div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+              <div className="order-last lg:order-first lg:w-44">
+                <Button onClick={() => navigate('/login')} icon={<Search size={16} />} className="!py-3">
+                  ابحث عن رحلة
+                </Button>
               </div>
 
-              <button
-                onClick={swapLocations}
-                className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border-2 border-border bg-bg text-primary transition hover:border-primary lg:mb-0.5"
-                aria-label="بدّل بين نقطة الانطلاق والوجهة"
-              >
-                <ArrowLeftRight size={18} />
-              </button>
-
-              <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-                  <MapPin size={14} className="text-primary" /> إلى
-                </label>
-                <div className="rounded-xl border-2 border-border bg-bg px-4 py-3 text-text-secondary transition hover:border-primary/50 focus-within:border-primary">
-                  اختار الوجهة
+              <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_auto_1fr_1fr_1fr]">
+                <div className="rounded-xl border-2 border-border bg-bg px-3 py-2.5 transition hover:border-primary/50">
+                  <p className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
+                    <MapPin size={11} className="text-primary" /> من
+                  </p>
+                  <p className="text-sm text-text-secondary">اختار مكان الانطلاق</p>
                 </div>
-              </div>
-              <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-                  <Calendar size={14} className="text-primary" /> تاريخ الرحلة
-                </label>
-                <div className="rounded-xl border-2 border-border bg-bg px-4 py-3 text-text-secondary transition hover:border-primary/50">اختار التاريخ</div>
-              </div>
-              <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-                  <Users size={14} className="text-primary" /> عدد الركاب
-                </label>
-                <div className="flex items-center justify-between rounded-xl border-2 border-border bg-bg px-3 py-2.5">
+
+                <button
+                  onClick={swapLocations}
+                  className="mx-auto hidden h-9 w-9 items-center justify-center rounded-full border-2 border-border bg-bg text-primary transition hover:border-primary lg:flex"
+                  aria-label="بدّل بين نقطة الانطلاق والوجهة"
+                >
+                  <ArrowLeftRight size={16} />
+                </button>
+
+                <div className="rounded-xl border-2 border-border bg-bg px-3 py-2.5 transition hover:border-primary/50">
+                  <p className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
+                    <MapPin size={11} className="text-primary" /> إلى
+                  </p>
+                  <p className="text-sm text-text-secondary">اختار الوجهة</p>
+                </div>
+
+                <div className="rounded-xl border-2 border-border bg-bg px-3 py-2.5 transition hover:border-primary/50">
+                  <p className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
+                    <Calendar size={11} className="text-primary" /> تاريخ الرحلة
+                  </p>
+                  <p className="text-sm text-text-secondary">اختار التاريخ</p>
+                </div>
+
+                <div className="flex items-center justify-between rounded-xl border-2 border-border bg-bg px-2 py-2">
                   <button
                     onClick={() => setSeats((s) => Math.max(1, s - 1))}
-                    className="flex h-7 w-7 items-center justify-center rounded-full border border-border text-text-secondary"
+                    className="flex h-6 w-6 items-center justify-center rounded-full border border-border text-text-secondary"
                   >
-                    <Minus size={14} />
+                    <Minus size={12} />
                   </button>
-                  <span className="font-semibold">{seats} راكب</span>
+                  <span className="text-sm font-semibold">{seats} راكب</span>
                   <button
                     onClick={() => setSeats((s) => Math.min(8, s + 1))}
-                    className="flex h-7 w-7 items-center justify-center rounded-full border border-border text-text-secondary"
+                    className="flex h-6 w-6 items-center justify-center rounded-full border border-border text-text-secondary"
                   >
-                    <Plus size={14} />
+                    <Plus size={12} />
                   </button>
                 </div>
               </div>
-            </div>
-            <div className="mt-4">
-              <Button onClick={() => navigate('/login')} icon={<Search size={18} />}>
-                ابحث عن رحلة
-              </Button>
             </div>
           </div>
         </div>
