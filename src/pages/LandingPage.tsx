@@ -152,16 +152,39 @@ export default function LandingPage() {
               احجز رحلتك بين جميع المحافظات بأمان وسهولة وبأفضل الأسعار
             </p>
 
-            <div className="flex flex-wrap gap-4 text-sm text-white/90">
+            <div className="flex flex-wrap items-center gap-3 text-sm text-white/90">
               <span className="flex items-center gap-1.5">
                 <Tag size={16} className="text-secondary" /> أسعار عادلة
               </span>
+              <span className="text-white/20">|</span>
               <span className="flex items-center gap-1.5">
                 <Zap size={16} className="text-secondary" /> سريع
               </span>
+              <span className="text-white/20">|</span>
               <span className="flex items-center gap-1.5">
                 <ShieldCheck size={16} className="text-secondary" /> آمن
               </span>
+            </div>
+
+            {/* حمل التطبيق - جوه عمود النص فوق شريط البحث مباشرة زي المرجع بالظبط */}
+            <div className="mt-6 rounded-2xl border border-border bg-tertiary/60 p-3">
+              <p className="mb-2 text-xs font-semibold text-white/70">حمل التطبيق الآن</p>
+              <div className="flex flex-wrap gap-2">
+                <div className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 opacity-60">
+                  <span>▶</span>
+                  <div className="text-right leading-tight">
+                    <p className="text-[8px] text-white/50">قريبًا على</p>
+                    <p className="text-[11px] font-semibold">Google Play</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 opacity-60">
+                  <span></span>
+                  <div className="text-right leading-tight">
+                    <p className="text-[8px] text-white/50">قريبًا على</p>
+                    <p className="text-[11px] font-semibold">App Store</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -293,50 +316,6 @@ export default function LandingPage() {
                 <p className="text-xs text-text-secondary">{v.desc}</p>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ---- App promo: التطبيق لسه مش منشور، فالأزرار بعلامة "قريبًا"
-      مش روابط وهمية بتودّي لمكان مفيش - PWA حقيقي شغال دلوقتي بديل ---- */}
-      <section className="relative overflow-hidden border-t border-white/10 bg-gradient-to-br from-tertiary via-primary/20 to-secondary/20 py-16">
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 md:grid-cols-2">
-          <div className="mx-auto w-48 rounded-[2.5rem] border-4 border-white/10 bg-tertiary p-2 shadow-2xl sm:w-56">
-            <div className="flex aspect-[9/19] flex-col items-center justify-center gap-3 rounded-[2rem] bg-gradient-to-br from-primary to-secondary p-4 text-center">
-              <img src="/Mosafer/logo.jpeg" alt="مسافر" className="h-14 w-14 rounded-2xl object-cover" />
-              <p className="text-sm font-bold">MOSAFER</p>
-              <div className="mt-4 w-full rounded-lg bg-white/15 py-2 text-xs">تسجيل الدخول</div>
-              <div className="w-full rounded-lg bg-white/90 py-2 text-xs text-primary">دخول</div>
-            </div>
-          </div>
-
-          <div>
-            <h2 className="mb-3 text-2xl font-bold sm:text-3xl">حمّل تطبيق مسافر الآن</h2>
-            <p className="mb-6 text-white/70">رحلاتك بين إيديك في أي وقت وأي مكان</p>
-
-            <div className="mb-6 flex flex-wrap gap-3">
-              <div className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 opacity-60">
-                <span className="text-xl">▶</span>
-                <div className="text-right">
-                  <p className="text-[10px] text-white/60">قريبًا على</p>
-                  <p className="text-sm font-semibold">Google Play</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/5 px-4 py-2.5 opacity-60">
-                <span className="text-xl"></span>
-                <div className="text-right">
-                  <p className="text-[10px] text-white/60">قريبًا على</p>
-                  <p className="text-sm font-semibold">App Store</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-primary/30 bg-primary-light p-4">
-              <p className="mb-1 text-sm font-semibold text-white">✨ دلوقتي تقدر تستخدم مسافر زي تطبيق</p>
-              <p className="text-xs text-white/60">
-                من متصفحك، دوس على "إضافة إلى الشاشة الرئيسية" وهتلاقي أيقونة مسافر على موبايلك على طول
-              </p>
-            </div>
           </div>
         </div>
       </section>
