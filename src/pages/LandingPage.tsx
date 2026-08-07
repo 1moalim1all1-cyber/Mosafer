@@ -138,7 +138,7 @@ export default function LandingPage() {
           className="absolute inset-0 h-full w-full object-cover"
           style={{ objectPosition: 'center 30%' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-tertiary via-tertiary/85 to-tertiary/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-tertiary/70 via-tertiary/20 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-tertiary via-transparent to-transparent" />
 
         <div className="relative mx-auto flex min-h-[420px] max-w-6xl flex-col justify-center px-4 pt-14 sm:min-h-[480px] sm:pt-20">
