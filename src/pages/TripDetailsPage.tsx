@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import confetti from 'canvas-confetti'
 import { collection, query, where, limit, getDocs, Timestamp } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { subscribeToTrip } from '../lib/trips'
@@ -142,23 +143,7 @@ export default function TripDetailsPage() {
   const total = Math.max(0, trip.pricePerSeat * seats - couponDiscount)
 
   if (success) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
-        <div className="text-5xl">🎉</div>
-        <h1 className="text-2xl font-bold text-text-primary">تم الحجز بنجاح</h1>
-        <p className="text-text-secondary">حجزك بانتظار موافقة السائق، هتوصلك إشعار فور ما يتم التأكيد</p>
-        <div className="flex gap-3">
-          <Button variant="secondary" onClick={() => navigate('/')} fullWidth={false}>
-            الرئيسية
-          </Button>
-          {confirmedBookingId && (
-            <Button onClick={() => navigate(`/track/${confirmedBookingId}`)} fullWidth={false}>
-              تتبّع السائق 🚗
-            </Button>
-          )}
-        </div>
-      </div>
-    )
+    return <BookingSuccessView confirmedBookingId={confirmedBookingId} onNavigate={navigate} />
   }
 
   return (
@@ -169,6 +154,25 @@ export default function TripDetailsPage() {
         </button>
         <h1 className="text-lg font-bold text-text-primary">تفاصيل الرحلة</h1>
         <div className="mr-auto flex items-center gap-3">
+          <button
+            onClick={async () => {
+              const url = window.location.href
+              const shareText = `شوف الرحلة دي على مسافر: ${trip?.originCity} → ${trip?.destinationCity}`
+              if (navigator.share) {
+                try {
+                  await navigator.share({ title: 'مسافر', text: shareText, url })
+                } catch {
+                  // المستخدم لغى المشاركة، مفيش داعي نعمل حاجة
+                }
+              } else {
+                window.open(`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + url)}`, '_blank')
+              }
+            }}
+            className="text-xl"
+            aria-label="شارك الرحلة"
+          >
+            📤
+          </button>
           {trip && user && (
             <button onClick={() => toggleFavorite(user.uid, trip.id, isFavorite)} className="text-xl">
               {isFavorite ? '❤️' : '🤍'}
@@ -332,6 +336,46 @@ export default function TripDetailsPage() {
           }}
         />
       )}
+    </div>
+  )
+}
+
+/**
+ * شاشة نجاح الحجز باحتفال Confetti حقيقي (مش مجرد إيموجي ثابت) - أول
+ * انطباع بعد أي حجز لازم يحس المستخدم إنه حصل حاجة كويسة فعلاً.
+ */
+function BookingSuccessView({
+  confirmedBookingId,
+  onNavigate,
+}: {
+  confirmedBookingId: string | null
+  onNavigate: (path: string) => void
+}) {
+  useEffect(() => {
+    const colors = ['#1E40AF', '#1D4ED8', '#22C55E', '#F59E0B']
+    confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 }, colors })
+    const timer = setTimeout(() => {
+      confetti({ particleCount: 60, spread: 70, origin: { y: 0.5, x: 0.2 }, colors })
+      confetti({ particleCount: 60, spread: 70, origin: { y: 0.5, x: 0.8 }, colors })
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [])
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
+      <div className="text-6xl">🎉</div>
+      <h1 className="text-2xl font-bold text-text-primary">تم الحجز بنجاح</h1>
+      <p className="text-text-secondary">حجزك بانتظار موافقة السائق، هتوصلك إشعار فور ما يتم التأكيد</p>
+      <div className="flex gap-3">
+        <Button variant="secondary" onClick={() => onNavigate('/')} fullWidth={false}>
+          الرئيسية
+        </Button>
+        {confirmedBookingId && (
+          <Button onClick={() => onNavigate(`/track/${confirmedBookingId}`)} fullWidth={false}>
+            تتبّع السائق 🚗
+          </Button>
+        )}
+      </div>
     </div>
   )
 }

@@ -128,6 +128,10 @@ export async function markTripCompleted(tripId: string) {
 
       tx.update(tripRef, { status: 'completed' })
 
+      // زيادة العداد الاجتماعي العام - بيظهر في الصفحة الرئيسية لكل
+      // المستخدمين ("أكتر من X رحلة اتعملت")، بيبني ثقة فورية
+      tx.set(doc(db, 'stats', 'public'), { completedTripsCount: increment(1) }, { merge: true })
+
       const driverRef = doc(db, 'users', uid)
       tx.update(driverRef, { totalTrips: increment(1) })
 

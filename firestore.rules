@@ -20,6 +20,11 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.gender;
     }
 
+    // حساب موقوف أو محظور من الإدارة مايقدرش يحجز أو ينشر رحلات جديدة
+    function isActiveAccount() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active';
+    }
+
     // ---- Users ----
     match /users/{userId} {
       allow read: if isSignedIn();
@@ -48,6 +53,7 @@ service cloud.firestore {
 
       allow create: if isSignedIn() &&
         request.resource.data.driverId == request.auth.uid &&
+        isActiveAccount() &&
         get(/databases/$(database)/documents/drivers/$(request.auth.uid)).data.verificationStatus == 'approved';
 
       allow update: if isSignedIn();
@@ -60,7 +66,7 @@ service cloud.firestore {
         (resource.data.passengerId == request.auth.uid ||
          resource.data.driverId == request.auth.uid ||
          isAdmin());
-      allow create: if isSignedIn() && request.resource.data.passengerId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.passengerId == request.auth.uid && isActiveAccount();
       allow update: if isSignedIn() &&
         (resource.data.passengerId == request.auth.uid ||
          resource.data.driverId == request.auth.uid ||

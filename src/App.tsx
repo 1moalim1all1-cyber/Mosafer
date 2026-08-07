@@ -1,35 +1,68 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ProtectedRoute, GuestOnlyRoute } from './routes/guards'
-import LoginPage from './pages/LoginPage'
-import RegisterPage from './pages/RegisterPage'
-import RoleSelectionPage from './pages/RoleSelectionPage'
-import HomePage from './pages/HomePage'
-import SearchResultsPage from './pages/SearchResultsPage'
-import TripDetailsPage from './pages/TripDetailsPage'
-import DriverDocumentsPage from './pages/DriverDocumentsPage'
-import DriverPendingApprovalPage from './pages/DriverPendingApprovalPage'
-import DriverDashboardPage from './pages/DriverDashboardPage'
-import CreateTripPage from './pages/CreateTripPage'
-import DriverTripBookingsPage from './pages/DriverTripBookingsPage'
-import WalletPage from './pages/WalletPage'
-import MyBookingsPage from './pages/MyBookingsPage'
-import ProfilePage from './pages/ProfilePage'
-import AdminDashboardPage from './pages/AdminDashboardPage'
-import AdminDriverQueuePage from './pages/AdminDriverQueuePage'
-import AdminWalletRequestsPage from './pages/AdminWalletRequestsPage'
-import AdminGovernoratesPage from './pages/AdminGovernoratesPage'
-import AdminCouponsPage from './pages/AdminCouponsPage'
-import AdminSettingsPage from './pages/AdminSettingsPage'
-import NotificationsPage from './pages/NotificationsPage'
-import ChatPage from './pages/ChatPage'
-import FavoritesPage from './pages/FavoritesPage'
-import SupportPage from './pages/SupportPage'
-import AboutHelpPage from './pages/AboutHelpPage'
-import FaqPage from './pages/FaqPage'
-import TrackTripPage from './pages/TrackTripPage'
-import StaticPageView from './pages/StaticPageView'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { AdminRoute, DriverRoute } from './routes/roleGuards'
+const LoginPage = lazy(() => import('./pages/LoginPage'))
+const RegisterPage = lazy(() => import('./pages/RegisterPage'))
+const RoleSelectionPage = lazy(() => import('./pages/RoleSelectionPage'))
+const HomePage = lazy(() => import('./pages/HomePage'))
+const SearchResultsPage = lazy(() => import('./pages/SearchResultsPage'))
+const TripDetailsPage = lazy(() => import('./pages/TripDetailsPage'))
+const DriverDocumentsPage = lazy(() => import('./pages/DriverDocumentsPage'))
+const DriverPendingApprovalPage = lazy(() => import('./pages/DriverPendingApprovalPage'))
+const DriverDashboardPage = lazy(() => import('./pages/DriverDashboardPage'))
+const CreateTripPage = lazy(() => import('./pages/CreateTripPage'))
+const DriverTripBookingsPage = lazy(() => import('./pages/DriverTripBookingsPage'))
+const WalletPage = lazy(() => import('./pages/WalletPage'))
+const MyBookingsPage = lazy(() => import('./pages/MyBookingsPage'))
+const ProfilePage = lazy(() => import('./pages/ProfilePage'))
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'))
+const AdminDriverQueuePage = lazy(() => import('./pages/AdminDriverQueuePage'))
+const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'))
+const AdminWalletRequestsPage = lazy(() => import('./pages/AdminWalletRequestsPage'))
+const AdminGovernoratesPage = lazy(() => import('./pages/AdminGovernoratesPage'))
+const AdminCouponsPage = lazy(() => import('./pages/AdminCouponsPage'))
+const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'))
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'))
+const ChatPage = lazy(() => import('./pages/ChatPage'))
+const FavoritesPage = lazy(() => import('./pages/FavoritesPage'))
+const SupportPage = lazy(() => import('./pages/SupportPage'))
+const AboutHelpPage = lazy(() => import('./pages/AboutHelpPage'))
+const FaqPage = lazy(() => import('./pages/FaqPage'))
+const TrackTripPage = lazy(() => import('./pages/TrackTripPage'))
+const StaticPageView = lazy(() => import('./pages/StaticPageView'))
+const HowItWorksPage = lazy(() => import('./pages/HowItWorksPage'))
+
 import { WhatsAppButton } from './components/WhatsAppButton'
 import { PageTransition } from './components/PageTransition'
 
@@ -39,6 +72,13 @@ export default function App() {
       <BrowserRouter basename="/Mosafer">
         <WhatsAppButton />
         <PageTransition>
+        <Suspense
+          fallback={
+            <div className="flex min-h-screen items-center justify-center bg-bg">
+              <span className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            </div>
+          }
+        >
         <Routes>
           <Route
             path="/login"
@@ -173,6 +213,16 @@ export default function App() {
             }
           />
           <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <AdminUsersPage />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/admin/drivers"
             element={
               <ProtectedRoute>
@@ -265,7 +315,9 @@ export default function App() {
             }
           />
           <Route path="/page/:pageId" element={<StaticPageView />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
           </Routes>
+        </Suspense>
         </PageTransition>
       </BrowserRouter>
     </AuthProvider>

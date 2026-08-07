@@ -48,8 +48,8 @@ export function TripRouteMap({ trip }: { trip: Trip }) {
       <div className="overflow-hidden rounded-2xl border border-border" style={{ height: 220 }}>
         <MapContainer center={driverPoint ?? center} zoom={hasLiveDriver ? 12 : 7} style={{ height: '100%', width: '100%' }}>
           <TileLayer
-            url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           />
           {(trip.originLat !== 0 || trip.originLng !== 0) && (
             <>

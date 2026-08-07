@@ -126,3 +126,10 @@ export async function stopTripLiveLocation(tripId: string) {
     driverLiveUpdatedAt: null,
   })
 }
+
+/** العداد الاجتماعي العام - إجمالي الرحلات المكتملة على المنصة كلها */
+export function subscribeCompletedTripsCount(callback: (count: number) => void) {
+  return onSnapshot(doc(db, 'stats', 'public'), (snap) => {
+    callback(snap.exists() ? (snap.data().completedTripsCount ?? 0) : 0)
+  })
+}

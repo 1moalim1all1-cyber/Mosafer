@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 
 const ITEMS = [
+  { path: '/how-it-works', icon: '🧭', label: 'إزاي يشتغل مسافر' },
   { path: '/page/about', icon: '📖', label: 'من نحن' },
   { path: '/faq', icon: '❓', label: 'الأسئلة الشائعة' },
   { path: '/page/contact', icon: '✉️', label: 'اتصل بنا' },

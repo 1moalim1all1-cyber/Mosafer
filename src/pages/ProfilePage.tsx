@@ -19,6 +19,20 @@ export default function ProfilePage() {
     alert('اتنسخ الكود')
   }
 
+  async function shareCode() {
+    if (!user?.referralCode) return
+    const text = `سجّل في تطبيق مسافر بكود الدعوة بتاعي "${user.referralCode}" وخد رصيد ترحيبي في محفظتك!`
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'مسافر', text })
+      } catch {
+        // المستخدم لغى المشاركة
+      }
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+    }
+  }
+
   return (
     <div className="min-h-screen bg-bg pb-24">
       <header className="border-b border-border bg-white px-4 py-4">
@@ -39,8 +53,11 @@ export default function ProfilePage() {
             <p className="mb-2 text-sm text-white/70">ادعُ صديقك واكسبوا مكافأة سوا</p>
             <div className="flex items-center justify-center gap-2">
               <span className="text-2xl font-bold tracking-widest">{user.referralCode}</span>
-              <button onClick={copyCode} className="text-lg">
+              <button onClick={copyCode} className="text-lg" aria-label="نسخ الكود">
                 📋
+              </button>
+              <button onClick={shareCode} className="text-lg" aria-label="مشاركة الكود">
+                📤
               </button>
             </div>
           </div>

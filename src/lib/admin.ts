@@ -4,6 +4,7 @@ import {
   doc,
   query,
   where,
+  orderBy,
   onSnapshot,
   getCountFromServer,
   addDoc,
@@ -225,4 +226,42 @@ export async function fetchAppSettings(): Promise<AppSettings> {
 
 export async function updateAppSettings(settings: AppSettings) {
   await setDoc(doc(db, 'appSettings', 'general'), settings, { merge: true })
+}
+
+// ---- إدارة المستخدمين ----
+export interface ManagedUser {
+  uid: string
+  fullName: string
+  phone: string
+  role: 'passenger' | 'driver' | 'admin'
+  status: 'active' | 'suspended' | 'banned'
+  totalTrips: number
+  avgRating: number
+  createdAt: Date
+}
+
+export function subscribeAllUsers(callback: (users: ManagedUser[]) => void) {
+  const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'))
+  return onSnapshot(q, (snap) => {
+    callback(
+      snap.docs.map((d) => {
+        const data = d.data()
+        const created = data.createdAt as { toDate?: () => Date }
+        return {
+          uid: d.id,
+          fullName: data.fullName ?? '',
+          phone: data.phone ?? '',
+          role: data.role ?? 'passenger',
+          status: data.status ?? 'active',
+          totalTrips: data.totalTrips ?? 0,
+          avgRating: data.avgRating ?? 0,
+          createdAt: created?.toDate ? created.toDate() : new Date(),
+        }
+      }),
+    )
+  })
+}
+
+export async function setUserStatus(uid: string, status: 'active' | 'suspended' | 'banned') {
+  await updateDoc(doc(db, 'users', uid), { status })
 }
