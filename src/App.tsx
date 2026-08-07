@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { lazy, Suspense, useEffect } from 'react'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ProtectedRoute, GuestOnlyRoute } from './routes/guards'
 
@@ -34,6 +34,7 @@ import { ProtectedRoute, GuestOnlyRoute } from './routes/guards'
 import { AdminRoute, DriverRoute } from './routes/roleGuards'
 import { useAuth } from './contexts/AuthContext'
 import { SplashScreen } from './components/SplashScreen'
+import { ChunkErrorBoundary } from './components/ChunkErrorBoundary'
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const RoleSelectionPage = lazy(() => import('./pages/RoleSelectionPage'))
@@ -84,12 +85,20 @@ export default function App() {
 function AppShell() {
   const { loading } = useAuth()
 
+  // لو التطبيق شغّال تمام (مفيش خطأ)، بنصفّي علامة "حصل Refresh قبل
+  // كده" عشان لو تحديث تاني حصل بعدين ولسه نفس التاب مفتوح، آلية
+  // الإصلاح التلقائي تشتغل تاني من غير ما تتعطل
+  useEffect(() => {
+    sessionStorage.removeItem('mosafer_chunk_reload')
+  }, [])
+
   if (loading) return <SplashScreen />
 
   return (
-    <BrowserRouter basename="/Mosafer">
+    <HashRouter>
         <WhatsAppButton />
         <PageTransition>
+        <ChunkErrorBoundary>
         <Suspense
           fallback={
             <div className="flex min-h-screen items-center justify-center bg-bg">
@@ -336,7 +345,8 @@ function AppShell() {
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           </Routes>
         </Suspense>
+        </ChunkErrorBoundary>
         </PageTransition>
-      </BrowserRouter>
+      </HashRouter>
   )
 }
