@@ -42,11 +42,11 @@ const VEHICLE_TYPES = [
   { icon: UserRound, title: 'سائقة للسيدات', desc: 'أمان وخصوصية تامة' },
 ]
 
-const STATS = [
-  { value: '+500', label: 'سائق معتمد', icon: UserRound },
-  { value: '+50K', label: 'رحلة مكتملة', icon: CarFront },
-  { value: '+100K', label: 'مستخدم سعيد', icon: Users2 },
-  { value: '+27', label: 'محافظة', icon: MapPinned },
+const STAT_ICONS = [
+  { label: 'سائق معتمد', icon: UserRound, key: 'drivers' as const },
+  { label: 'رحلة مكتملة', icon: CarFront, key: 'trips' as const },
+  { label: 'مستخدم سعيد', icon: Users2, key: 'users' as const },
+  { label: 'محافظة', icon: MapPinned, key: 'cities' as const },
 ]
 
 const NAV_LINKS = [
@@ -69,14 +69,20 @@ export default function LandingPage() {
     // لما نضيف حقول اختيار فعلية بدل placeholders
   }
   const [heroImageUrl, setHeroImageUrl] = useState('/Mosafer/hero-clean.png')
+  const [heroTitle, setHeroTitle] = useState('رحلتك...\nتبدأ من هنا')
+  const [heroSubtitle, setHeroSubtitle] = useState('احجز رحلتك بين جميع المحافظات بأمان وسهولة وبأفضل الأسعار')
+  const [stats, setStats] = useState({ drivers: '+500', trips: '+50K', users: '+100K', cities: '+27' })
 
   useEffect(() => {
     fetchAppSettings()
       .then((s) => {
         if (s.heroImageUrl) setHeroImageUrl(s.heroImageUrl)
+        if (s.heroTitle) setHeroTitle(s.heroTitle)
+        if (s.heroSubtitle) setHeroSubtitle(s.heroSubtitle)
+        setStats({ drivers: s.statDrivers, trips: s.statTrips, users: s.statUsers, cities: s.statCities })
       })
       .catch(() => {
-        // لو فشل، بتفضل الصورة الافتراضية زي ما هي
+        // لو فشل، بتفضل القيم الافتراضية زي ما هي
       })
   }, [])
 
@@ -141,16 +147,10 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-tertiary/70 via-tertiary/20 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-tertiary via-transparent to-transparent" />
 
-        <div className="relative mx-auto flex min-h-[420px] max-w-6xl flex-col justify-center px-4 pt-14 sm:min-h-[480px] sm:pt-20">
+        <div className="relative flex min-h-[420px] flex-col justify-center px-5 pt-14 sm:min-h-[480px] sm:px-10 sm:pt-20 lg:px-16">
           <div className="max-w-xl mr-auto">
-            <h1 className="mb-4 text-4xl font-bold leading-tight sm:text-5xl">
-              رحلتك...
-              <br />
-              تبدأ من هنا
-            </h1>
-            <p className="mb-6 text-lg text-white/85">
-              احجز رحلتك بين جميع المحافظات بأمان وسهولة وبأفضل الأسعار
-            </p>
+            <h1 className="mb-4 whitespace-pre-line text-4xl font-bold leading-tight sm:text-5xl">{heroTitle}</h1>
+            <p className="mb-6 text-lg text-white/85">{heroSubtitle}</p>
 
             <div className="flex flex-wrap items-center gap-3 text-sm text-white/90">
               <span className="flex items-center gap-1.5">
@@ -166,32 +166,13 @@ export default function LandingPage() {
               </span>
             </div>
 
-            {/* حمل التطبيق - جوه عمود النص فوق شريط البحث مباشرة زي المرجع بالظبط */}
-            <div className="mt-6 rounded-2xl border border-border bg-tertiary/60 p-3">
-              <p className="mb-2 text-xs font-semibold text-white/70">حمل التطبيق الآن</p>
-              <div className="flex flex-wrap gap-2">
-                <div className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 opacity-60">
-                  <span>▶</span>
-                  <div className="text-right leading-tight">
-                    <p className="text-[8px] text-white/50">قريبًا على</p>
-                    <p className="text-[11px] font-semibold">Google Play</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 opacity-60">
-                  <span></span>
-                  <div className="text-right leading-tight">
-                    <p className="text-[8px] text-white/50">قريبًا على</p>
-                    <p className="text-[11px] font-semibold">App Store</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* حمل التطبيق - اتشال بناءً على طلب صاحب المشروع */}
           </div>
         </div>
 
         {/* ---- شريط البحث - رفيع ومدمج، مسحوب لأعلى شوية عشان يبان
         ملزّق تحت حافة الصورة مباشرة زي المرجع، مش صندوق كبير فاضي ---- */}
-        <div className="relative z-10 mx-auto -mt-8 max-w-6xl px-4 pb-10 sm:-mt-10">
+        <div className="relative z-10 mx-auto mt-4 max-w-6xl px-4 pb-10 sm:mt-6">
           <div className="rounded-2xl bg-card p-3 text-text-primary shadow-2xl shadow-primary/20 ring-1 ring-primary/25 sm:p-4">
             {/* تابات نوع الرحلة - "رحلة واحدة" هي الوحيدة المدعومة فعليًا
             في النظام حاليًا، فالتابين التانيين معطّلين بوضوح "قريبًا" */}
@@ -326,10 +307,10 @@ export default function LandingPage() {
       {/* ---- Stats ---- */}
       <section className="border-t border-white/10 bg-card py-12">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 px-4 sm:grid-cols-4">
-          {STATS.map((s) => (
+          {STAT_ICONS.map((s) => (
             <div key={s.label} className="flex flex-col items-center rounded-2xl border border-border bg-bg p-5 text-center">
               <s.icon size={22} className="mb-2 text-primary" />
-              <p className="text-2xl font-bold text-text-primary">{s.value}</p>
+              <p className="text-2xl font-bold text-text-primary">{stats[s.key]}</p>
               <p className="text-sm text-text-secondary">{s.label}</p>
             </div>
           ))}

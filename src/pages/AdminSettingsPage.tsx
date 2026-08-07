@@ -134,6 +134,52 @@ export default function AdminSettingsPage() {
           />
         </div>
 
+        <h2 className="mb-3 font-bold text-text-primary">نص صفحة الهبوط الرئيسية</h2>
+        <div className="mb-6 flex flex-col gap-3">
+          <div>
+            <label className="mb-1.5 block text-sm font-semibold text-text-primary">العنوان الرئيسي</label>
+            <textarea
+              value={settings.heroTitle}
+              onChange={(e) => setSettings({ ...settings, heroTitle: e.target.value })}
+              rows={2}
+              className="w-full rounded-xl border-2 border-border bg-white px-4 py-3 text-base focus:border-primary focus:outline-none"
+            />
+            <p className="mt-1 text-xs text-text-secondary">سطر جديد (Enter) بيبدأ سطر تاني في العرض</p>
+          </div>
+          <Input
+            label="الوصف تحت العنوان"
+            value={settings.heroSubtitle}
+            onChange={(e) => setSettings({ ...settings, heroSubtitle: e.target.value })}
+          />
+        </div>
+
+        <h2 className="mb-3 font-bold text-text-primary">الإحصائيات الظاهرة للزوّار</h2>
+        <p className="mb-3 text-sm text-text-secondary">
+          حدّثها بأرقامك الحقيقية أول بأول - الزوّار بيشوفوها كدليل ثقة
+        </p>
+        <div className="mb-6 grid grid-cols-2 gap-3">
+          <Input
+            label="عدد السائقين"
+            value={settings.statDrivers}
+            onChange={(e) => setSettings({ ...settings, statDrivers: e.target.value })}
+          />
+          <Input
+            label="عدد الرحلات المكتملة"
+            value={settings.statTrips}
+            onChange={(e) => setSettings({ ...settings, statTrips: e.target.value })}
+          />
+          <Input
+            label="عدد المستخدمين"
+            value={settings.statUsers}
+            onChange={(e) => setSettings({ ...settings, statUsers: e.target.value })}
+          />
+          <Input
+            label="عدد المحافظات"
+            value={settings.statCities}
+            onChange={(e) => setSettings({ ...settings, statCities: e.target.value })}
+          />
+        </div>
+
         <h2 className="mb-3 font-bold text-text-primary">صورة صفحة الهبوط الرئيسية</h2>
         <p className="mb-3 text-sm text-text-secondary">
           الصورة اللي بتظهر خلفية في أول صفحة يشوفها أي زائر قبل ما يسجّل دخول

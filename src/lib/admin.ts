@@ -208,6 +208,12 @@ export interface AppSettings {
   depositMethodName: string
   depositPhoneNumber: string
   heroImageUrl: string
+  heroTitle: string
+  heroSubtitle: string
+  statDrivers: string
+  statTrips: string
+  statUsers: string
+  statCities: string
 }
 
 export async function fetchAppSettings(): Promise<AppSettings> {
@@ -223,6 +229,12 @@ export async function fetchAppSettings(): Promise<AppSettings> {
     depositMethodName: data.depositMethodName ?? 'فودافون كاش',
     depositPhoneNumber: data.depositPhoneNumber ?? '',
     heroImageUrl: data.heroImageUrl ?? '',
+    heroTitle: data.heroTitle ?? 'رحلتك...\nتبدأ من هنا',
+    heroSubtitle: data.heroSubtitle ?? 'احجز رحلتك بين جميع المحافظات بأمان وسهولة وبأفضل الأسعار',
+    statDrivers: data.statDrivers ?? '+500',
+    statTrips: data.statTrips ?? '+50K',
+    statUsers: data.statUsers ?? '+100K',
+    statCities: data.statCities ?? '+27',
   }
 }
 
