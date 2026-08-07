@@ -32,6 +32,7 @@
 html, body {
   margin: 0;
   padding: 0;
+  scroll-behavior: smooth;
   background-color: var(--color-bg);
   color: var(--color-text-primary);
   font-family: var(--font-plex);

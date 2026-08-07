@@ -50,7 +50,14 @@ const STATS = [
   { value: '+27', label: 'محافظة', icon: MapPinned },
 ]
 
-const NAV_LINKS = ['الرئيسية', 'عن مسافر', 'الخدمات', 'رحلات مشتركة', 'الأسعار', 'تواصل معنا']
+const NAV_LINKS = [
+  { label: 'الرئيسية', href: '#home' },
+  { label: 'عن مسافر', href: '/page/about' },
+  { label: 'الخدمات', href: '#services' },
+  { label: 'رحلات مشتركة', href: '#features' },
+  { label: 'الأسعار', href: '#services' },
+  { label: 'تواصل معنا', href: '/page/contact' },
+]
 
 export default function LandingPage() {
   const navigate = useNavigate()
@@ -62,7 +69,7 @@ export default function LandingPage() {
     // ما يقدر يبحث فعليًا) - الزرار هنا بصري بس دلوقتي، هيشتغل حقيقي
     // لما نضيف حقول اختيار فعلية بدل placeholders
   }
-  const [heroImageUrl, setHeroImageUrl] = useState('/Mosafer/hero-2.jpeg')
+  const [heroImageUrl, setHeroImageUrl] = useState('/Mosafer/hero-clean.png')
 
   useEffect(() => {
     fetchAppSettings()
@@ -88,19 +95,22 @@ export default function LandingPage() {
           </div>
 
           <nav className="hidden items-center gap-6 text-sm text-white/80 lg:flex">
-            {NAV_LINKS.map((link, i) => (
-              <a
-                key={link}
-                href="#"
-                className={
-                  i === 0
-                    ? 'relative pb-1 font-semibold text-white after:absolute after:bottom-0 after:right-0 after:h-0.5 after:w-full after:rounded-full after:bg-gradient-to-l after:from-primary after:to-secondary'
-                    : 'hover:text-white'
-                }
-              >
-                {link}
-              </a>
-            ))}
+            {NAV_LINKS.map((link, i) => {
+              const isRoute = link.href.startsWith('/')
+              const className =
+                i === 0
+                  ? 'relative pb-1 font-semibold text-white after:absolute after:bottom-0 after:right-0 after:h-0.5 after:w-full after:rounded-full after:bg-gradient-to-l after:from-primary after:to-secondary'
+                  : 'hover:text-white transition-colors'
+              return isRoute ? (
+                <button key={link.label} onClick={() => navigate(link.href)} className={className}>
+                  {link.label}
+                </button>
+              ) : (
+                <a key={link.label} href={link.href} className={className}>
+                  {link.label}
+                </a>
+              )
+            })}
           </nav>
 
           <div className="flex items-center gap-2">
@@ -121,16 +131,28 @@ export default function LandingPage() {
       </header>
 
       {/* ---- Hero ---- */}
-      <section className="relative overflow-hidden bg-tertiary">
-        <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 pb-10 pt-14 sm:pt-20 lg:grid-cols-2">
-          {/* ---- عمود النص - على خلفية صلبة، بعيد تمامًا عن أي تراكب مع الصورة ---- */}
-          <div className="relative z-10">
+      <section id="home" className="relative scroll-mt-20 overflow-hidden bg-tertiary">
+        {/* الصورة النضيفة الجديدة - ممتدة كخلفية كاملة، مأمونة دلوقتي
+        لأنها مفيهاش أي نص متكتوب جواها زي المرة اللي فاتت */}
+        <img
+          src={heroImageUrl}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: 'center 40%' }}
+        />
+        {/* تدرّج غامق من ناحية النص (يمين الشاشة في RTL) عشان يضمن
+        تباين قوي وواضح، وشفاف تدريجيًا لناحية الصورة */}
+        <div className="absolute inset-0 bg-gradient-to-l from-tertiary via-tertiary/85 to-tertiary/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-tertiary via-transparent to-transparent" />
+
+        <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-14 sm:pt-20">
+          <div className="max-w-xl">
             <h1 className="mb-4 text-4xl font-bold leading-tight sm:text-5xl">
               رحلتك...
               <br />
               تبدأ من هنا
             </h1>
-            <p className="mb-6 max-w-md text-lg text-white/85">
+            <p className="mb-6 text-lg text-white/85">
               احجز رحلتك بين جميع المحافظات بأمان وسهولة وبأفضل الأسعار
             </p>
 
@@ -146,38 +168,35 @@ export default function LandingPage() {
               </span>
             </div>
           </div>
-
-          {/* ---- عمود الصورة - عنصر بصري محتوى في مكانه، مش خلفية كاملة
-          للشاشة، عشان منعرفش أي تراكب مع النص أبدًا ---- */}
-          <div className="relative h-56 overflow-hidden rounded-3xl shadow-2xl sm:h-72 lg:h-80">
-            <img
-              src={heroImageUrl}
-              alt="مسافر"
-              className="absolute inset-0 h-full w-full object-cover"
-              style={{ objectPosition: 'center 35%' }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-tertiary/60 via-transparent to-transparent" />
-          </div>
         </div>
 
         {/* ---- صندوق البحث - جزء طبيعي من تدفق الصفحة، مش عائم فوقها ---- */}
-        <div className="mx-auto max-w-6xl px-4 pb-16">
+        <div className="relative mx-auto max-w-6xl px-4 pb-16">
           <div className="rounded-3xl bg-card p-5 text-text-primary shadow-2xl sm:p-6">
-            {/* تابات نوع الرحلة */}
-            <div className="mb-4 flex gap-2">
-              {(['رحلة واحدة', 'رحلة ذهاب وعودة', 'رحلات متعددة'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setTripTab(tab)}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    tripTab === tab
-                      ? 'bg-gradient-to-l from-primary to-secondary text-white shadow-lg shadow-primary/30'
-                      : 'bg-bg text-text-secondary'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+            {/* تابات نوع الرحلة - "رحلة واحدة" هي الوحيدة المدعومة فعليًا
+            في النظام حاليًا (رحلات مجدولة بمقاعد ثابتة)، فالتابين
+            التانيين معطّلين بوضوح "قريبًا" بدل ما يوهموا المستخدم إنهم شغالين */}
+            <div className="mb-4 flex flex-wrap gap-2">
+              {(['رحلة واحدة', 'رحلة ذهاب وعودة', 'رحلات متعددة'] as const).map((tab) => {
+                const isComingSoon = tab !== 'رحلة واحدة'
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => !isComingSoon && setTripTab(tab)}
+                    disabled={isComingSoon}
+                    className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                      tripTab === tab
+                        ? 'bg-gradient-to-l from-primary to-secondary text-white shadow-lg shadow-primary/30'
+                        : isComingSoon
+                          ? 'cursor-not-allowed bg-bg text-text-secondary/50'
+                          : 'bg-bg text-text-secondary'
+                    }`}
+                  >
+                    {tab}
+                    {isComingSoon && <span className="text-[10px]">(قريبًا)</span>}
+                  </button>
+                )
+              })}
             </div>
 
             <div className="grid grid-cols-1 items-end gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_auto_1fr_1fr_1fr]">
@@ -241,7 +260,7 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-      <section className="border-t border-white/10 bg-tertiary py-14">
+      <section id="features" className="scroll-mt-20 border-t border-white/10 bg-tertiary py-14">
         <div className="mx-auto max-w-6xl px-4">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {FEATURES.map((f) => (
@@ -258,7 +277,7 @@ export default function LandingPage() {
       </section>
 
       {/* ---- Vehicle Types / Services ---- */}
-      <section id="services" className="border-t border-white/10 bg-card py-16 text-text-primary">
+      <section id="services" className="scroll-mt-20 border-t border-white/10 bg-card py-16 text-text-primary">
         <div className="mx-auto max-w-6xl px-4">
           <p className="mb-1 text-sm font-bold text-primary">خدماتنا</p>
           <h2 className="mb-2 text-2xl font-bold sm:text-3xl">اختر وسيلة السفر المناسبة لك</h2>
