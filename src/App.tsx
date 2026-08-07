@@ -32,6 +32,7 @@ import { ProtectedRoute, GuestOnlyRoute } from './routes/guards'
 
 
 import { AdminRoute, DriverRoute } from './routes/roleGuards'
+import { RootRoute } from './routes/guards'
 import { useAuth } from './contexts/AuthContext'
 import { SplashScreen } from './components/SplashScreen'
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary'
@@ -65,6 +66,7 @@ const FaqPage = lazy(() => import('./pages/FaqPage'))
 const TrackTripPage = lazy(() => import('./pages/TrackTripPage'))
 const StaticPageView = lazy(() => import('./pages/StaticPageView'))
 const HowItWorksPage = lazy(() => import('./pages/HowItWorksPage'))
+const LandingPage = lazy(() => import('./pages/LandingPage'))
 
 import { WhatsAppButton } from './components/WhatsAppButton'
 import { PageTransition } from './components/PageTransition'
@@ -134,9 +136,14 @@ function AppShell() {
           <Route
             path="/"
             element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
+              <RootRoute
+                authed={
+                  <ProtectedRoute>
+                    <HomePage />
+                  </ProtectedRoute>
+                }
+                guest={<LandingPage />}
+              />
             }
           />
           <Route

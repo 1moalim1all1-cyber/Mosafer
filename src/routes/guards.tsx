@@ -36,3 +36,10 @@ export function GuestOnlyRoute({ children }: { children: ReactNode }) {
   if (firebaseUser) return <Navigate to="/" replace />
   return <>{children}</>
 }
+
+/** الجذر "/" - زائر مش مسجّل دخول يشوف صفحة الهبوط، ومسجّل الدخول يشوف الرئيسية مباشرة */
+export function RootRoute({ authed, guest }: { authed: ReactNode; guest: ReactNode }) {
+  const { firebaseUser, loading } = useAuth()
+  if (loading) return null
+  return <>{firebaseUser ? authed : guest}</>
+}

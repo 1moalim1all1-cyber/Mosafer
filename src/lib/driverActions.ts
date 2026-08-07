@@ -144,9 +144,9 @@ export async function markTripCompleted(tripId: string) {
         const booking = bookingDoc.data()
         tx.update(bookingDoc.ref, { status: 'completed' })
 
-        const passengerRef = doc(db, 'users', booking.passengerId)
-        tx.update(passengerRef, { totalTrips: increment(1) })
-
+        // ملحوظة: مش بنعدّل عدد رحلات الراكب هنا لأن قواعد الأمان بترفض
+        // أي حساب يعدّل بيانات حساب تاني (وده صح ومقصود) - عدد رحلات
+        // السائق بس هو اللي بيتحدّث، لأنه بيعدّل حسابه هو نفسه.
         if (booking.paymentStatus === 'paid') {
           const commission = (booking.totalPrice as number) * (commissionPercent / 100)
           const earnings = (booking.totalPrice as number) - commission
