@@ -142,11 +142,11 @@ export default function LandingPage() {
         />
         {/* تدرّج غامق من ناحية النص (يمين الشاشة في RTL) عشان يضمن
         تباين قوي وواضح، وشفاف تدريجيًا لناحية الصورة */}
-        <div className="absolute inset-0 bg-gradient-to-l from-tertiary via-tertiary/85 to-tertiary/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-tertiary via-tertiary/85 to-tertiary/20" />
         <div className="absolute inset-0 bg-gradient-to-t from-tertiary via-transparent to-transparent" />
 
         <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-14 sm:pt-20">
-          <div className="max-w-xl">
+          <div className="max-w-xl mr-auto">
             <h1 className="mb-4 text-4xl font-bold leading-tight sm:text-5xl">
               رحلتك...
               <br />
