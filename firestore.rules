@@ -48,8 +48,11 @@ service cloud.firestore {
 
     // ---- Trips ----
     match /trips/{tripId} {
-      allow read: if isSignedIn() &&
-        (resource.data.isWomenOnly == false || userGender() == 'female' || isAdmin());
+      // القراءة متاحة للجميع (حتى زائر مش مسجّل دخول) للرحلات العادية،
+      // عشان تظهر في صفحة الهبوط - رحلات السيدات فقط لازم تسجيل دخول
+      // وتحقق من الجنس، حفاظًا على الخصوصية
+      allow read: if resource.data.isWomenOnly == false ||
+        (isSignedIn() && (userGender() == 'female' || isAdmin()));
 
       allow create: if isSignedIn() &&
         request.resource.data.driverId == request.auth.uid &&

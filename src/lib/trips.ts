@@ -115,6 +115,25 @@ export function subscribeAvailableTrips(
 }
 
 /** السائق بيحدّث موقعه الحي أثناء الرحلة - زي كريم بالظبط */
+/**
+ * رحلات عامة للزائر غير المسجّل دخول (تظهر في صفحة الهبوط) - بترجع
+ * الرحلات العادية بس (مش رحلات السيدات، عشان الخصوصية)، ومتاحة من
+ * غير أي تسجيل دخول حسب قواعد الأمان.
+ */
+export function subscribePublicTrips(callback: (trips: Trip[]) => void, count = 6) {
+  const q = query(
+    collection(db, 'trips'),
+    where('status', '==', 'active'),
+    where('isWomenOnly', '==', false),
+    where('departureTime', '>=', Timestamp.now()),
+    orderBy('departureTime'),
+    limit(count),
+  )
+  return onSnapshot(q, (snap) => {
+    callback(snap.docs.map((d) => mapTripDoc(d.id, d.data())))
+  })
+}
+
 export async function updateTripLiveLocation(tripId: string, lat: number, lng: number) {
   await updateDoc(doc(db, 'trips', tripId), {
     driverLiveLat: lat,

@@ -6,11 +6,11 @@
  */
 export function SplashScreen() {
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-primary to-secondary p-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-tertiary">
       <img
-        src={`${import.meta.env.BASE_URL}logo.jpeg`}
+        src={`${import.meta.env.BASE_URL}splash-web.jpeg`}
         alt="مسافر"
-        className="max-h-full max-w-full rounded-3xl object-contain shadow-2xl"
+        className="h-full w-full object-cover"
       />
     </div>
   )

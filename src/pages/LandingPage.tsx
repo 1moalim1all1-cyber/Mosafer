@@ -26,6 +26,8 @@ import {
 import { useState, useEffect } from 'react'
 import { Button } from '../components/ui/Button'
 import { fetchAppSettings } from '../lib/admin'
+import { subscribePublicTrips } from '../lib/trips'
+import type { Trip } from '../types/trip'
 
 const FEATURES = [
   { icon: UserRound, title: 'سائقات للسيدات', desc: 'رحلات آمنة ومريحة بقيادة سيدات' },
@@ -51,10 +53,9 @@ const STAT_ICONS = [
 
 const NAV_LINKS = [
   { label: 'الرئيسية', href: '#home' },
-  { label: 'عن مسافر', href: '/page/about' },
-  { label: 'الخدمات', href: '#services' },
-  { label: 'رحلات مشتركة', href: '#features' },
-  { label: 'الأسعار', href: '#services' },
+  { label: 'كيف تعمل', href: '/how-it-works' },
+  { label: 'الرحلات', href: '#trips' },
+  { label: 'للسائقين', href: '#driver-cta' },
   { label: 'تواصل معنا', href: '/page/contact' },
 ]
 
@@ -63,14 +64,27 @@ export default function LandingPage() {
   const [seats, setSeats] = useState(1)
   const [tripTab, setTripTab] = useState<'رحلة واحدة' | 'رحلة ذهاب وعودة' | 'رحلات متعددة'>('رحلة واحدة')
 
+  const [swapAnimating, setSwapAnimating] = useState(false)
+  const [trips, setTrips] = useState<Trip[]>([])
+  const [tripsLoading, setTripsLoading] = useState(true)
+
+  useEffect(() => {
+    return subscribePublicTrips((data) => {
+      setTrips(data)
+      setTripsLoading(false)
+    })
+  }, [])
+
   function swapLocations() {
+    setSwapAnimating(true)
+    setTimeout(() => setSwapAnimating(false), 300)
     // الحقول لسه شكلية في صفحة الهبوط (المستخدم لازم يسجّل دخول قبل
     // ما يقدر يبحث فعليًا) - الزرار هنا بصري بس دلوقتي، هيشتغل حقيقي
     // لما نضيف حقول اختيار فعلية بدل placeholders
   }
   const [heroImageUrl, setHeroImageUrl] = useState(`${import.meta.env.BASE_URL}hero-clean.png`)
-  const [heroTitle, setHeroTitle] = useState('رحلتك...\nتبدأ من هنا')
-  const [heroSubtitle, setHeroSubtitle] = useState('احجز رحلتك بين جميع المحافظات بأمان وسهولة وبأفضل الأسعار')
+  const [heroTitle, setHeroTitle] = useState('سافر بسهولة..\nواحجز مكانك في ثواني')
+  const [heroSubtitle, setHeroSubtitle] = useState('رحلات آمنة ومريحة بين محافظات مصر')
   const [stats, setStats] = useState({ drivers: '+500', trips: '+50K', users: '+100K', cities: '+27' })
   const [socials, setSocials] = useState({
     whatsapp: '',
@@ -112,7 +126,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-40 border-b border-white/10 bg-tertiary/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <img src={`${import.meta.env.BASE_URL}logo.jpeg`} alt="مسافر" className="h-10 w-10 rounded-xl object-cover" />
+            <img src={`${import.meta.env.BASE_URL}logo.jpeg`} alt="مسافر" className="h-11 w-11 rounded-xl object-cover" />
             <div className="hidden sm:block">
               <p className="text-lg font-bold leading-tight">MOSAFER</p>
               <p className="-mt-1 text-xs text-white/60">مسافر</p>
@@ -191,7 +205,7 @@ export default function LandingPage() {
         {/* ---- شريط البحث - رفيع ومدمج، مسحوب لأعلى شوية عشان يبان
         ملزّق تحت حافة الصورة مباشرة زي المرجع، مش صندوق كبير فاضي ---- */}
         <div className="relative z-10 mx-auto mt-4 max-w-6xl px-4 pb-10 sm:mt-6">
-          <div className="rounded-2xl bg-card p-3 text-text-primary shadow-2xl shadow-primary/20 ring-1 ring-primary/25 sm:p-4">
+          <div className="rounded-2xl border border-white/10 bg-card p-3 text-text-primary shadow-lg sm:p-4">
             {/* تابات نوع الرحلة - "رحلة واحدة" هي الوحيدة المدعومة فعليًا
             في النظام حاليًا، فالتابين التانيين معطّلين بوضوح "قريبًا" */}
             <div className="mb-3 flex flex-wrap gap-2">
@@ -222,7 +236,7 @@ export default function LandingPage() {
                 <Button
                   onClick={() => navigate('/login')}
                   icon={<Search size={16} />}
-                  className="!bg-gradient-to-l !from-primary !to-secondary !py-3 !shadow-lg !shadow-primary/40 hover:!brightness-110"
+                  className="!bg-gradient-to-l !from-primary !to-secondary !py-3 !shadow-md"
                 >
                   ابحث عن رحلة
                 </Button>
@@ -238,7 +252,7 @@ export default function LandingPage() {
 
                 <button
                   onClick={swapLocations}
-                  className="mx-auto hidden h-9 w-9 items-center justify-center rounded-full border border-border bg-tertiary text-primary shadow-md shadow-primary/20 transition hover:border-primary lg:flex"
+                  className={`mx-auto hidden h-9 w-9 items-center justify-center rounded-full border border-border bg-tertiary text-primary shadow-sm transition-transform duration-300 hover:border-primary lg:flex ${swapAnimating ? 'rotate-180' : ''}`}
                   aria-label="بدّل بين نقطة الانطلاق والوجهة"
                 >
                   <ArrowLeftRight size={16} />
@@ -278,16 +292,104 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ---- Why Mosafer: 3 خطوات بسيطة ---- */}
+      <section className="border-t border-white/10 bg-tertiary py-14">
+        <div className="mx-auto max-w-6xl px-4">
+          <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">مسافر بيخلّي رحلتك أسهل</h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {[
+              { icon: MapPin, title: 'اختار رحلتك', desc: 'اختر المحافظة والوجهة والموعد المناسب' },
+              { icon: CarFront, title: 'احجز مكانك', desc: 'اختار الرحلة والمقعد المناسب لك' },
+              { icon: ShieldCheck, title: 'سافر بأمان', desc: 'تواصل مع السائق وتابع تفاصيل رحلتك' },
+            ].map((step, i) => (
+              <div key={step.title} className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-primary">
+                  <step.icon size={22} />
+                </div>
+                <p className="mb-1 text-xs font-semibold text-primary">{i + 1}</p>
+                <p className="mb-1 font-semibold">{step.title}</p>
+                <p className="text-sm text-white/60">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ---- الرحلات المتاحة دلوقتي - بيانات حقيقية بس، من غير أي بيانات وهمية ---- */}
+      <section id="trips" className="scroll-mt-20 border-t border-white/10 bg-card py-14 text-text-primary">
+        <div className="mx-auto max-w-6xl px-4">
+          <h2 className="mb-8 text-2xl font-bold sm:text-3xl">رحلات متاحة دلوقتي</h2>
+
+          {tripsLoading && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-40 animate-pulse rounded-2xl bg-bg" />
+              ))}
+            </div>
+          )}
+
+          {!tripsLoading && trips.length === 0 && (
+            <div className="rounded-2xl border border-border bg-bg py-12 text-center">
+              <p className="mb-1 font-semibold text-text-primary">مفيش رحلات متاحة دلوقتي</p>
+              <p className="text-sm text-text-secondary">تابعنا كل شوية، السائقين بينشروا رحلات جديدة أول بأول</p>
+            </div>
+          )}
+
+          {!tripsLoading && trips.length > 0 && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {trips.map((trip) => (
+                <button
+                  key={trip.id}
+                  onClick={() => navigate('/login')}
+                  className="rounded-2xl border border-border bg-bg p-5 text-right transition hover:-translate-y-0.5 hover:border-primary/40"
+                >
+                  <p className="mb-2 font-bold text-text-primary">
+                    {trip.originCity} ← {trip.destinationCity}
+                  </p>
+                  <p className="mb-3 text-sm text-text-secondary">
+                    {new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(
+                      trip.departureTime,
+                    )}
+                  </p>
+                  <div className="mb-3 flex flex-wrap gap-3 text-xs text-text-secondary">
+                    <span>💺 {trip.availableSeats} مقاعد متاحة</span>
+                    <span>💰 {trip.pricePerSeat.toFixed(0)} ج.م</span>
+                  </div>
+                  <span className="text-sm font-semibold text-primary">عرض الرحلة ←</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ---- Driver CTA ---- */}
+      <section id="driver-cta" className="scroll-mt-20 border-t border-white/10 bg-gradient-to-l from-primary to-secondary py-14">
+        <div className="mx-auto max-w-6xl px-4 text-center">
+          <h2 className="mb-2 text-2xl font-bold sm:text-3xl">رايح مشوار وعندك مكان فاضي؟</h2>
+          <p className="mx-auto mb-6 max-w-md text-white/85">
+            شارك رحلتك وساعد مسافرين تانيين وقلّل تكلفة مشوارك
+          </p>
+          <button
+            onClick={() => navigate('/role-selection')}
+            className="rounded-xl bg-white px-8 py-3.5 font-bold text-primary shadow-md transition hover:brightness-95"
+          >
+            أضف رحلة
+          </button>
+        </div>
+      </section>
+
       <section id="features" className="scroll-mt-20 border-t border-white/10 bg-tertiary py-14">
         <div className="mx-auto max-w-6xl px-4">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {FEATURES.map((f) => (
               <div
                 key={f.title}
-                className="group rounded-2xl border border-white/10 bg-card/40 p-5 text-center transition hover:-translate-y-1 hover:border-primary/40"
+                className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-center transition duration-200 hover:-translate-y-0.5 hover:border-white/20"
               >
-                <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary via-primary to-secondary shadow-lg shadow-primary/40 ring-2 ring-white/10 transition group-hover:shadow-primary/60">
-                  <f.icon size={28} strokeWidth={2.4} className="drop-shadow-md" />
+                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary">
+                  <f.icon size={24} strokeWidth={2} />
                 </div>
                 <p className="mb-1 font-semibold">{f.title}</p>
                 <p className="text-xs leading-relaxed text-white/60">{f.desc}</p>
