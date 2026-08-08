@@ -12,6 +12,7 @@ export default function AdminDashboardPage() {
 
   const links = [
     { path: '/admin/users', icon: '👥', label: 'إدارة المستخدمين' },
+    { path: '/admin/trips', icon: '🚗', label: 'إدارة الرحلات' },
     { path: '/admin/drivers', icon: '🪪', label: 'مراجعة السائقين' },
     { path: '/admin/wallet-requests', icon: '👛', label: 'طلبات المحفظة' },
     { path: '/admin/governorates', icon: '🗺️', label: 'إدارة المحافظات' },

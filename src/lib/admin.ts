@@ -13,6 +13,7 @@ import {
   getDoc,
   setDoc,
   runTransaction,
+  limit,
 } from 'firebase/firestore'
 import { db } from './firebase'
 
@@ -292,4 +293,45 @@ export function subscribeAllUsers(callback: (users: ManagedUser[]) => void) {
 
 export async function setUserStatus(uid: string, status: 'active' | 'suspended' | 'banned') {
   await updateDoc(doc(db, 'users', uid), { status })
+}
+
+// ---- إدارة الرحلات ----
+export interface ManagedTrip {
+  id: string
+  driverId: string
+  originCity: string
+  destinationCity: string
+  departureTime: Date
+  status: string
+  totalSeats: number
+  availableSeats: number
+  pricePerSeat: number
+}
+
+export function subscribeAllTrips(callback: (trips: ManagedTrip[]) => void, count = 100) {
+  const q = query(collection(db, 'trips'), orderBy('departureTime', 'desc'), limit(count))
+  return onSnapshot(q, (snap) => {
+    callback(
+      snap.docs.map((d) => {
+        const data = d.data()
+        const dep = data.departureTime as { toDate?: () => Date }
+        return {
+          id: d.id,
+          driverId: data.driverId ?? '',
+          originCity: data.originCity ?? '',
+          destinationCity: data.destinationCity ?? '',
+          departureTime: dep?.toDate ? dep.toDate() : new Date(),
+          status: data.status ?? 'pending',
+          totalSeats: data.totalSeats ?? 0,
+          availableSeats: data.availableSeats ?? 0,
+          pricePerSeat: data.pricePerSeat ?? 0,
+        }
+      }),
+    )
+  })
+}
+
+/** حذف رحلة نهائيًا - الأدمن بس اللي يقدر يعمل كده لأي رحلة (السائق بيقدر يحذف بس رحلته هو) */
+export async function deleteTrip(tripId: string) {
+  await deleteDoc(doc(db, 'trips', tripId))
 }
