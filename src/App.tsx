@@ -35,6 +35,7 @@ import { AdminRoute, DriverRoute } from './routes/roleGuards'
 import { RootRoute } from './routes/guards'
 import { useAuth } from './contexts/AuthContext'
 import { SplashScreen } from './components/SplashScreen'
+import { DesktopNav } from './components/DesktopNav'
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary'
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
@@ -86,7 +87,7 @@ export default function App() {
  * إنت مسجّل دخول ولا لأ، بدل شاشة بيضا أو دائرة تحميل عادية.
  */
 function AppShell() {
-  const { loading } = useAuth()
+  const { loading, firebaseUser } = useAuth()
 
   // لو التطبيق شغّال تمام (مفيش خطأ)، بنصفّي علامة "حصل Refresh قبل
   // كده" عشان لو تحديث تاني حصل بعدين ولسه نفس التاب مفتوح، آلية
@@ -99,6 +100,7 @@ function AppShell() {
 
   return (
     <HashRouter>
+        {firebaseUser && <DesktopNav />}
         <WhatsAppButton />
         <PageTransition>
         <ChunkErrorBoundary>
