@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../contexts/useAuth'
 
 /** حماية مسارات السائق - راكب عادي مستحيل يفتحها حتى بالرابط المباشر */
 export function DriverRoute({ children }: { children: ReactNode }) {

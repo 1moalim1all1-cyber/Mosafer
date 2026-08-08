@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Search, CarFront, PlusCircle, Wallet, UserCircle, LayoutDashboard } from 'lucide-react'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../contexts/useAuth'
 
 const PASSENGER_TABS = [
   { path: '/', icon: Search, label: 'مسافر فين؟' },

@@ -33,7 +33,7 @@ import { ProtectedRoute, GuestOnlyRoute } from './routes/guards'
 
 import { AdminRoute, DriverRoute } from './routes/roleGuards'
 import { RootRoute } from './routes/guards'
-import { useAuth } from './contexts/AuthContext'
+import { useAuth } from './contexts/useAuth'
 import { SplashScreen } from './components/SplashScreen'
 import { DesktopNav } from './components/DesktopNav'
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary'

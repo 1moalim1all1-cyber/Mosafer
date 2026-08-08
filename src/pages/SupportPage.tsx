@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { addDoc, collection, Timestamp } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { fetchAppSettings } from '../lib/admin'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../contexts/useAuth'
 import { Button } from '../components/ui/Button'
 
 export default function SupportPage() {

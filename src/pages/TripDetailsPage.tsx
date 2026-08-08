@@ -14,7 +14,7 @@ import type { Trip } from '../types/trip'
 import type { AppUser } from '../types/user'
 import type { PaymentMethod } from '../types/booking'
 import { Button } from '../components/ui/Button'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../contexts/useAuth'
 
 export default function TripDetailsPage() {
   const { tripId } = useParams<{ tripId: string }>()

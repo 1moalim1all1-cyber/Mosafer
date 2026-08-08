@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -10,6 +10,7 @@ import {
 import { doc, getDoc, updateDoc, collection, query, where, limit, getDocs, Timestamp, writeBatch } from 'firebase/firestore'
 import { auth, db } from '../lib/firebase'
 import type { AppUser, Gender, UserRole } from '../types/user'
+import { AuthContext } from './authContextInstance'
 
 interface RegisterInput {
   fullName: string
@@ -20,7 +21,7 @@ interface RegisterInput {
   referralCode?: string
 }
 
-interface AuthContextValue {
+export interface AuthContextValue {
   user: AppUser | null
   firebaseUser: FirebaseUser | null
   loading: boolean
@@ -28,8 +29,6 @@ interface AuthContextValue {
   register: (input: RegisterInput & { email: string }) => Promise<void>
   logout: () => Promise<void>
 }
-
-const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 /** ترجمة أكواد أخطاء Firebase لرسائل عربية مفهومة */
 function mapFirebaseError(code: string): string {
@@ -200,10 +199,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   )
-}
-
-export function useAuth(): AuthContextValue {
-  const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth لازم يتنادى جوه AuthProvider')
-  return ctx
 }

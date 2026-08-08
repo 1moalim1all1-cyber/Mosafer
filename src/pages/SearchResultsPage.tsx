@@ -4,7 +4,7 @@ import { searchTrips } from '../lib/trips'
 import type { Trip } from '../types/trip'
 import { TripCard } from '../components/TripCard'
 import { Button } from '../components/ui/Button'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../contexts/useAuth'
 
 export default function SearchResultsPage() {
   const [searchParams] = useSearchParams()

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../contexts/useAuth'
 import { Button } from '../components/ui/Button'
 import { BottomNav } from '../components/BottomNav'
 

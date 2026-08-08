@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../contexts/useAuth'
 import { subscribePassengerBookings } from '../lib/bookings'
 import { cancelBooking } from '../lib/booking'
 import { hasRated } from '../lib/ratings'
