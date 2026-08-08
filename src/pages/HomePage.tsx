@@ -57,7 +57,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-bg">
       <header className="flex items-center justify-between border-b border-border bg-card px-4 py-4">
         <div className="flex items-center gap-2">
-          <img src="/Mosafer/logo.jpeg" alt="مسافر" className="h-11 w-11 rounded-2xl object-cover shadow-md" />
+          <img src={`${import.meta.env.BASE_URL}logo.jpeg`} alt="مسافر" className="h-11 w-11 rounded-2xl object-cover shadow-md" />
           <h1 className="text-xl font-bold text-primary">مسافر</h1>
         </div>
         <div className="flex items-center gap-3">

@@ -107,6 +107,63 @@ export default function AdminSettingsPage() {
           />
         </div>
 
+        <h2 className="mb-3 font-bold text-text-primary">بيانات التواصل (تظهر في أسفل الموقع)</h2>
+        <div className="mb-6 flex flex-col gap-3">
+          <Input
+            label="رقم الهاتف الظاهر للزوّار"
+            value={settings.contactPhone}
+            onChange={(e) => setSettings({ ...settings, contactPhone: e.target.value })}
+            dir="ltr"
+            placeholder="+20 1xxxxxxxxx"
+          />
+          <Input
+            label="البريد الإلكتروني الظاهر للزوّار"
+            value={settings.contactEmail}
+            onChange={(e) => setSettings({ ...settings, contactEmail: e.target.value })}
+            dir="ltr"
+          />
+          <Input
+            label="العنوان"
+            value={settings.contactAddress}
+            onChange={(e) => setSettings({ ...settings, contactAddress: e.target.value })}
+          />
+        </div>
+
+        <h2 className="mb-3 font-bold text-text-primary">روابط السوشيال ميديا</h2>
+        <p className="mb-3 text-sm text-text-secondary">
+          سيب أي حقل فاضي لو مفيش صفحة ليك على المنصة دي - هتختفي أيقونتها تلقائيًا
+        </p>
+        <div className="mb-6 flex flex-col gap-3">
+          <Input
+            label="فيسبوك"
+            value={settings.facebookUrl}
+            onChange={(e) => setSettings({ ...settings, facebookUrl: e.target.value })}
+            dir="ltr"
+            placeholder="https://facebook.com/..."
+          />
+          <Input
+            label="إنستجرام"
+            value={settings.instagramUrl}
+            onChange={(e) => setSettings({ ...settings, instagramUrl: e.target.value })}
+            dir="ltr"
+            placeholder="https://instagram.com/..."
+          />
+          <Input
+            label="تيك توك"
+            value={settings.tiktokUrl}
+            onChange={(e) => setSettings({ ...settings, tiktokUrl: e.target.value })}
+            dir="ltr"
+            placeholder="https://tiktok.com/@..."
+          />
+          <Input
+            label="يوتيوب"
+            value={settings.youtubeUrl}
+            onChange={(e) => setSettings({ ...settings, youtubeUrl: e.target.value })}
+            dir="ltr"
+            placeholder="https://youtube.com/@..."
+          />
+        </div>
+
         <h2 className="mb-3 font-bold text-text-primary">استقبال الإيداعات</h2>
         <p className="mb-3 text-sm text-text-secondary">
           الرقم ده هيظهر للمستخدمين لما يحبوا يودّعوا رصيد - هيحوّلوا عليه بره التطبيق (فودافون كاش/إنستاباي)

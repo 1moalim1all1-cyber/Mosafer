@@ -14,8 +14,8 @@ import {
   Navigation2,
   Wallet,
   Headphones,
-  Share2,
   MessageCircle,
+  ExternalLink,
   Phone,
   Mail,
   MapPinned,
@@ -68,10 +68,20 @@ export default function LandingPage() {
     // ما يقدر يبحث فعليًا) - الزرار هنا بصري بس دلوقتي، هيشتغل حقيقي
     // لما نضيف حقول اختيار فعلية بدل placeholders
   }
-  const [heroImageUrl, setHeroImageUrl] = useState('/Mosafer/hero-clean.png')
+  const [heroImageUrl, setHeroImageUrl] = useState(`${import.meta.env.BASE_URL}hero-clean.png`)
   const [heroTitle, setHeroTitle] = useState('رحلتك...\nتبدأ من هنا')
   const [heroSubtitle, setHeroSubtitle] = useState('احجز رحلتك بين جميع المحافظات بأمان وسهولة وبأفضل الأسعار')
   const [stats, setStats] = useState({ drivers: '+500', trips: '+50K', users: '+100K', cities: '+27' })
+  const [socials, setSocials] = useState({
+    whatsapp: '',
+    facebook: '',
+    instagram: '',
+    tiktok: '',
+    youtube: '',
+    phone: '',
+    email: '',
+    address: 'القاهرة - مصر',
+  })
 
   useEffect(() => {
     fetchAppSettings()
@@ -80,6 +90,16 @@ export default function LandingPage() {
         if (s.heroTitle) setHeroTitle(s.heroTitle)
         if (s.heroSubtitle) setHeroSubtitle(s.heroSubtitle)
         setStats({ drivers: s.statDrivers, trips: s.statTrips, users: s.statUsers, cities: s.statCities })
+        setSocials({
+          whatsapp: s.whatsappNumber,
+          facebook: s.facebookUrl,
+          instagram: s.instagramUrl,
+          tiktok: s.tiktokUrl,
+          youtube: s.youtubeUrl,
+          phone: s.contactPhone,
+          email: s.contactEmail,
+          address: s.contactAddress || 'القاهرة - مصر',
+        })
       })
       .catch(() => {
         // لو فشل، بتفضل القيم الافتراضية زي ما هي
@@ -92,7 +112,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-40 border-b border-white/10 bg-tertiary/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <img src="/Mosafer/logo.jpeg" alt="مسافر" className="h-10 w-10 rounded-xl object-cover" />
+            <img src={`${import.meta.env.BASE_URL}logo.jpeg`} alt="مسافر" className="h-10 w-10 rounded-xl object-cover" />
             <div className="hidden sm:block">
               <p className="text-lg font-bold leading-tight">MOSAFER</p>
               <p className="-mt-1 text-xs text-white/60">مسافر</p>
@@ -320,12 +340,40 @@ export default function LandingPage() {
         <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 sm:grid-cols-2 md:grid-cols-4">
           <div>
             <div className="mb-3 flex items-center gap-2">
-              <img src="/Mosafer/logo.jpeg" alt="مسافر" className="h-9 w-9 rounded-lg object-cover" />
+              <img src={`${import.meta.env.BASE_URL}logo.jpeg`} alt="مسافر" className="h-9 w-9 rounded-lg object-cover" />
               <span className="font-bold text-white">مسافر</span>
             </div>
-            <div className="flex gap-3">
-              <MessageCircle size={18} />
-              <Share2 size={18} />
+            <div className="flex flex-wrap gap-2">
+              {socials.whatsapp && (
+                <a
+                  href={`https://wa.me/${socials.whatsapp.replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="واتساب"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 transition hover:border-primary"
+                >
+                  <MessageCircle size={16} />
+                </a>
+              )}
+              {[
+                { url: socials.facebook, label: 'فيسبوك' },
+                { url: socials.instagram, label: 'إنستجرام' },
+                { url: socials.tiktok, label: 'تيك توك' },
+                { url: socials.youtube, label: 'يوتيوب' },
+              ]
+                .filter((s) => s.url)
+                .map((s) => (
+                  <a
+                    key={s.label}
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 transition hover:border-primary"
+                  >
+                    <ExternalLink size={16} />
+                  </a>
+                ))}
             </div>
           </div>
 
@@ -351,14 +399,18 @@ export default function LandingPage() {
           <div>
             <p className="mb-3 font-semibold text-white">تواصل معنا</p>
             <ul className="space-y-2 text-sm">
+              {socials.phone && (
+                <li className="flex items-center gap-2">
+                  <Phone size={14} /> <span dir="ltr">{socials.phone}</span>
+                </li>
+              )}
+              {socials.email && (
+                <li className="flex items-center gap-2">
+                  <Mail size={14} /> {socials.email}
+                </li>
+              )}
               <li className="flex items-center gap-2">
-                <Phone size={14} /> <span dir="ltr">+20 123 456 7890</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Mail size={14} /> info@mosafer.app
-              </li>
-              <li className="flex items-center gap-2">
-                <MapPinned size={14} /> القاهرة - مصر
+                <MapPinned size={14} /> {socials.address}
               </li>
             </ul>
           </div>

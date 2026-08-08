@@ -8,7 +8,7 @@ export function SplashScreen() {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-primary to-secondary p-8">
       <img
-        src="/Mosafer/logo.jpeg"
+        src={`${import.meta.env.BASE_URL}logo.jpeg`}
         alt="مسافر"
         className="max-h-full max-w-full rounded-3xl object-contain shadow-2xl"
       />

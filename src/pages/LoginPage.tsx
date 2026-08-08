@@ -36,7 +36,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center text-center">
           <img
-            src="/Mosafer/logo.jpeg"
+            src={`${import.meta.env.BASE_URL}logo.jpeg`}
             alt="مسافر"
             className="mb-4 h-28 w-28 rounded-2xl object-cover shadow-lg shadow-primary/30"
           />

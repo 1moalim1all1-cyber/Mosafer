@@ -214,6 +214,13 @@ export interface AppSettings {
   statTrips: string
   statUsers: string
   statCities: string
+  facebookUrl: string
+  instagramUrl: string
+  tiktokUrl: string
+  youtubeUrl: string
+  contactPhone: string
+  contactEmail: string
+  contactAddress: string
 }
 
 export async function fetchAppSettings(): Promise<AppSettings> {
@@ -235,6 +242,13 @@ export async function fetchAppSettings(): Promise<AppSettings> {
     statTrips: data.statTrips ?? '+50K',
     statUsers: data.statUsers ?? '+100K',
     statCities: data.statCities ?? '+27',
+    facebookUrl: data.facebookUrl ?? '',
+    instagramUrl: data.instagramUrl ?? '',
+    tiktokUrl: data.tiktokUrl ?? '',
+    youtubeUrl: data.youtubeUrl ?? '',
+    contactPhone: data.contactPhone ?? '',
+    contactEmail: data.contactEmail ?? '',
+    contactAddress: data.contactAddress ?? 'القاهرة - مصر',
   }
 }
 
