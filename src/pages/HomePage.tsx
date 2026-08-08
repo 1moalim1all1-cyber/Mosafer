@@ -8,7 +8,7 @@ import { subscribeUnreadCount } from '../lib/notifications'
 import { subscribeAvailableTrips, subscribeCompletedTripsCount } from '../lib/trips'
 import type { Trip } from '../types/trip'
 import { Animated3DCar } from '../components/Animated3DCar'
-import { Users2, Bell } from 'lucide-react'
+import { Users2, Bell, MapPin, ArrowLeftRight, Users, Search } from 'lucide-react'
 
 const GOVERNORATES = [
   'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحر الأحمر', 'البحيرة',
@@ -92,29 +92,48 @@ export default function HomePage() {
       <main className="mx-auto max-w-lg px-4 pb-24 pt-6">
         <div className="-mt-14 mb-8">
 
-        <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-[0_8px_30px_rgba(15,23,42,0.08)]">
-          <div>
-            <label className="mb-1.5 block text-sm font-semibold text-text-primary">من</label>
-            <select
-              value={origin}
-              onChange={(e) => setOrigin(e.target.value)}
-              className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-base focus:border-primary focus:outline-none"
+        <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-[0_8px_30px_rgba(15,23,42,0.08)]">
+          <div className="relative">
+            <div>
+              <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-text-primary">
+                <MapPin size={14} className="text-primary" /> من
+              </label>
+              <select
+                value={origin}
+                onChange={(e) => setOrigin(e.target.value)}
+                className="w-full rounded-xl border-2 border-border bg-bg px-4 py-3.5 text-base transition focus:border-primary focus:outline-none"
+              >
+                <option value="">اختار المحافظة</option>
+                {GOVERNORATES.map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                const o = origin
+                setOrigin(destination)
+                setDestination(o)
+              }}
+              aria-label="بدّل بين نقطة الانطلاق والوجهة"
+              className="absolute left-1/2 top-full z-10 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-border bg-card text-primary shadow-sm transition hover:border-primary"
             >
-              <option value="">اختار المحافظة</option>
-              {GOVERNORATES.map((g) => (
-                <option key={g} value={g}>
-                  {g}
-                </option>
-              ))}
-            </select>
+              <ArrowLeftRight size={14} className="rotate-90" />
+            </button>
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-semibold text-text-primary">إلى</label>
+            <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-text-primary">
+              <MapPin size={14} className="text-primary" /> إلى
+            </label>
             <select
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
-              className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 text-base focus:border-primary focus:outline-none"
+              className="w-full rounded-xl border-2 border-border bg-bg px-4 py-3.5 text-base transition focus:border-primary focus:outline-none"
             >
               <option value="">اختار المحافظة</option>
               {GOVERNORATES.map((g) => (
@@ -125,26 +144,28 @@ export default function HomePage() {
             </select>
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-text-primary">عدد الركاب</span>
+          <div className="flex items-center justify-between rounded-xl border-2 border-border bg-bg px-4 py-3">
+            <span className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
+              <Users size={14} className="text-primary" /> عدد الركاب
+            </span>
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSeats((s) => Math.max(1, s - 1))}
-                className="h-8 w-8 rounded-full border border-border text-lg"
+                className="h-8 w-8 rounded-full border border-border text-lg transition hover:border-primary"
               >
                 −
               </button>
               <span className="w-4 text-center font-semibold">{seats}</span>
               <button
                 onClick={() => setSeats((s) => Math.min(8, s + 1))}
-                className="h-8 w-8 rounded-full border border-border text-lg"
+                className="h-8 w-8 rounded-full border border-border text-lg transition hover:border-primary"
               >
                 +
               </button>
             </div>
           </div>
 
-          <Button onClick={handleSearch} disabled={!origin || !destination}>
+          <Button onClick={handleSearch} disabled={!origin || !destination} icon={<Search size={18} />}>
             ابحث عن رحلة
           </Button>
         </div>
