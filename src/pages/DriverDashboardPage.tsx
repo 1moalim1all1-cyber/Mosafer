@@ -10,6 +10,7 @@ const STATUS_LABELS: Record<Trip['status'], { label: string; color: string }> = 
   full: { label: 'مكتملة المقاعد', color: 'text-primary' },
   completed: { label: 'منتهية', color: 'text-text-secondary' },
   cancelled: { label: 'ملغاة', color: 'text-danger' },
+  expired: { label: 'انتهى موعدها', color: 'text-text-secondary' },
   pending: { label: 'قيد المراجعة', color: 'text-warning' },
 }
 

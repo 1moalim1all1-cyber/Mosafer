@@ -152,17 +152,15 @@ export default function LandingPage() {
             <h1 className="mb-4 whitespace-pre-line text-4xl font-bold leading-tight sm:text-5xl">{heroTitle}</h1>
             <p className="mb-6 text-lg text-white/85">{heroSubtitle}</p>
 
-            <div className="flex flex-wrap items-center gap-3 text-sm text-white/90">
-              <span className="flex items-center gap-1.5">
-                <Tag size={16} className="text-secondary" /> أسعار عادلة
+            <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+              <span className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/90">
+                <Tag size={15} className="text-secondary" /> أسعار عادلة
               </span>
-              <span className="text-white/20">|</span>
-              <span className="flex items-center gap-1.5">
-                <Zap size={16} className="text-secondary" /> سريع
+              <span className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/90">
+                <Zap size={15} className="text-secondary" /> سريع
               </span>
-              <span className="text-white/20">|</span>
-              <span className="flex items-center gap-1.5">
-                <ShieldCheck size={16} className="text-secondary" /> آمن
+              <span className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/90">
+                <ShieldCheck size={15} className="text-secondary" /> آمن
               </span>
             </div>
 

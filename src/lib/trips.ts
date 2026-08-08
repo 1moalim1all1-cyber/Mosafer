@@ -97,16 +97,20 @@ export function subscribeAvailableTrips(
   callback: (trips: Trip[]) => void,
   count = 15,
 ) {
-  const constraints = [where('status', '==', 'active'), orderBy('departureTime')]
+  // لازم نفلتر الرحلات اللي فاتت من داخل الاستعلام نفسه، مش بعد ما
+  // نجيب البيانات - عشان لو فيه رحلات قديمة السائق نسي يقفلها، مكنش
+  // هيبقى موجود مكان للرحلات الجديدة الفعلية جوه حد الـ 15 نتيجة
+  const constraints = [
+    where('status', '==', 'active'),
+    where('departureTime', '>=', Timestamp.now()),
+    orderBy('departureTime'),
+  ]
   if (requesterGender === 'male') {
     constraints.splice(1, 0, where('isWomenOnly', '==', false))
   }
   const q = query(collection(db, 'trips'), ...constraints, limit(count))
   return onSnapshot(q, (snap) => {
-    const trips = snap.docs
-      .map((d) => mapTripDoc(d.id, d.data()))
-      .filter((t) => t.departureTime.getTime() > Date.now() - 60 * 60 * 1000) // نستبعد الرحلات اللي فاتت من ساعة
-    callback(trips)
+    callback(snap.docs.map((d) => mapTripDoc(d.id, d.data())))
   })
 }
 

@@ -90,7 +90,22 @@ function mapTripDoc(id: string, data: Record<string, unknown>): Trip {
 export function subscribeDriverTrips(driverId: string, callback: (trips: Trip[]) => void) {
   const q = query(collection(db, 'trips'), where('driverId', '==', driverId), orderBy('departureTime', 'desc'))
   return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => mapTripDoc(d.id, d.data())))
+    const trips = snap.docs.map((d) => mapTripDoc(d.id, d.data()))
+
+    // مفيش سيرفر خلفي شغال 24 ساعة يقفل الرحلات القديمة لوحده (محتاج
+    // خطة Blaze)، فبنعمل تحديث "كسول" بدل كده: أول ما السائق يفتح
+    // لوحته، أي رحلة فات ميعادها بأكتر من 3 ساعات ولسه "نشطة" أو
+    // "مكتملة المقاعد" بنقفلها تلقائيًا هنا
+    const threeHoursAgo = Date.now() - 3 * 60 * 60 * 1000
+    trips.forEach((trip) => {
+      if ((trip.status === 'active' || trip.status === 'full') && trip.departureTime.getTime() < threeHoursAgo) {
+        updateTripStatus(trip.id, 'expired').catch(() => {
+          // لو فشل التحديث، منمنعش عرض الرحلات على أي حال
+        })
+      }
+    })
+
+    callback(trips)
   })
 }
 
