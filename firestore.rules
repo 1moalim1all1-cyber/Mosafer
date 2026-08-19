@@ -148,7 +148,9 @@ service cloud.firestore {
 
     // ---- Ratings ----
     match /ratings/{ratingId} {
-      allow read: if isSignedIn();
+      // قراءة عامة (حتى لزائر مش مسجّل دخول) عشان تبان في قسم "آراء
+      // المستخدمين" بصفحة الهبوط - نفس منطق الرحلات العادية بالظبط
+      allow read: if true;
       allow create: if isSignedIn() && request.resource.data.fromUserId == request.auth.uid;
       allow update: if isAdmin();
       allow delete: if isAdmin();

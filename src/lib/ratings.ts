@@ -29,3 +29,25 @@ export async function submitRating(params: {
     createdAt: Timestamp.now(),
   })
 }
+
+/**
+ * آراء حقيقية للعرض في صفحة الهبوط - تقييمات 4 نجوم فأكتر ومعاها
+ * تعليق فعلي بس (مش أي تقييم عشوائي)، عشان القسم يبقى ذو معنى ومفيدش
+ * أي بيانات مزيّفة.
+ */
+export async function fetchTopTestimonials(count = 6) {
+  const q = query(collection(db, 'ratings'), where('stars', '>=', 4), limit(count * 3))
+  const snap = await getDocs(q)
+  return snap.docs
+    .map((d) => {
+      const data = d.data()
+      return {
+        id: d.id,
+        stars: data.stars as number,
+        comment: (data.comment as string) ?? '',
+        toUserId: data.toUserId as string,
+      }
+    })
+    .filter((r) => r.comment.trim().length > 0)
+    .slice(0, count)
+}

@@ -22,12 +22,15 @@ import {
   Plus,
   Minus,
   ArrowLeftRight,
+  Star,
+  ChevronDown,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Button } from '../components/ui/Button'
-import { FadeInSection } from '../components/FadeInSection'
 import { fetchAppSettings } from '../lib/admin'
 import { subscribePublicTrips } from '../lib/trips'
+import { fetchTopTestimonials } from '../lib/ratings'
+import { fetchFaqItems } from '../lib/pages'
 import type { Trip } from '../types/trip'
 
 const FEATURES = [
@@ -87,6 +90,14 @@ export default function LandingPage() {
   const [heroTitle, setHeroTitle] = useState('سافر بسهولة..\nواحجز مكانك في ثواني')
   const [heroSubtitle, setHeroSubtitle] = useState('رحلات آمنة ومريحة بين محافظات مصر')
   const [stats, setStats] = useState({ drivers: '+500', trips: '+50K', users: '+100K', cities: '+27' })
+  const [testimonials, setTestimonials] = useState<{ id: string; stars: number; comment: string }[]>([])
+  const [faqItems, setFaqItems] = useState<{ question: string; answer: string }[]>([])
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetchTopTestimonials().then(setTestimonials)
+    fetchFaqItems().then((items) => setFaqItems(items.slice(0, 4)))
+  }, [])
   const [socials, setSocials] = useState({
     whatsapp: '',
     facebook: '',
@@ -122,12 +133,7 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-tertiary text-white">
-      {/* عناصر خلفية زخرفية بنفس ألوان النظام بالظبط (أزرق/بنفسجي) -
-      دوائر ضبابية خفيفة جدًا بتدّي عمق للصفحة من غير ما تغيّر أي لون
-      أساسي أو تتعارض مع قابلية القراءة */}
-      <div className="pointer-events-none fixed -right-40 top-40 h-96 w-96 rounded-full bg-primary/10 blur-[120px]" />
-      <div className="pointer-events-none fixed -left-40 top-[900px] h-96 w-96 rounded-full bg-secondary/10 blur-[120px]" />
+    <div className="min-h-screen bg-tertiary text-white">
       {/* ---- Navbar ---- */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-tertiary/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
@@ -300,7 +306,6 @@ export default function LandingPage() {
       </section>
 
       {/* ---- Why Mosafer: 3 خطوات بسيطة ---- */}
-      <FadeInSection>
       <section className="border-t border-white/10 bg-tertiary py-14">
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">مسافر بيخلّي رحلتك أسهل</h2>
@@ -322,10 +327,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-      </FadeInSection>
 
       {/* ---- الرحلات المتاحة دلوقتي - بيانات حقيقية بس، من غير أي بيانات وهمية ---- */}
-      <FadeInSection>
       <section id="trips" className="scroll-mt-20 border-t border-white/10 bg-card py-14 text-text-primary">
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="mb-8 text-2xl font-bold sm:text-3xl">رحلات متاحة دلوقتي</h2>
@@ -372,10 +375,8 @@ export default function LandingPage() {
           )}
         </div>
       </section>
-      </FadeInSection>
 
       {/* ---- Driver CTA ---- */}
-      <FadeInSection>
       <section id="driver-cta" className="scroll-mt-20 border-t border-white/10 bg-gradient-to-l from-primary to-secondary py-14">
         <div className="mx-auto max-w-6xl px-4 text-center">
           <h2 className="mb-2 text-2xl font-bold sm:text-3xl">رايح مشوار وعندك مكان فاضي؟</h2>
@@ -390,16 +391,14 @@ export default function LandingPage() {
           </button>
         </div>
       </section>
-      </FadeInSection>
 
-      <FadeInSection>
       <section id="features" className="scroll-mt-20 border-t border-white/10 bg-tertiary py-14">
         <div className="mx-auto max-w-6xl px-4">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
             {FEATURES.map((f) => (
               <div
                 key={f.title}
-                className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-center transition duration-200 hover:-translate-y-0.5 hover:border-white/20"
+                className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-center transition duration-300 [transform-style:preserve-3d] hover:[transform:perspective(600px)_translateY(-4px)_rotateX(4deg)] hover:border-white/20"
               >
                 <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary">
                   <f.icon size={24} strokeWidth={2} />
@@ -411,10 +410,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-      </FadeInSection>
 
       {/* ---- Vehicle Types / Services ---- */}
-      <FadeInSection>
       <section id="services" className="scroll-mt-20 border-t border-white/10 bg-card py-16 text-text-primary">
         <div className="mx-auto max-w-6xl px-4">
           <p className="mb-1 text-sm font-bold text-primary">خدماتنا</p>
@@ -426,7 +423,7 @@ export default function LandingPage() {
             {VEHICLE_TYPES.map((v) => (
               <div
                 key={v.title}
-                className="group overflow-hidden rounded-2xl border border-border bg-bg text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                className="group overflow-hidden rounded-2xl border border-border bg-bg text-center shadow-sm transition duration-300 [transform-style:preserve-3d] hover:[transform:perspective(600px)_translateY(-4px)_rotateX(4deg)] hover:shadow-lg"
               >
                 <div className="flex h-24 items-center justify-center bg-gradient-to-br from-primary to-secondary">
                   <v.icon size={36} className="text-white transition group-hover:scale-110" strokeWidth={1.6} />
@@ -440,10 +437,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-      </FadeInSection>
 
       {/* ---- Stats ---- */}
-      <FadeInSection>
       <section className="border-t border-white/10 bg-card py-12">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 px-4 sm:grid-cols-4">
           {STAT_ICONS.map((s) => (
@@ -455,7 +450,53 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
-      </FadeInSection>
+
+      {/* ---- آراء حقيقية من مستخدمين فعليين (تقييمات 4+ نجوم بتعليق) ---- */}
+      {testimonials.length > 0 && (
+        <section className="border-t border-white/10 bg-card py-14 text-text-primary">
+          <div className="mx-auto max-w-6xl px-4">
+            <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">آراء المستخدمين</h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {testimonials.map((t) => (
+                <div
+                  key={t.id}
+                  className="rounded-2xl border border-border bg-bg p-5 transition duration-300 [transform-style:preserve-3d] hover:[transform:perspective(600px)_rotateX(3deg)_rotateY(-3deg)]"
+                >
+                  <div className="mb-2 flex gap-0.5 text-warning">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} size={14} fill={i < t.stars ? 'currentColor' : 'none'} />
+                    ))}
+                  </div>
+                  <p className="text-sm text-text-secondary">"{t.comment}"</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ---- أسئلة شائعة مختصرة ---- */}
+      {faqItems.length > 0 && (
+        <section className="border-t border-white/10 bg-tertiary py-14">
+          <div className="mx-auto max-w-2xl px-4">
+            <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">أسئلة شائعة</h2>
+            <div className="flex flex-col gap-2">
+              {faqItems.map((item, i) => (
+                <div key={item.question} className="rounded-xl border border-white/10 bg-white/[0.03]">
+                  <button
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="flex w-full items-center justify-between p-4 text-right font-semibold"
+                  >
+                    {item.question}
+                    <ChevronDown size={18} className={`transition-transform ${openFaq === i ? 'rotate-180' : ''}`} />
+                  </button>
+                  {openFaq === i && <p className="border-t border-white/10 p-4 text-sm text-white/70">{item.answer}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ---- Footer ---- */}
       <footer className="border-t border-white/10 bg-tertiary py-12 text-white/70">
