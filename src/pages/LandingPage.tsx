@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Button } from '../components/ui/Button'
+import { FadeInSection } from '../components/FadeInSection'
 import { fetchAppSettings } from '../lib/admin'
 import { subscribePublicTrips } from '../lib/trips'
 import type { Trip } from '../types/trip'
@@ -121,7 +122,12 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-tertiary text-white">
+    <div className="relative min-h-screen overflow-x-hidden bg-tertiary text-white">
+      {/* عناصر خلفية زخرفية بنفس ألوان النظام بالظبط (أزرق/بنفسجي) -
+      دوائر ضبابية خفيفة جدًا بتدّي عمق للصفحة من غير ما تغيّر أي لون
+      أساسي أو تتعارض مع قابلية القراءة */}
+      <div className="pointer-events-none fixed -right-40 top-40 h-96 w-96 rounded-full bg-primary/10 blur-[120px]" />
+      <div className="pointer-events-none fixed -left-40 top-[900px] h-96 w-96 rounded-full bg-secondary/10 blur-[120px]" />
       {/* ---- Navbar ---- */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-tertiary/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
@@ -183,7 +189,7 @@ export default function LandingPage() {
 
         <div className="relative flex min-h-[420px] flex-col justify-center px-5 pt-14 sm:min-h-[480px] sm:px-10 sm:pt-20 lg:px-16">
           <div className="max-w-xl mr-auto">
-            <h1 className="mb-4 whitespace-pre-line text-4xl font-bold leading-tight sm:text-5xl">{heroTitle}</h1>
+            <h1 className="mb-4 whitespace-pre-line text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl">{heroTitle}</h1>
             <p className="mb-6 text-lg text-white/85">{heroSubtitle}</p>
 
             <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
@@ -294,6 +300,7 @@ export default function LandingPage() {
       </section>
 
       {/* ---- Why Mosafer: 3 خطوات بسيطة ---- */}
+      <FadeInSection>
       <section className="border-t border-white/10 bg-tertiary py-14">
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">مسافر بيخلّي رحلتك أسهل</h2>
@@ -315,8 +322,10 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      </FadeInSection>
 
       {/* ---- الرحلات المتاحة دلوقتي - بيانات حقيقية بس، من غير أي بيانات وهمية ---- */}
+      <FadeInSection>
       <section id="trips" className="scroll-mt-20 border-t border-white/10 bg-card py-14 text-text-primary">
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="mb-8 text-2xl font-bold sm:text-3xl">رحلات متاحة دلوقتي</h2>
@@ -363,8 +372,10 @@ export default function LandingPage() {
           )}
         </div>
       </section>
+      </FadeInSection>
 
       {/* ---- Driver CTA ---- */}
+      <FadeInSection>
       <section id="driver-cta" className="scroll-mt-20 border-t border-white/10 bg-gradient-to-l from-primary to-secondary py-14">
         <div className="mx-auto max-w-6xl px-4 text-center">
           <h2 className="mb-2 text-2xl font-bold sm:text-3xl">رايح مشوار وعندك مكان فاضي؟</h2>
@@ -379,7 +390,9 @@ export default function LandingPage() {
           </button>
         </div>
       </section>
+      </FadeInSection>
 
+      <FadeInSection>
       <section id="features" className="scroll-mt-20 border-t border-white/10 bg-tertiary py-14">
         <div className="mx-auto max-w-6xl px-4">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
@@ -398,8 +411,10 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      </FadeInSection>
 
       {/* ---- Vehicle Types / Services ---- */}
+      <FadeInSection>
       <section id="services" className="scroll-mt-20 border-t border-white/10 bg-card py-16 text-text-primary">
         <div className="mx-auto max-w-6xl px-4">
           <p className="mb-1 text-sm font-bold text-primary">خدماتنا</p>
@@ -411,20 +426,24 @@ export default function LandingPage() {
             {VEHICLE_TYPES.map((v) => (
               <div
                 key={v.title}
-                className="rounded-2xl border border-border bg-bg p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+                className="group overflow-hidden rounded-2xl border border-border bg-bg text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-primary-light text-primary">
-                  <v.icon size={26} />
+                <div className="flex h-24 items-center justify-center bg-gradient-to-br from-primary to-secondary">
+                  <v.icon size={36} className="text-white transition group-hover:scale-110" strokeWidth={1.6} />
                 </div>
-                <p className="font-semibold text-text-primary">{v.title}</p>
-                <p className="text-xs text-text-secondary">{v.desc}</p>
+                <div className="p-4">
+                  <p className="font-semibold text-text-primary">{v.title}</p>
+                  <p className="text-xs text-text-secondary">{v.desc}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
+      </FadeInSection>
 
       {/* ---- Stats ---- */}
+      <FadeInSection>
       <section className="border-t border-white/10 bg-card py-12">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 px-4 sm:grid-cols-4">
           {STAT_ICONS.map((s) => (
@@ -436,6 +455,7 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+      </FadeInSection>
 
       {/* ---- Footer ---- */}
       <footer className="border-t border-white/10 bg-tertiary py-12 text-white/70">
