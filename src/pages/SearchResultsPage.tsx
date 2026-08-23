@@ -28,6 +28,7 @@ export default function SearchResultsPage() {
       {
         originCity: origin,
         destinationCity: destination,
+        country: 'egypt',
         date: new Date(),
         seatsNeeded: seats,
         returnEmptyOnly: false,

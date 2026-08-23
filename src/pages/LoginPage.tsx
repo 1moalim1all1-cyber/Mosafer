@@ -1,11 +1,13 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { useAuth } from '../contexts/useAuth'
 import { syntheticEmailFromPhone } from '../lib/phoneAuth'
 
 export default function LoginPage() {
+  const { t } = useTranslation()
   const { login } = useAuth()
   const navigate = useNavigate()
   const [phone, setPhone] = useState('')
@@ -40,13 +42,13 @@ export default function LoginPage() {
             alt="مسافر"
             className="mb-4 h-28 w-28 rounded-2xl object-cover shadow-lg shadow-primary/30"
           />
-          <h1 className="text-2xl font-bold text-text-primary">أهلاً بيك تاني</h1>
-          <p className="mt-1 text-text-secondary">سجّل دخولك وكمّل رحلتك</p>
+          <h1 className="text-2xl font-bold text-text-primary">{t('auth.welcomeBack')}</h1>
+          <p className="mt-1 text-text-secondary">{t('auth.loginSubtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <Input
-            label="رقم الهاتف"
+            label={t('auth.phone')}
             type="tel"
             placeholder="01xxxxxxxxx"
             value={phone}
@@ -55,7 +57,7 @@ export default function LoginPage() {
             autoComplete="tel"
           />
           <Input
-            label="كلمة المرور"
+            label={t('auth.password')}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -63,20 +65,20 @@ export default function LoginPage() {
           />
 
           <Link to="/forgot-password" className="text-sm font-semibold text-primary hover:text-primary-hover">
-            نسيت كلمة المرور؟
+            {t('auth.forgotPassword')}
           </Link>
 
           {error && <p className="text-sm text-danger">{error}</p>}
 
           <Button type="submit" loading={loading}>
-            تسجيل الدخول
+            {t('auth.loginButton')}
           </Button>
 
           <Link
             to="/role-selection"
             className="text-center text-sm font-semibold text-primary hover:text-primary-hover"
           >
-            معندكش حساب؟ سجّل دلوقتي
+            {t('auth.noAccount')}
           </Link>
         </form>
       </div>

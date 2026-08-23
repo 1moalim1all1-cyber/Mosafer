@@ -84,6 +84,7 @@ function mapTripDoc(id: string, data: Record<string, unknown>): Trip {
     isReturnEmptyTrip: Boolean(data.isReturnEmptyTrip),
     isWomenOnly: Boolean(data.isWomenOnly),
     carType: data.carType as string,
+    country: (data.country as string) ?? 'egypt',
   }
 }
 

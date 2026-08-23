@@ -5,14 +5,7 @@ import { createTrip, subscribeDriverStatus } from '../lib/driverActions'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { LocationPicker } from '../components/LocationPicker'
-
-const GOVERNORATES = [
-  'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحر الأحمر', 'البحيرة',
-  'الفيوم', 'الغربية', 'الإسماعيلية', 'المنوفية', 'المنيا', 'القليوبية',
-  'الوادي الجديد', 'السويس', 'أسوان', 'أسيوط', 'بني سويف', 'بورسعيد',
-  'دمياط', 'الشرقية', 'جنوب سيناء', 'كفر الشيخ', 'مطروح', 'الأقصر',
-  'قنا', 'شمال سيناء', 'سوهاج',
-]
+import { COUNTRIES, DEFAULT_COUNTRY, type CountryCode } from '../lib/countries'
 
 export default function CreateTripPage() {
   const { user } = useAuth()
@@ -22,6 +15,7 @@ export default function CreateTripPage() {
   // يتحط افتراضيًا لكن يفضل قابل للتغيير عادي لو السائق عايز تاريخ تاني
   const todayStr = new Date().toISOString().split('T')[0]
 
+  const [country, setCountry] = useState<CountryCode>(DEFAULT_COUNTRY)
   const [origin, setOrigin] = useState('')
   const [destination, setDestination] = useState('')
   const [date, setDate] = useState(todayStr)
@@ -100,6 +94,7 @@ export default function CreateTripPage() {
         isReturnEmptyTrip,
         isWomenOnly,
         carType: 'اقتصادية',
+        country,
       })
       navigate('/driver')
     } catch {
@@ -126,6 +121,28 @@ export default function CreateTripPage() {
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
+          <label className="mb-1.5 block text-sm font-semibold text-text-primary">الدولة</label>
+          <div className="flex gap-2">
+            {Object.values(COUNTRIES).map((c) => (
+              <button
+                key={c.code}
+                type="button"
+                onClick={() => {
+                  setCountry(c.code)
+                  setOrigin('')
+                  setDestination('')
+                }}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-xl border-2 py-3 font-semibold transition ${
+                  country === c.code ? 'border-primary bg-primary-light text-primary' : 'border-border text-text-secondary'
+                }`}
+              >
+                <span>{c.flag}</span> {c.nameAr}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
           <label className="mb-1.5 block text-sm font-semibold text-text-primary">من</label>
           <select
             value={origin}
@@ -133,7 +150,7 @@ export default function CreateTripPage() {
             className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 focus:border-primary focus:outline-none"
           >
             <option value="">اختار المحافظة</option>
-            {GOVERNORATES.map((g) => (
+            {COUNTRIES[country].regions.map((g) => (
               <option key={g} value={g}>
                 {g}
               </option>
@@ -158,7 +175,7 @@ export default function CreateTripPage() {
             className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 focus:border-primary focus:outline-none"
           >
             <option value="">اختار المحافظة</option>
-            {GOVERNORATES.map((g) => (
+            {COUNTRIES[country].regions.map((g) => (
               <option key={g} value={g}>
                 {g}
               </option>
@@ -180,7 +197,12 @@ export default function CreateTripPage() {
           <Input label="الوقت" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
         </div>
 
-        <Input label="السعر للمقعد الواحد (ج.م)" type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
+        <Input
+          label={`السعر للمقعد الواحد (${COUNTRIES[country].currencyAr})`}
+          type="number"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
         <Input label="عدد المقاعد المتاحة" type="number" value={seats} onChange={(e) => setSeats(e.target.value)} />
         <Input label="المدة المتوقعة (دقيقة)" type="number" value={duration} onChange={(e) => setDuration(e.target.value)} />
 

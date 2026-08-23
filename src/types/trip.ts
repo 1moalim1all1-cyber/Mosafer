@@ -4,6 +4,7 @@ export interface Trip {
   id: string
   driverId: string
   status: TripStatus
+  country: string
   originCity: string
   originGovernorate: string
   originLat: number
@@ -27,6 +28,7 @@ export interface Trip {
 }
 
 export interface TripSearchParams {
+  country: string
   originCity: string
   destinationCity: string
   date: Date

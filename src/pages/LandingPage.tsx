@@ -32,6 +32,11 @@ import { subscribePublicTrips } from '../lib/trips'
 import { fetchTopTestimonials } from '../lib/ratings'
 import { fetchFaqItems } from '../lib/pages'
 import type { Trip } from '../types/trip'
+import { useTranslation } from 'react-i18next'
+import { changeLanguage } from '../lib/i18n'
+import { useCountry } from '../hooks/useCountry'
+import { CountrySelector } from '../components/CountrySelector'
+import { Globe } from 'lucide-react'
 
 const FEATURES = [
   { icon: UserRound, title: 'سائقات للسيدات', desc: 'رحلات آمنة ومريحة بقيادة سيدات' },
@@ -65,6 +70,8 @@ const NAV_LINKS = [
 
 export default function LandingPage() {
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation()
+  const [country, setCountry] = useCountry()
   const [seats, setSeats] = useState(1)
   const [tripTab, setTripTab] = useState<'رحلة واحدة' | 'رحلة ذهاب وعودة' | 'رحلات متعددة'>('رحلة واحدة')
 
@@ -73,11 +80,13 @@ export default function LandingPage() {
   const [tripsLoading, setTripsLoading] = useState(true)
 
   useEffect(() => {
-    return subscribePublicTrips((data) => {
+    setTripsLoading(true)
+    return subscribePublicTrips(country, (data) => {
       setTrips(data)
       setTripsLoading(false)
     })
-  }, [])
+  }, [country])
+
 
   function swapLocations() {
     setSwapAnimating(true)
@@ -165,17 +174,26 @@ export default function LandingPage() {
           </nav>
 
           <div className="flex items-center gap-2">
+            <CountrySelector value={country} onChange={setCountry} variant="dark" />
+            <button
+              onClick={() => changeLanguage(i18n.language === 'ar' ? 'en' : 'ar')}
+              className="flex items-center gap-1 rounded-full border border-white/20 px-3 py-1.5 text-sm font-semibold text-white/80 hover:text-white"
+              aria-label="تغيير اللغة"
+            >
+              <Globe size={14} />
+              {i18n.language === 'ar' ? 'EN' : 'عربي'}
+            </button>
             <button
               onClick={() => navigate('/login')}
               className="rounded-xl border-2 border-white/30 px-4 py-2 text-sm font-semibold"
             >
-              تسجيل الدخول
+              {t('nav.login')}
             </button>
             <button
               onClick={() => navigate('/role-selection')}
               className="rounded-xl bg-gradient-to-l from-primary to-secondary px-4 py-2 text-sm font-semibold shadow-lg shadow-primary/30"
             >
-              إنشاء حساب
+              {t('nav.signup')}
             </button>
           </div>
         </div>
@@ -195,8 +213,10 @@ export default function LandingPage() {
 
         <div className="relative flex min-h-[420px] flex-col justify-center px-5 pt-14 sm:min-h-[480px] sm:px-10 sm:pt-20 lg:px-16">
           <div className="max-w-xl mr-auto">
-            <h1 className="mb-4 whitespace-pre-line text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl">{heroTitle}</h1>
-            <p className="mb-6 text-lg text-white/85">{heroSubtitle}</p>
+            <h1 className="mb-4 whitespace-pre-line text-4xl font-extrabold leading-[1.1] tracking-tight sm:text-6xl">
+              {i18n.language === 'ar' ? heroTitle : `${t('hero.titleLine1')}\n${t('hero.titleLine2')}`}
+            </h1>
+            <p className="mb-6 text-lg text-white/85">{i18n.language === 'ar' ? heroSubtitle : t('hero.subtitle')}</p>
 
             <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
               <span className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-white/90">

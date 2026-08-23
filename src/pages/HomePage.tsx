@@ -41,7 +41,7 @@ export default function HomePage() {
   useEffect(() => {
     if (!user) return
     setTripsLoading(true)
-    const unsubscribe = subscribeAvailableTrips(user.gender, (trips) => {
+    const unsubscribe = subscribeAvailableTrips(user.gender, 'egypt', (trips: Trip[]) => {
       setAvailableTrips(trips)
       setTripsLoading(false)
     })

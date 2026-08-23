@@ -19,6 +19,7 @@ function mapTripDoc(id: string, data: DocumentData): Trip {
     id,
     driverId: data.driverId ?? '',
     status: data.status ?? 'pending',
+    country: data.country ?? 'egypt',
     originCity: data.originCity ?? '',
     originGovernorate: data.originGovernorate ?? '',
     originLat: data.originLat ?? 0,
@@ -56,6 +57,7 @@ export async function searchTrips(params: TripSearchParams, requesterGender: 'ma
 
   const constraints = [
     where('status', '==', 'active'),
+    where('country', '==', params.country),
     where('originCity', '==', params.originCity),
     where('destinationCity', '==', params.destinationCity),
     where('departureTime', '>=', Timestamp.fromDate(startOfDay)),
@@ -94,6 +96,7 @@ export function subscribeToTrip(tripId: string, callback: (trip: Trip | null) =>
  */
 export function subscribeAvailableTrips(
   requesterGender: 'male' | 'female',
+  country: string,
   callback: (trips: Trip[]) => void,
   count = 15,
 ) {
@@ -102,11 +105,12 @@ export function subscribeAvailableTrips(
   // هيبقى موجود مكان للرحلات الجديدة الفعلية جوه حد الـ 15 نتيجة
   const constraints = [
     where('status', '==', 'active'),
+    where('country', '==', country),
     where('departureTime', '>=', Timestamp.now()),
     orderBy('departureTime'),
   ]
   if (requesterGender === 'male') {
-    constraints.splice(1, 0, where('isWomenOnly', '==', false))
+    constraints.splice(2, 0, where('isWomenOnly', '==', false))
   }
   const q = query(collection(db, 'trips'), ...constraints, limit(count))
   return onSnapshot(q, (snap) => {
@@ -120,10 +124,11 @@ export function subscribeAvailableTrips(
  * الرحلات العادية بس (مش رحلات السيدات، عشان الخصوصية)، ومتاحة من
  * غير أي تسجيل دخول حسب قواعد الأمان.
  */
-export function subscribePublicTrips(callback: (trips: Trip[]) => void, count = 6) {
+export function subscribePublicTrips(country: string, callback: (trips: Trip[]) => void, count = 6) {
   const q = query(
     collection(db, 'trips'),
     where('status', '==', 'active'),
+    where('country', '==', country),
     where('isWomenOnly', '==', false),
     where('departureTime', '>=', Timestamp.now()),
     orderBy('departureTime'),

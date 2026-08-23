@@ -1,0 +1,68 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "howItWorks": "كيف تعمل",
+    "trips": "الرحلات",
+    "forDrivers": "للسائقين",
+    "contact": "تواصل معنا",
+    "login": "تسجيل الدخول",
+    "signup": "إنشاء حساب",
+    "logout": "خروج",
+    "myBookings": "رحلاتي",
+    "wallet": "المحفظة",
+    "notifications": "الإشعارات",
+    "admin": "الإدارة",
+    "profile": "حسابي"
+  },
+  "hero": {
+    "titleLine1": "سافر بسهولة..",
+    "titleLine2": "واحجز مكانك في ثواني",
+    "subtitle": "رحلات آمنة ومريحة بين محافظات مصر",
+    "fairPrices": "أسعار عادلة",
+    "fast": "سريع",
+    "safe": "آمن"
+  },
+  "search": {
+    "oneWay": "رحلة واحدة",
+    "roundTrip": "رحلة ذهاب وعودة",
+    "multiCity": "رحلات متعددة",
+    "comingSoon": "قريبًا",
+    "from": "من",
+    "to": "إلى",
+    "chooseOrigin": "اختار مكان الانطلاق",
+    "chooseDestination": "اختار الوجهة",
+    "date": "تاريخ الرحلة",
+    "chooseDate": "اختار التاريخ",
+    "passengers": "عدد الركاب",
+    "passenger": "راكب",
+    "searchButton": "ابحث عن رحلة"
+  },
+  "auth": {
+    "welcomeBack": "أهلاً بيك تاني",
+    "loginSubtitle": "سجّل دخولك وكمّل رحلتك",
+    "phone": "رقم الهاتف",
+    "password": "كلمة المرور",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "loginButton": "تسجيل الدخول",
+    "noAccount": "معندكش حساب؟ سجّل دلوقتي",
+    "fullName": "الاسم بالكامل",
+    "createAccount": "إنشاء الحساب",
+    "haveAccount": "عندك حساب بالفعل؟ سجّل الدخول",
+    "gender": "النوع",
+    "male": "ذكر",
+    "female": "أنثى",
+    "createAccountSubtitle": "خطوات بسيطة وهتبقى جاهز"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حصل خطأ، حاول تاني",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "myTrips": "رحلاتي",
+    "profile": "حسابي",
+    "search": "بحث",
+    "logout": "تسجيل الخروج",
+    "editProfile": "تعديل الملف الشخصي"
+  }
+}

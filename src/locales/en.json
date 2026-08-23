@@ -1,0 +1,68 @@
+{
+  "nav": {
+    "home": "Home",
+    "howItWorks": "How It Works",
+    "trips": "Trips",
+    "forDrivers": "For Drivers",
+    "contact": "Contact Us",
+    "login": "Log In",
+    "signup": "Sign Up",
+    "logout": "Log Out",
+    "myBookings": "My Trips",
+    "wallet": "Wallet",
+    "notifications": "Notifications",
+    "admin": "Admin",
+    "profile": "My Account"
+  },
+  "hero": {
+    "titleLine1": "Travel with ease..",
+    "titleLine2": "book your seat in seconds",
+    "subtitle": "Safe and comfortable trips between Egypt's governorates",
+    "fairPrices": "Fair prices",
+    "fast": "Fast",
+    "safe": "Safe"
+  },
+  "search": {
+    "oneWay": "One way",
+    "roundTrip": "Round trip",
+    "multiCity": "Multi-city",
+    "comingSoon": "Coming soon",
+    "from": "From",
+    "to": "To",
+    "chooseOrigin": "Choose starting point",
+    "chooseDestination": "Choose destination",
+    "date": "Trip date",
+    "chooseDate": "Choose date",
+    "passengers": "Passengers",
+    "passenger": "passenger",
+    "searchButton": "Search for a trip"
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "loginSubtitle": "Log in and continue your trip",
+    "phone": "Phone number",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "loginButton": "Log in",
+    "noAccount": "Don't have an account? Sign up",
+    "fullName": "Full name",
+    "createAccount": "Create account",
+    "haveAccount": "Already have an account? Log in",
+    "gender": "Gender",
+    "male": "Male",
+    "female": "Female",
+    "createAccountSubtitle": "A few simple steps and you're ready"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong, try again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "myTrips": "My Trips",
+    "profile": "My Account",
+    "search": "Search",
+    "logout": "Log Out",
+    "editProfile": "Edit Profile"
+  }
+}

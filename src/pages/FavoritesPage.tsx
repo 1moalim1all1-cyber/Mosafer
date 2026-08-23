@@ -45,6 +45,7 @@ export default function FavoritesPage() {
             isReturnEmptyTrip: Boolean(data.isReturnEmptyTrip),
             isWomenOnly: Boolean(data.isWomenOnly),
             carType: data.carType ?? '',
+            country: data.country ?? 'egypt',
           }
           const others = prev.filter((t) => t.id !== trip.id)
           return [...others, trip]
