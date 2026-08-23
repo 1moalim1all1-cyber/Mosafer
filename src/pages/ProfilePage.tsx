@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/useAuth'
 import { Button } from '../components/ui/Button'
 import { BottomNav } from '../components/BottomNav'
@@ -6,6 +7,7 @@ import { BottomNav } from '../components/BottomNav'
 export default function ProfilePage() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   async function handleLogout() {
     if (!confirm('متأكد إنك عايز تسجّل خروج من حسابك؟')) return
@@ -36,7 +38,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-bg pb-24">
       <header className="border-b border-border bg-card px-4 py-4">
-        <h1 className="text-lg font-bold text-text-primary">الملف الشخصي</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('profile.title')}</h1>
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">
@@ -84,13 +86,13 @@ export default function ProfilePage() {
             المفضلة
           </Button>
           <Button variant="secondary" onClick={() => navigate('/about-help')}>
-            عن مسافر ومساعدة
+            {t('profile.aboutHelp')}
           </Button>
           <Button variant="secondary" onClick={() => navigate('/support')}>
             الدعم والشكاوى
           </Button>
           <Button variant="danger" onClick={handleLogout}>
-            تسجيل الخروج
+            {t('profile.logout')}
           </Button>
         </div>
       </main>

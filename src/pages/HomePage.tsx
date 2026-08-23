@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../components/ui/Button'
 import { BottomNav } from '../components/BottomNav'
 import { TripCard } from '../components/TripCard'
@@ -20,6 +21,7 @@ const GOVERNORATES = [
 
 export default function HomePage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { user, logout } = useAuth()
   const [origin, setOrigin] = useState('')
   const [destination, setDestination] = useState('')
@@ -78,7 +80,7 @@ export default function HomePage() {
 
       <div className="bg-gradient-to-br from-primary to-secondary px-4 pb-10 pt-6 text-white">
         <div className="mx-auto max-w-lg">
-          <h2 className="mb-1 text-2xl font-bold">مسافر فين؟</h2>
+          <h2 className="mb-1 text-2xl font-bold">{t('home.whereTo')}</h2>
           <p className="text-sm text-white/70">شارك رحلتك مع آلاف الركاب والسائقين في مصر</p>
           {completedCount >= 5 && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-card/15 px-4 py-2 backdrop-blur-sm">
@@ -171,7 +173,7 @@ export default function HomePage() {
         </div>
         </div>
 
-        <h2 className="mb-4 mt-8 text-xl font-bold text-text-primary">رحلات متاحة دلوقتي</h2>
+        <h2 className="mb-4 mt-8 text-xl font-bold text-text-primary">{t('home.availableTripsNow')}</h2>
 
         {tripsLoading && (
           <div className="space-y-4">
@@ -184,7 +186,7 @@ export default function HomePage() {
         {!tripsLoading && availableTrips.length === 0 && (
           <div className="flex flex-col items-center py-6">
             <Animated3DCar size={110} />
-            <p className="mt-2 text-text-secondary">مفيش رحلات متاحة دلوقتي، جرّب تاني بعد شوية</p>
+            <p className="mt-2 text-text-secondary">{t('home.noTripsNow')}</p>
           </div>
         )}
 

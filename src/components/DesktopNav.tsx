@@ -1,4 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Search, CarFront, Wallet, UserCircle, LayoutDashboard, Bell } from 'lucide-react'
 import { useAuth } from '../contexts/useAuth'
 
@@ -12,19 +13,20 @@ export function DesktopNav() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuth()
+  const { t } = useTranslation()
 
   const links = [
-    { path: '/', icon: Search, label: 'مسافر فين؟' },
-    { path: '/my-bookings', icon: CarFront, label: 'رحلاتي' },
-    { path: '/wallet', icon: Wallet, label: 'المحفظة' },
-    { path: '/notifications', icon: Bell, label: 'الإشعارات' },
+    { path: '/', icon: Search, label: t('bottomNav.home') },
+    { path: '/my-bookings', icon: CarFront, label: t('bottomNav.myTrips') },
+    { path: '/wallet', icon: Wallet, label: t('bottomNav.wallet') },
+    { path: '/notifications', icon: Bell, label: t('notifications.title') },
   ]
 
   if (user?.role === 'driver') {
-    links.splice(1, 0, { path: '/driver', icon: CarFront, label: 'لوحة السائق' })
+    links.splice(1, 0, { path: '/driver', icon: CarFront, label: t('bottomNav.driverTrips') })
   }
   if (user?.role === 'admin') {
-    links.splice(1, 0, { path: '/admin', icon: LayoutDashboard, label: 'الإدارة' })
+    links.splice(1, 0, { path: '/admin', icon: LayoutDashboard, label: t('bottomNav.admin') })
   }
 
   return (
@@ -59,10 +61,10 @@ export function DesktopNav() {
             className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-sm font-semibold text-text-primary hover:border-primary"
           >
             <UserCircle size={16} />
-            {user?.fullName ?? 'حسابي'}
+            {user?.fullName ?? t('bottomNav.profile')}
           </button>
           <button onClick={() => logout()} className="text-sm font-semibold text-danger">
-            خروج
+            {t('profile.logout')}
           </button>
         </div>
       </div>

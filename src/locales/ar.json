@@ -51,7 +51,12 @@
     "gender": "النوع",
     "male": "ذكر",
     "female": "أنثى",
-    "createAccountSubtitle": "خطوات بسيطة وهتبقى جاهز"
+    "createAccountSubtitle": "خطوات بسيطة وهتبقى جاهز",
+    "role": "نوع الحساب",
+    "passenger": "راكب",
+    "driver": "سائق",
+    "phoneHint": "٠١xxxxxxxxx",
+    "referralOptional": "كود الدعوة (اختياري)"
   },
   "common": {
     "loading": "جاري التحميل...",
@@ -63,6 +68,57 @@
     "profile": "حسابي",
     "search": "بحث",
     "logout": "تسجيل الخروج",
-    "editProfile": "تعديل الملف الشخصي"
+    "editProfile": "تعديل الملف الشخصي",
+    "currency": "ج.م"
+  },
+  "home": {
+    "whereTo": "مسافر فين؟",
+    "availableTripsNow": "رحلات متاحة دلوقتي",
+    "noTripsNow": "مفيش رحلات متاحة دلوقتي، جرّب تاني بعد شوية",
+    "seats": "راكب"
+  },
+  "bottomNav": {
+    "home": "مسافر فين؟",
+    "myTrips": "رحلاتي",
+    "wallet": "المحفظة",
+    "profile": "حسابي",
+    "driverTrips": "رحلاتي كسائق",
+    "addTrip": "أضف رحلة",
+    "admin": "الإدارة"
+  },
+  "bookings": {
+    "title": "رحلاتي",
+    "pending": "بانتظار الموافقة",
+    "confirmed": "مؤكدة",
+    "completed": "مكتملة",
+    "cancelled": "ملغاة",
+    "rejected": "مرفوضة",
+    "noBookings": "مفيش حجوزات لسه",
+    "cancelBooking": "إلغاء الحجز",
+    "trackDriver": "تتبّع السائق",
+    "rateTrip": "قيّم الرحلة",
+    "chat": "محادثة",
+    "seatsCount": "مقاعد"
+  },
+  "wallet": {
+    "title": "المحفظة",
+    "balance": "رصيدك الحالي",
+    "deposit": "إيداع",
+    "withdraw": "سحب",
+    "transactions": "العمليات",
+    "noTransactions": "مفيش عمليات لسه"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "editProfile": "تعديل البيانات",
+    "referralCode": "كود الدعوة",
+    "aboutHelp": "عن مسافر ومساعدة",
+    "support": "الدعم الفني",
+    "logout": "تسجيل الخروج"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "markAllRead": "تحديد الكل كمقروء",
+    "noNotifications": "مفيش إشعارات لسه"
   }
 }

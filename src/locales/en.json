@@ -51,7 +51,12 @@
     "gender": "Gender",
     "male": "Male",
     "female": "Female",
-    "createAccountSubtitle": "A few simple steps and you're ready"
+    "createAccountSubtitle": "A few simple steps and you're ready",
+    "role": "Account Type",
+    "passenger": "Passenger",
+    "driver": "Driver",
+    "phoneHint": "01xxxxxxxxx",
+    "referralOptional": "Referral Code (optional)"
   },
   "common": {
     "loading": "Loading...",
@@ -63,6 +68,57 @@
     "profile": "My Account",
     "search": "Search",
     "logout": "Log Out",
-    "editProfile": "Edit Profile"
+    "editProfile": "Edit Profile",
+    "currency": "EGP"
+  },
+  "home": {
+    "whereTo": "Where to?",
+    "availableTripsNow": "Available Trips Now",
+    "noTripsNow": "No trips available right now, check back soon",
+    "seats": "passenger"
+  },
+  "bottomNav": {
+    "home": "Where to?",
+    "myTrips": "My Trips",
+    "wallet": "Wallet",
+    "profile": "My Account",
+    "driverTrips": "My Trips (Driver)",
+    "addTrip": "Add Trip",
+    "admin": "Admin"
+  },
+  "bookings": {
+    "title": "My Trips",
+    "pending": "Pending Approval",
+    "confirmed": "Confirmed",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "rejected": "Rejected",
+    "noBookings": "No bookings yet",
+    "cancelBooking": "Cancel Booking",
+    "trackDriver": "Track Driver",
+    "rateTrip": "Rate Trip",
+    "chat": "Chat",
+    "seatsCount": "seats"
+  },
+  "wallet": {
+    "title": "Wallet",
+    "balance": "Your Balance",
+    "deposit": "Deposit",
+    "withdraw": "Withdraw",
+    "transactions": "Transactions",
+    "noTransactions": "No transactions yet"
+  },
+  "profile": {
+    "title": "Profile",
+    "editProfile": "Edit Details",
+    "referralCode": "Referral Code",
+    "aboutHelp": "About & Help",
+    "support": "Support",
+    "logout": "Log Out"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark All Read",
+    "noNotifications": "No notifications yet"
   }
 }

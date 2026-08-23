@@ -1,37 +1,39 @@
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Search, CarFront, PlusCircle, Wallet, UserCircle, LayoutDashboard } from 'lucide-react'
 import { useAuth } from '../contexts/useAuth'
-
-const PASSENGER_TABS = [
-  { path: '/', icon: Search, label: 'مسافر فين؟' },
-  { path: '/my-bookings', icon: CarFront, label: 'رحلاتي' },
-  { path: '/wallet', icon: Wallet, label: 'المحفظة' },
-  { path: '/profile', icon: UserCircle, label: 'حسابي' },
-]
 
 export function BottomNav() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
+  const { t } = useTranslation()
 
-  let tabs = PASSENGER_TABS
+  const passengerTabs = [
+    { path: '/', icon: Search, label: t('bottomNav.home') },
+    { path: '/my-bookings', icon: CarFront, label: t('bottomNav.myTrips') },
+    { path: '/wallet', icon: Wallet, label: t('bottomNav.wallet') },
+    { path: '/profile', icon: UserCircle, label: t('bottomNav.profile') },
+  ]
+
+  let tabs = passengerTabs
 
   if (user?.role === 'driver') {
     tabs = [
-      PASSENGER_TABS[0],
-      { path: '/driver', icon: CarFront, label: 'رحلاتي كسائق' },
-      { path: '/driver/create-trip', icon: PlusCircle, label: 'أضف رحلة' },
-      PASSENGER_TABS[2],
-      PASSENGER_TABS[3],
+      passengerTabs[0],
+      { path: '/driver', icon: CarFront, label: t('bottomNav.driverTrips') },
+      { path: '/driver/create-trip', icon: PlusCircle, label: t('bottomNav.addTrip') },
+      passengerTabs[2],
+      passengerTabs[3],
     ]
   }
 
   if (user?.role === 'admin') {
     tabs = [
-      PASSENGER_TABS[0],
-      { path: '/admin', icon: LayoutDashboard, label: 'الإدارة' },
-      PASSENGER_TABS[2],
-      PASSENGER_TABS[3],
+      passengerTabs[0],
+      { path: '/admin', icon: LayoutDashboard, label: t('bottomNav.admin') },
+      passengerTabs[2],
+      passengerTabs[3],
     ]
   }
 

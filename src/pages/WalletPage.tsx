@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/useAuth'
 import {
   subscribeWalletBalance,
@@ -26,6 +27,7 @@ const WITHDRAW_METHODS = ['فودافون كاش', 'إنستاباي', 'اتصا
 export default function WalletPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [balance, setBalance] = useState(0)
   const [transactions, setTransactions] = useState<WalletTransaction[]>([])
   const [settings, setSettings] = useState<AppSettings | null>(null)
@@ -90,7 +92,7 @@ export default function WalletPage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
-        <h1 className="text-lg font-bold text-text-primary">المحفظة</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('wallet.title')}</h1>
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">
@@ -113,8 +115,8 @@ export default function WalletPage() {
           </div>
         </div>
 
-        <h2 className="mb-3 font-bold text-text-primary">سجل العمليات</h2>
-        {transactions.length === 0 && <p className="py-8 text-center text-text-secondary">لسه مفيش عمليات على محفظتك</p>}
+        <h2 className="mb-3 font-bold text-text-primary">{t('wallet.transactions')}</h2>
+        {transactions.length === 0 && <p className="py-8 text-center text-text-secondary">{t('wallet.noTransactions')}</p>}
         {transactions.map((tx) => {
           const isCredit = tx.type === 'deposit' || tx.type === 'refund'
           const color = tx.status === 'pending' ? 'text-warning' : isCredit ? 'text-success' : 'text-danger'

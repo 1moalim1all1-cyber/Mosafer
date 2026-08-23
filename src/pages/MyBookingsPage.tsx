@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/useAuth'
 import { subscribePassengerBookings } from '../lib/bookings'
 import { cancelBooking } from '../lib/booking'
@@ -9,17 +10,21 @@ import { Button } from '../components/ui/Button'
 import { BottomNav } from '../components/BottomNav'
 import { RatingModal } from '../components/RatingModal'
 
-const STATUS_LABELS: Record<Booking['status'], { label: string; color: string }> = {
-  pending: { label: 'بانتظار الرد', color: 'text-warning' },
-  confirmed: { label: 'مؤكد', color: 'text-success' },
-  rejected: { label: 'مرفوض', color: 'text-danger' },
-  cancelled: { label: 'ملغي', color: 'text-danger' },
-  completed: { label: 'منتهي', color: 'text-primary' },
+function getStatusLabels(t: (key: string) => string): Record<Booking['status'], { label: string; color: string }> {
+  return {
+    pending: { label: t('bookings.pending'), color: 'text-warning' },
+    confirmed: { label: t('bookings.confirmed'), color: 'text-success' },
+    rejected: { label: t('bookings.rejected'), color: 'text-danger' },
+    cancelled: { label: t('bookings.cancelled'), color: 'text-danger' },
+    completed: { label: t('bookings.completed'), color: 'text-primary' },
+  }
 }
 
 export default function MyBookingsPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
+  const STATUS_LABELS = getStatusLabels(t)
   const [bookings, setBookings] = useState<Booking[]>([])
   const [cancellingId, setCancellingId] = useState<string | null>(null)
   const [ratingBooking, setRatingBooking] = useState<Booking | null>(null)
@@ -54,7 +59,7 @@ export default function MyBookingsPage() {
   return (
     <div className="min-h-screen bg-bg pb-24">
       <header className="border-b border-border bg-card px-4 py-4">
-        <h1 className="text-lg font-bold text-text-primary">رحلاتي</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('bookings.title')}</h1>
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">
@@ -76,7 +81,7 @@ export default function MyBookingsPage() {
               </span>
             </div>
             <p className="mb-3 text-text-primary">
-              {b.seatsBooked} مقاعد · {b.totalPrice.toFixed(0)} ج.م
+              {b.seatsBooked} {t('bookings.seatsCount')} · {b.totalPrice.toFixed(0)} {t('common.currency')}
             </p>
             {b.status === 'confirmed' && b.startPin && !b.pinVerified && (
               <div className="mb-3 rounded-xl bg-primary-light p-3 text-center">
@@ -93,7 +98,7 @@ export default function MyBookingsPage() {
                   disabled={cancellingId === b.id}
                   className="text-sm font-semibold text-danger"
                 >
-                  إلغاء الحجز
+                  {t('bookings.cancelBooking')}
                 </button>
               )}
               {b.status === 'confirmed' && (
@@ -101,7 +106,7 @@ export default function MyBookingsPage() {
                   onClick={() => navigate(`/track/${b.id}`)}
                   className="text-sm font-semibold text-success"
                 >
-                  🚗 تتبّع السائق
+                  🚗 {t('bookings.trackDriver')}
                 </button>
               )}
               {b.status === 'completed' && (
