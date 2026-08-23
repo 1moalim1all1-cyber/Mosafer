@@ -1,13 +1,14 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/useAuth'
+import { changeLanguage } from '../lib/i18n'
 import { Button } from '../components/ui/Button'
 import { BottomNav } from '../components/BottomNav'
 
 export default function ProfilePage() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   async function handleLogout() {
     if (!confirm('متأكد إنك عايز تسجّل خروج من حسابك؟')) return
@@ -80,10 +81,16 @@ export default function ProfilePage() {
             المحفظة
           </Button>
           <Button variant="secondary" onClick={() => navigate('/my-bookings')}>
-            رحلاتي
+            {t('bottomNav.myTrips')}
           </Button>
           <Button variant="secondary" onClick={() => navigate('/favorites')}>
             المفضلة
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => changeLanguage(i18n.language === 'ar' ? 'en' : 'ar')}
+          >
+            🌐 {i18n.language === 'ar' ? 'English' : 'العربية'}
           </Button>
           <Button variant="secondary" onClick={() => navigate('/about-help')}>
             {t('profile.aboutHelp')}

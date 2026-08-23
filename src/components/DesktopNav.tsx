@@ -1,7 +1,8 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Search, CarFront, Wallet, UserCircle, LayoutDashboard, Bell } from 'lucide-react'
+import { Search, CarFront, Wallet, UserCircle, LayoutDashboard, Bell, Globe } from 'lucide-react'
 import { useAuth } from '../contexts/useAuth'
+import { changeLanguage } from '../lib/i18n'
 
 /**
  * شريط تنقّل علوي بيظهر بس على شاشات الكمبيوتر (lg فأكبر)، عشان
@@ -13,7 +14,7 @@ export function DesktopNav() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user, logout } = useAuth()
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   const links = [
     { path: '/', icon: Search, label: t('bottomNav.home') },
@@ -56,6 +57,14 @@ export function DesktopNav() {
         </nav>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => changeLanguage(i18n.language === 'ar' ? 'en' : 'ar')}
+            className="flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-sm font-semibold text-text-secondary hover:text-text-primary"
+            aria-label="تغيير اللغة"
+          >
+            <Globe size={14} />
+            {i18n.language === 'ar' ? 'EN' : 'عربي'}
+          </button>
           <button
             onClick={() => navigate('/profile')}
             className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-sm font-semibold text-text-primary hover:border-primary"
