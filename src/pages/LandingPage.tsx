@@ -38,27 +38,33 @@ import { useCountry } from '../hooks/useCountry'
 import { CountrySelector } from '../components/CountrySelector'
 import { Globe } from 'lucide-react'
 
-const FEATURES = [
-  { icon: UserRound, title: 'سائقات للسيدات', desc: 'رحلات آمنة ومريحة بقيادة سيدات' },
-  { icon: Users2, title: 'رحلات مشتركة', desc: 'شارك الرحلة وقلل تكلفة السفر' },
-  { icon: Navigation2, title: 'تتبّع مباشر', desc: 'تابع رحلتك لحظة بلحظة حتى الوصول' },
-  { icon: Wallet, title: 'دفع آمن', desc: 'طرق دفع متعددة محلية وآمنة' },
-  { icon: Headphones, title: 'دعم على مدار الساعة', desc: 'فريق دعم متاح لمساعدتك في أي وقت' },
-]
+function getFeatures(t: (key: string) => string) {
+  return [
+    { icon: UserRound, title: t('landing.featWomenDrivers'), desc: t('landing.featWomenDriversDesc') },
+    { icon: Users2, title: t('landing.featShared'), desc: t('landing.featSharedDesc') },
+    { icon: Navigation2, title: t('landing.featTracking'), desc: t('landing.featTrackingDesc') },
+    { icon: Wallet, title: t('landing.featPayment'), desc: t('landing.featPaymentDesc') },
+    { icon: Headphones, title: t('landing.featSupport'), desc: t('landing.featSupportDesc') },
+  ]
+}
 
-const VEHICLE_TYPES = [
-  { icon: CarFront, title: 'سيارة خاصة', desc: 'راحة وخصوصية' },
-  { icon: Truck, title: 'ميكروباص', desc: 'رحلات جماعية صغيرة' },
-  { icon: Bus, title: 'أتوبيس', desc: 'رحلات مريحة وآمنة' },
-  { icon: UserRound, title: 'سائقة للسيدات', desc: 'أمان وخصوصية تامة' },
-]
+function getVehicleTypes(t: (key: string) => string) {
+  return [
+    { icon: CarFront, title: t('landing.vehiclePrivate'), desc: t('landing.vehiclePrivateDesc') },
+    { icon: Truck, title: t('landing.vehicleMicrobus'), desc: t('landing.vehicleMicrobusDesc') },
+    { icon: Bus, title: t('landing.vehicleBus'), desc: t('landing.vehicleBusDesc') },
+    { icon: UserRound, title: t('landing.vehicleWomenDriver'), desc: t('landing.vehicleWomenDriverDesc') },
+  ]
+}
 
-const STAT_ICONS = [
-  { label: 'سائق معتمد', icon: UserRound, key: 'drivers' as const },
-  { label: 'رحلة مكتملة', icon: CarFront, key: 'trips' as const },
-  { label: 'مستخدم سعيد', icon: Users2, key: 'users' as const },
-  { label: 'محافظة', icon: MapPinned, key: 'cities' as const },
-]
+function getStatIcons(t: (key: string) => string) {
+  return [
+    { label: t('landing.statDrivers'), icon: UserRound, key: 'drivers' as const },
+    { label: t('landing.statTrips'), icon: CarFront, key: 'trips' as const },
+    { label: t('landing.statUsers'), icon: Users2, key: 'users' as const },
+    { label: t('landing.statCities'), icon: MapPinned, key: 'cities' as const },
+  ]
+}
 
 const NAV_LINKS = [
   { label: 'الرئيسية', href: '#home' },
@@ -340,9 +346,9 @@ export default function LandingPage() {
           <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">{t('landing.howMosaferHelps')}</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {[
-              { icon: MapPin, title: 'اختار رحلتك', desc: 'اختر المحافظة والوجهة والموعد المناسب' },
-              { icon: CarFront, title: 'احجز مكانك', desc: 'اختار الرحلة والمقعد المناسب لك' },
-              { icon: ShieldCheck, title: 'سافر بأمان', desc: 'تواصل مع السائق وتابع تفاصيل رحلتك' },
+              { icon: MapPin, title: t('landing.step1Title'), desc: t('landing.step1Desc') },
+              { icon: CarFront, title: t('landing.step2Title'), desc: t('landing.step2Desc') },
+              { icon: ShieldCheck, title: t('landing.step3Title'), desc: t('landing.step3Desc') },
             ].map((step, i) => (
               <div key={step.title} className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
                 <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-primary">
@@ -410,13 +416,13 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl px-4 text-center">
           <h2 className="mb-2 text-2xl font-bold sm:text-3xl">{t('landing.driverCtaTitle')}</h2>
           <p className="mx-auto mb-6 max-w-md text-white/85">
-            شارك رحلتك وساعد مسافرين تانيين وقلّل تكلفة مشوارك
+            {t('landing.driverCtaSubtitle')}
           </p>
           <button
             onClick={() => navigate('/role-selection')}
             className="rounded-xl bg-white px-8 py-3.5 font-bold text-primary shadow-md transition hover:brightness-95"
           >
-            أضف رحلة
+            {t('landing.addTripButton')}
           </button>
         </div>
       </section>
@@ -424,7 +430,7 @@ export default function LandingPage() {
       <section id="features" className="scroll-mt-20 border-t border-white/10 bg-tertiary py-14">
         <div className="mx-auto max-w-6xl px-4">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-            {FEATURES.map((f) => (
+            {getFeatures(t).map((f) => (
               <div
                 key={f.title}
                 className="group rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-center transition duration-300 [transform-style:preserve-3d] hover:[transform:perspective(600px)_translateY(-4px)_rotateX(4deg)] hover:border-white/20"
@@ -446,10 +452,10 @@ export default function LandingPage() {
           <p className="mb-1 text-sm font-bold text-primary">{t('landing.ourServices')}</p>
           <h2 className="mb-2 text-2xl font-bold sm:text-3xl">{t('landing.chooseVehicle')}</h2>
           <p className="mb-8 max-w-lg text-text-secondary">
-            نوفر لك جميع وسائل النقل لتناسب احتياجاتك ومميزانيتك
+            {t('landing.servicesSubtitle')}
           </p>
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {VEHICLE_TYPES.map((v) => (
+            {getVehicleTypes(t).map((v) => (
               <div
                 key={v.title}
                 className="group overflow-hidden rounded-2xl border border-border bg-bg text-center shadow-sm transition duration-300 [transform-style:preserve-3d] hover:[transform:perspective(600px)_translateY(-4px)_rotateX(4deg)] hover:shadow-lg"
@@ -470,7 +476,7 @@ export default function LandingPage() {
       {/* ---- Stats ---- */}
       <section className="border-t border-white/10 bg-card py-12">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 px-4 sm:grid-cols-4">
-          {STAT_ICONS.map((s) => (
+          {getStatIcons(t).map((s) => (
             <div key={s.label} className="flex flex-col items-center rounded-2xl border border-border bg-bg p-5 text-center">
               <s.icon size={22} className="mb-2 text-primary" />
               <p className="text-2xl font-bold text-text-primary">{stats[s.key]}</p>
