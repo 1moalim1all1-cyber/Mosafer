@@ -35,7 +35,9 @@
     "chooseDate": "اختار التاريخ",
     "passengers": "عدد الركاب",
     "passenger": "راكب",
-    "searchButton": "ابحث عن رحلة"
+    "searchButton": "ابحث عن رحلة",
+    "selectGovernorate": "اختار المحافظة",
+    "swap": "بدّل بين نقطة الانطلاق والوجهة"
   },
   "auth": {
     "welcomeBack": "أهلاً بيك تاني",
@@ -56,7 +58,15 @@
     "passenger": "راكب",
     "driver": "سائق",
     "phoneHint": "٠١xxxxxxxxx",
-    "referralOptional": "كود الدعوة (اختياري)"
+    "referralOptional": "كود الدعوة (اختياري)",
+    "createDriverAccount": "إنشاء حساب سائق",
+    "createPassengerAccount": "إنشاء حساب راكب",
+    "createAccountButton": "إنشاء الحساب",
+    "termsAgree": "بالتسجيل إنت موافق على",
+    "terms": "الشروط والأحكام",
+    "and": "و",
+    "privacy": "سياسة الخصوصية",
+    "referralPlaceholder": "لو صاحبك بعتلك كود، اكتبه هنا"
   },
   "common": {
     "loading": "جاري التحميل...",

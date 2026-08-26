@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/useAuth'
 import { subscribeNotifications, markNotificationRead, markAllNotificationsRead, type AppNotification } from '../lib/notifications'
 
@@ -18,6 +19,7 @@ const TYPE_ICONS: Record<string, string> = {
 export default function NotificationsPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [notifications, setNotifications] = useState<AppNotification[]>([])
 
   useEffect(() => {
@@ -32,18 +34,18 @@ export default function NotificationsPage() {
           <button onClick={() => navigate(-1)} className="text-xl">
             ←
           </button>
-          <h1 className="text-lg font-bold text-text-primary">الإشعارات</h1>
+          <h1 className="text-lg font-bold text-text-primary">{t('notifications.title')}</h1>
         </div>
         <button
           onClick={() => user && markAllNotificationsRead(user.uid)}
           className="text-sm font-semibold text-primary"
         >
-          تعليم الكل كمقروء
+          {t('notifications.markAllRead')}
         </button>
       </header>
 
       <main className="mx-auto max-w-lg">
-        {notifications.length === 0 && <p className="py-12 text-center text-text-secondary">لسه مفيش إشعارات</p>}
+        {notifications.length === 0 && <p className="py-12 text-center text-text-secondary">{t('notifications.noNotifications')}</p>}
         {notifications.map((n) => (
           <button
             key={n.id}

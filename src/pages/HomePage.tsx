@@ -98,14 +98,14 @@ export default function HomePage() {
           <div className="relative">
             <div>
               <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-                <MapPin size={14} className="text-primary" /> من
+                <MapPin size={14} className="text-primary" /> {t('search.from')}
               </label>
               <select
                 value={origin}
                 onChange={(e) => setOrigin(e.target.value)}
                 className="w-full rounded-xl border-2 border-border bg-bg px-4 py-3.5 text-base transition focus:border-primary focus:outline-none"
               >
-                <option value="">اختار المحافظة</option>
+                <option value="">{t('search.selectGovernorate')}</option>
                 {GOVERNORATES.map((g) => (
                   <option key={g} value={g}>
                     {g}
@@ -121,7 +121,7 @@ export default function HomePage() {
                 setOrigin(destination)
                 setDestination(o)
               }}
-              aria-label="بدّل بين نقطة الانطلاق والوجهة"
+              aria-label={t('search.swap')}
               className="absolute left-1/2 top-full z-10 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-border bg-card text-primary shadow-sm transition hover:border-primary"
             >
               <ArrowLeftRight size={14} className="rotate-90" />
@@ -130,14 +130,14 @@ export default function HomePage() {
 
           <div>
             <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-              <MapPin size={14} className="text-primary" /> إلى
+              <MapPin size={14} className="text-primary" /> {t('search.to')}
             </label>
             <select
               value={destination}
               onChange={(e) => setDestination(e.target.value)}
               className="w-full rounded-xl border-2 border-border bg-bg px-4 py-3.5 text-base transition focus:border-primary focus:outline-none"
             >
-              <option value="">اختار المحافظة</option>
+              <option value="">{t('search.selectGovernorate')}</option>
               {GOVERNORATES.map((g) => (
                 <option key={g} value={g}>
                   {g}
@@ -148,7 +148,7 @@ export default function HomePage() {
 
           <div className="flex items-center justify-between rounded-xl border-2 border-border bg-bg px-4 py-3">
             <span className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-              <Users size={14} className="text-primary" /> عدد الركاب
+              <Users size={14} className="text-primary" /> {t('search.passengers')}
             </span>
             <div className="flex items-center gap-3">
               <button
@@ -168,7 +168,7 @@ export default function HomePage() {
           </div>
 
           <Button onClick={handleSearch} disabled={!origin || !destination} icon={<Search size={18} />}>
-            ابحث عن رحلة
+            {t('search.searchButton')}
           </Button>
         </div>
         </div>

@@ -35,17 +35,19 @@
     "chooseDate": "Choose date",
     "passengers": "Passengers",
     "passenger": "passenger",
-    "searchButton": "Search for a trip"
+    "searchButton": "Search for a Trip",
+    "selectGovernorate": "Select Governorate",
+    "swap": "Swap origin and destination"
   },
   "auth": {
-    "welcomeBack": "Welcome back",
-    "loginSubtitle": "Log in and continue your trip",
-    "phone": "Phone number",
+    "welcomeBack": "Welcome Back",
+    "loginSubtitle": "Log in and continue your journey",
+    "phone": "Phone Number",
     "password": "Password",
     "forgotPassword": "Forgot password?",
-    "loginButton": "Log in",
-    "noAccount": "Don't have an account? Sign up",
-    "fullName": "Full name",
+    "loginButton": "Log In",
+    "noAccount": "Don't have an account? Sign up now",
+    "fullName": "Full Name",
     "createAccount": "Create account",
     "haveAccount": "Already have an account? Log in",
     "gender": "Gender",
@@ -56,7 +58,15 @@
     "passenger": "Passenger",
     "driver": "Driver",
     "phoneHint": "01xxxxxxxxx",
-    "referralOptional": "Referral Code (optional)"
+    "referralOptional": "Referral Code (optional)",
+    "createDriverAccount": "Create Driver Account",
+    "createPassengerAccount": "Create Passenger Account",
+    "createAccountButton": "Create Account",
+    "termsAgree": "By signing up you agree to the",
+    "terms": "Terms & Conditions",
+    "and": "and",
+    "privacy": "Privacy Policy",
+    "referralPlaceholder": "If a friend sent you a code, enter it here"
   },
   "common": {
     "loading": "Loading...",

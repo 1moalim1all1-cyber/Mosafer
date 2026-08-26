@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { useAuth } from '../contexts/useAuth'
@@ -7,6 +8,7 @@ import { syntheticEmailFromPhone } from '../lib/phoneAuth'
 import type { Gender, UserRole } from '../types/user'
 
 export default function RegisterPage() {
+  const { t } = useTranslation()
   const { register } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -58,13 +60,13 @@ export default function RegisterPage() {
   return (
     <div className="mx-auto max-w-md px-4 py-10">
       <h1 className="mb-6 text-center text-2xl font-bold text-text-primary">
-        {role === 'driver' ? 'إنشاء حساب سائق' : 'إنشاء حساب راكب'}
+        {role === 'driver' ? t('auth.createDriverAccount') : t('auth.createPassengerAccount')}
       </h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Input label="الاسم بالكامل" value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" />
+        <Input label={t('auth.fullName')} value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" />
         <Input
-          label="رقم الهاتف"
+          label={t('auth.phone')}
           type="tel"
           placeholder="01xxxxxxxxx"
           value={phone}
@@ -73,7 +75,7 @@ export default function RegisterPage() {
           autoComplete="tel"
         />
         <Input
-          label="كلمة المرور"
+          label={t('auth.password')}
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -81,7 +83,7 @@ export default function RegisterPage() {
         />
 
         <div>
-          <p className="mb-1.5 text-sm font-semibold text-text-primary">النوع</p>
+          <p className="mb-1.5 text-sm font-semibold text-text-primary">{t('auth.gender')}</p>
           <div className="grid grid-cols-2 gap-3">
             <button
               type="button"
@@ -90,7 +92,7 @@ export default function RegisterPage() {
                 gender === 'male' ? 'border-primary bg-primary-light text-primary' : 'border-border text-text-secondary'
               }`}
             >
-              ذكر
+              {t('auth.male')}
             </button>
             <button
               type="button"
@@ -99,14 +101,14 @@ export default function RegisterPage() {
                 gender === 'female' ? 'border-primary bg-primary-light text-primary' : 'border-border text-text-secondary'
               }`}
             >
-              أنثى
+              {t('auth.female')}
             </button>
           </div>
         </div>
 
         <Input
-          label="كود دعوة (اختياري)"
-          placeholder="لو صاحبك بعتلك كود، اكتبه هنا"
+          label={t('auth.referralOptional')}
+          placeholder={t('auth.referralPlaceholder')}
           value={referralCode}
           onChange={(e) => setReferralCode(e.target.value)}
         />
@@ -114,22 +116,22 @@ export default function RegisterPage() {
         {error && <p className="text-sm text-danger">{error}</p>}
 
         <Button type="submit" loading={loading}>
-          إنشاء الحساب
+          {t('auth.createAccountButton')}
         </Button>
 
         <p className="text-center text-sm text-text-secondary">
-          بالتسجيل إنت موافق على{' '}
+          {t('auth.termsAgree')}{' '}
           <Link to="/page/terms" className="font-semibold text-primary">
-            الشروط والأحكام
+            {t('auth.terms')}
           </Link>{' '}
-          و{' '}
+          {t('auth.and')}{' '}
           <Link to="/page/privacy" className="font-semibold text-primary">
-            سياسة الخصوصية
+            {t('auth.privacy')}
           </Link>
         </p>
 
         <Link to="/login" className="text-center text-sm font-semibold text-primary">
-          عندك حساب بالفعل؟ سجّل الدخول
+          {t('auth.haveAccount')}
         </Link>
       </form>
     </div>
