@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/useAuth'
 import { subscribeChatMessages, sendMessage, type ChatMessage } from '../lib/chat'
 
 export default function ChatPage() {
+  const { t } = useTranslation()
   const { chatId } = useParams<{ chatId: string }>()
   const navigate = useNavigate()
   const { user } = useAuth()
@@ -34,11 +36,11 @@ export default function ChatPage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
-        <h1 className="text-lg font-bold text-text-primary">المحادثة</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('common.chat')}</h1>
       </header>
 
       <main className="flex-1 overflow-y-auto px-4 py-4">
-        {messages.length === 0 && <p className="py-12 text-center text-text-secondary">ابدأ المحادثة بأول رسالة</p>}
+        {messages.length === 0 && <p className="py-12 text-center text-text-secondary">{t('common.chatEmpty')}</p>}
         {messages.map((m) => {
           const isMe = m.senderId === user?.uid
           return (
@@ -63,7 +65,7 @@ export default function ChatPage() {
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="اكتب رسالتك..."
+          placeholder={t('common.typeMessage')}
           className="flex-1 rounded-full border-2 border-border px-4 py-2.5 focus:border-primary focus:outline-none"
         />
         <button

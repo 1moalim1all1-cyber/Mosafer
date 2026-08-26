@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { searchTrips } from '../lib/trips'
 import type { Trip } from '../types/trip'
 import { TripCard } from '../components/TripCard'
@@ -10,6 +11,7 @@ export default function SearchResultsPage() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { t } = useTranslation()
 
   const origin = searchParams.get('from') ?? ''
   const destination = searchParams.get('to') ?? ''
@@ -37,9 +39,9 @@ export default function SearchResultsPage() {
       user?.gender ?? 'male',
     )
       .then(setTrips)
-      .catch(() => setError('حصل خطأ أثناء البحث'))
+      .catch(() => setError(t('search.searchError')))
       .finally(() => setLoading(false))
-  }, [origin, destination, seats, user?.gender])
+  }, [origin, destination, seats, user?.gender, t])
 
   return (
     <div className="min-h-screen bg-bg">
@@ -65,17 +67,17 @@ export default function SearchResultsPage() {
           <div className="py-12 text-center">
             <p className="mb-4 text-text-secondary">{error}</p>
             <Button variant="secondary" onClick={() => window.location.reload()} fullWidth={false}>
-              إعادة المحاولة
+              {t('search.retryButton')}
             </Button>
           </div>
         )}
 
         {!loading && !error && trips.length === 0 && (
           <div className="py-12 text-center">
-            <p className="mb-2 text-lg font-semibold text-text-primary">مفيش رحلات متاحة على المعايير دي</p>
-            <p className="mb-4 text-sm text-text-secondary">جرّب تاريخ تاني أو قلّل عدد الركاب المطلوبين</p>
+            <p className="mb-2 text-lg font-semibold text-text-primary">{t('search.noResultsTitle')}</p>
+            <p className="mb-4 text-sm text-text-secondary">{t('search.noResultsSubtitle')}</p>
             <Button variant="secondary" onClick={() => navigate('/')} fullWidth={false}>
-              رجوع للبحث
+              {t('search.backToSearch')}
             </Button>
           </div>
         )}

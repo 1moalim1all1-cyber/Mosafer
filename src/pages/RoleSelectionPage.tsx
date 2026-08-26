@@ -1,14 +1,14 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 export default function RoleSelectionPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   return (
     <div className="mx-auto max-w-md px-4 py-10">
-      <h1 className="mb-2 text-center text-2xl font-bold text-text-primary">هتستخدم مسافر كإيه؟</h1>
-      <p className="mb-8 text-center text-text-secondary">
-        اختار الدور المناسب، ممكن تضيف الدور التاني لاحقًا من إعدادات حسابك
-      </p>
+      <h1 className="mb-2 text-center text-2xl font-bold text-text-primary">{t('roleSelection.title')}</h1>
+      <p className="mb-8 text-center text-text-secondary">{t('roleSelection.subtitle')}</p>
 
       <div className="flex flex-col gap-4">
         <button
@@ -19,8 +19,8 @@ export default function RoleSelectionPage() {
             🧑
           </div>
           <div className="flex-1">
-            <p className="text-lg font-bold text-text-primary">راكب</p>
-            <p className="text-sm text-text-secondary">دوّر على رحلة واحجز مقعدك</p>
+            <p className="text-lg font-bold text-text-primary">{t('auth.passenger')}</p>
+            <p className="text-sm text-text-secondary">{t('roleSelection.passengerDesc')}</p>
           </div>
           <span className="text-text-secondary">‹</span>
         </button>
@@ -33,8 +33,8 @@ export default function RoleSelectionPage() {
             🚘
           </div>
           <div className="flex-1">
-            <p className="text-lg font-bold text-text-primary">سائق</p>
-            <p className="text-sm text-text-secondary">شارك مقاعدك الفاضية واكسب دخل إضافي</p>
+            <p className="text-lg font-bold text-text-primary">{t('auth.driver')}</p>
+            <p className="text-sm text-text-secondary">{t('roleSelection.driverDesc')}</p>
           </div>
           <span className="text-text-secondary">‹</span>
         </button>

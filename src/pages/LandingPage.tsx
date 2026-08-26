@@ -279,13 +279,13 @@ export default function LandingPage() {
                   <p className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
                     <MapPin size={11} className="text-primary" /> من
                   </p>
-                  <p className="text-sm text-text-secondary">اختار مكان الانطلاق</p>
+                  <p className="text-sm text-text-secondary">{t('landing.selectOrigin')}</p>
                 </div>
 
                 <button
                   onClick={swapLocations}
                   className={`mx-auto hidden h-9 w-9 items-center justify-center rounded-full border border-border bg-tertiary text-primary shadow-sm transition-transform duration-300 hover:border-primary lg:flex ${swapAnimating ? 'rotate-180' : ''}`}
-                  aria-label="بدّل بين نقطة الانطلاق والوجهة"
+                  aria-label={t('search.swap')}
                 >
                   <ArrowLeftRight size={16} />
                 </button>
@@ -294,14 +294,14 @@ export default function LandingPage() {
                   <p className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
                     <MapPin size={11} className="text-primary" /> إلى
                   </p>
-                  <p className="text-sm text-text-secondary">اختار الوجهة</p>
+                  <p className="text-sm text-text-secondary">{t('landing.selectDestination')}</p>
                 </div>
 
                 <div className="rounded-xl border border-border bg-tertiary px-3 py-2.5 transition hover:border-primary">
                   <p className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
                     <Calendar size={11} className="text-primary" /> تاريخ الرحلة
                   </p>
-                  <p className="text-sm text-text-secondary">اختار التاريخ</p>
+                  <p className="text-sm text-text-secondary">{t('landing.selectDate')}</p>
                 </div>
 
                 <div className="flex items-center justify-between rounded-xl border border-border bg-tertiary px-2 py-2">
@@ -328,7 +328,7 @@ export default function LandingPage() {
       {/* ---- Why Mosafer: 3 خطوات بسيطة ---- */}
       <section className="border-t border-white/10 bg-tertiary py-14">
         <div className="mx-auto max-w-6xl px-4">
-          <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">مسافر بيخلّي رحلتك أسهل</h2>
+          <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">{t('landing.howMosaferHelps')}</h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {[
               { icon: MapPin, title: 'اختار رحلتك', desc: 'اختر المحافظة والوجهة والموعد المناسب' },
@@ -351,7 +351,7 @@ export default function LandingPage() {
       {/* ---- الرحلات المتاحة دلوقتي - بيانات حقيقية بس، من غير أي بيانات وهمية ---- */}
       <section id="trips" className="scroll-mt-20 border-t border-white/10 bg-card py-14 text-text-primary">
         <div className="mx-auto max-w-6xl px-4">
-          <h2 className="mb-8 text-2xl font-bold sm:text-3xl">رحلات متاحة دلوقتي</h2>
+          <h2 className="mb-8 text-2xl font-bold sm:text-3xl">{t('landing.availableTripsNow')}</h2>
 
           {tripsLoading && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -363,8 +363,8 @@ export default function LandingPage() {
 
           {!tripsLoading && trips.length === 0 && (
             <div className="rounded-2xl border border-border bg-bg py-12 text-center">
-              <p className="mb-1 font-semibold text-text-primary">مفيش رحلات متاحة دلوقتي</p>
-              <p className="text-sm text-text-secondary">تابعنا كل شوية، السائقين بينشروا رحلات جديدة أول بأول</p>
+              <p className="mb-1 font-semibold text-text-primary">{t('landing.noTripsNow')}</p>
+              <p className="text-sm text-text-secondary">{t('landing.checkBackSoon')}</p>
             </div>
           )}
 
@@ -388,7 +388,7 @@ export default function LandingPage() {
                     <span>💺 {trip.availableSeats} مقاعد متاحة</span>
                     <span>💰 {trip.pricePerSeat.toFixed(0)} ج.م</span>
                   </div>
-                  <span className="text-sm font-semibold text-primary">عرض الرحلة ←</span>
+                  <span className="text-sm font-semibold text-primary">{t('landing.viewTrip')}</span>
                 </button>
               ))}
             </div>
@@ -399,7 +399,7 @@ export default function LandingPage() {
       {/* ---- Driver CTA ---- */}
       <section id="driver-cta" className="scroll-mt-20 border-t border-white/10 bg-gradient-to-l from-primary to-secondary py-14">
         <div className="mx-auto max-w-6xl px-4 text-center">
-          <h2 className="mb-2 text-2xl font-bold sm:text-3xl">رايح مشوار وعندك مكان فاضي؟</h2>
+          <h2 className="mb-2 text-2xl font-bold sm:text-3xl">{t('landing.driverCtaTitle')}</h2>
           <p className="mx-auto mb-6 max-w-md text-white/85">
             شارك رحلتك وساعد مسافرين تانيين وقلّل تكلفة مشوارك
           </p>
@@ -434,8 +434,8 @@ export default function LandingPage() {
       {/* ---- Vehicle Types / Services ---- */}
       <section id="services" className="scroll-mt-20 border-t border-white/10 bg-card py-16 text-text-primary">
         <div className="mx-auto max-w-6xl px-4">
-          <p className="mb-1 text-sm font-bold text-primary">خدماتنا</p>
-          <h2 className="mb-2 text-2xl font-bold sm:text-3xl">اختر وسيلة السفر المناسبة لك</h2>
+          <p className="mb-1 text-sm font-bold text-primary">{t('landing.ourServices')}</p>
+          <h2 className="mb-2 text-2xl font-bold sm:text-3xl">{t('landing.chooseVehicle')}</h2>
           <p className="mb-8 max-w-lg text-text-secondary">
             نوفر لك جميع وسائل النقل لتناسب احتياجاتك ومميزانيتك
           </p>
@@ -475,7 +475,7 @@ export default function LandingPage() {
       {testimonials.length > 0 && (
         <section className="border-t border-white/10 bg-card py-14 text-text-primary">
           <div className="mx-auto max-w-6xl px-4">
-            <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">آراء المستخدمين</h2>
+            <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">{t('landing.testimonials')}</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {testimonials.map((t) => (
                 <div
@@ -499,7 +499,7 @@ export default function LandingPage() {
       {faqItems.length > 0 && (
         <section className="border-t border-white/10 bg-tertiary py-14">
           <div className="mx-auto max-w-2xl px-4">
-            <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">أسئلة شائعة</h2>
+            <h2 className="mb-8 text-center text-2xl font-bold sm:text-3xl">{t('landing.faq')}</h2>
             <div className="flex flex-col gap-2">
               {faqItems.map((item, i) => (
                 <div key={item.question} className="rounded-xl border border-white/10 bg-white/[0.03]">
@@ -532,7 +532,7 @@ export default function LandingPage() {
                   href={`https://wa.me/${socials.whatsapp.replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="واتساب"
+                  aria-label="WhatsApp"
                   className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 transition hover:border-primary"
                 >
                   <MessageCircle size={16} />
@@ -561,26 +561,26 @@ export default function LandingPage() {
           </div>
 
           <div>
-            <p className="mb-3 font-semibold text-white">روابط سريعة</p>
+            <p className="mb-3 font-semibold text-white">{t('landing.quickLinks')}</p>
             <ul className="space-y-2 text-sm">
-              <li>الرئيسية</li>
-              <li>عن مسافر</li>
-              <li>الخدمات</li>
+              <li>{t('landing.home')}</li>
+              <li>{t('landing.aboutUs')}</li>
+              <li>{t('landing.services')}</li>
             </ul>
           </div>
 
           <div>
-            <p className="mb-3 font-semibold text-white">خدماتنا</p>
+            <p className="mb-3 font-semibold text-white">{t('landing.ourServices')}</p>
             <ul className="space-y-2 text-sm">
-              <li>سيارة خاصة</li>
-              <li>ميكروباص</li>
-              <li>أتوبيس</li>
-              <li>سائقة للسيدات</li>
+              <li>{t('landing.privateCar')}</li>
+              <li>{t('landing.microbus')}</li>
+              <li>{t('landing.bus')}</li>
+              <li>{t('landing.womenDriver')}</li>
             </ul>
           </div>
 
           <div>
-            <p className="mb-3 font-semibold text-white">تواصل معنا</p>
+            <p className="mb-3 font-semibold text-white">{t('landing.contactUs')}</p>
             <ul className="space-y-2 text-sm">
               {socials.phone && (
                 <li className="flex items-center gap-2">

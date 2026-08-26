@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useAuth } from '../contexts/useAuth'
@@ -10,6 +11,7 @@ import { TripCard } from '../components/TripCard'
 export default function FavoritesPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [favoriteIds, setFavoriteIds] = useState<string[]>([])
   const [trips, setTrips] = useState<Trip[]>([])
 
@@ -61,11 +63,11 @@ export default function FavoritesPage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
-        <h1 className="text-lg font-bold text-text-primary">المفضلة</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('common.favorites')}</h1>
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">
-        {favoriteIds.length === 0 && <p className="py-12 text-center text-text-secondary">لسه مضفتش أي رحلة للمفضلة</p>}
+        {favoriteIds.length === 0 && <p className="py-12 text-center text-text-secondary">{t('common.noFavorites')}</p>}
         {trips.map((trip) => (
           <TripCard key={trip.id} trip={trip} />
         ))}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import confetti from 'canvas-confetti'
 import { collection, query, where, limit, getDocs, Timestamp } from 'firebase/firestore'
 import { db } from '../lib/firebase'
@@ -19,6 +20,7 @@ import { useAuth } from '../contexts/useAuth'
 export default function TripDetailsPage() {
   const { tripId } = useParams<{ tripId: string }>()
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { user } = useAuth()
 
   const [trip, setTrip] = useState<Trip | null | undefined>(undefined)
@@ -74,7 +76,7 @@ export default function TripDetailsPage() {
       const q = query(collection(db, 'coupons'), where('code', '==', code), limit(1))
       const snap = await getDocs(q)
       if (snap.empty) {
-        setCouponMessage('الكود ده مش موجود')
+        setCouponMessage(t('tripDetails.couponNotFound'))
         return
       }
       const coupon = snap.docs[0].data()
@@ -83,7 +85,7 @@ export default function TripDetailsPage() {
       const notExhausted = (coupon.usedCount ?? 0) < (coupon.maxUses ?? 0)
 
       if (!isActive || !notExpired || !notExhausted) {
-        setCouponMessage('الكود ده منتهي أو مش متاح دلوقتي')
+        setCouponMessage(t('tripDetails.couponExpired'))
         return
       }
 
@@ -91,16 +93,16 @@ export default function TripDetailsPage() {
       const discount = coupon.discountType === 'percentage' ? original * (coupon.value / 100) : coupon.value
       const finalDiscount = Math.min(discount, original)
       setCouponDiscount(finalDiscount)
-      setCouponMessage(`تم تطبيق الخصم! وفّرت ${finalDiscount.toFixed(0)} ج.م`)
+      setCouponMessage(`${t('tripDetails.couponApplied')} ${finalDiscount.toFixed(0)} ${t('common.currency')}`)
     } catch {
-      setCouponMessage('حصل خطأ، حاول تاني')
+      setCouponMessage(t('tripDetails.genericError'))
     }
   }
 
   async function handleBook() {
     if (!trip || !user) return
     if (!pickupPoint) {
-      setError('حدد نقطة استلامك بالظبط عشان السائق يلاقيك بسهولة')
+      setError(t('tripDetails.pickupRequired'))
       return
     }
     setLoading(true)
@@ -117,7 +119,7 @@ export default function TripDetailsPage() {
       setConfirmedBookingId(bookingId)
       setSuccess(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'حصل خطأ، حاول تاني')
+      setError(err instanceof Error ? err.message : t('tripDetails.genericError'))
     } finally {
       setLoading(false)
     }
@@ -134,7 +136,7 @@ export default function TripDetailsPage() {
   if (trip === null) {
     return (
       <div className="flex min-h-screen items-center justify-center text-text-secondary">
-        الرحلة دي مش موجودة
+        {t('tripDetails.tripNotFound')}
       </div>
     )
   }
@@ -152,12 +154,12 @@ export default function TripDetailsPage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
-        <h1 className="text-lg font-bold text-text-primary">تفاصيل الرحلة</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('tripDetails.title')}</h1>
         <div className="mr-auto flex items-center gap-3">
           <button
             onClick={async () => {
               const url = window.location.href
-              const shareText = `شوف الرحلة دي على مسافر: ${trip?.originCity} → ${trip?.destinationCity}`
+              const shareText = `${t('tripDetails.shareText')}: ${trip?.originCity} → ${trip?.destinationCity}`
               if (navigator.share) {
                 try {
                   await navigator.share({ title: 'مسافر', text: shareText, url })
@@ -169,7 +171,7 @@ export default function TripDetailsPage() {
               }
             }}
             className="text-xl"
-            aria-label="شارك الرحلة"
+            aria-label={t('tripDetails.shareTrip')}
           >
             📤
           </button>
@@ -192,7 +194,7 @@ export default function TripDetailsPage() {
       <main className="mx-auto max-w-lg px-4 py-6">
         {trip.isWomenOnly && (
           <div className="mb-4 flex items-center gap-2 rounded-xl bg-pink-50 p-3 text-pink-700">
-            👩 <span>رحلة سيدات فقط</span>
+            👩 <span>{t('tripDetails.womenOnly')}</span>
           </div>
         )}
 
@@ -208,7 +210,7 @@ export default function TripDetailsPage() {
             <div>
               <p className="text-lg font-semibold text-text-primary">{driver.fullName}</p>
               <p className="text-sm text-text-secondary">
-                ⭐ {driver.avgRating.toFixed(1)} · {driver.totalTrips} رحلة
+                ⭐ {driver.avgRating.toFixed(1)} · {driver.totalTrips} {t('tripDetails.trip')}
               </p>
             </div>
           </div>
@@ -220,9 +222,9 @@ export default function TripDetailsPage() {
         <p className="mb-4 text-text-secondary">{timeFormat.format(trip.departureTime)}</p>
 
         <div className="mb-4 flex flex-col gap-2 text-text-secondary">
-          <span>💺 {trip.availableSeats} مقاعد متاحة</span>
+          <span>💺 {trip.availableSeats} {t('tripDetails.availableSeats')}</span>
           <span>🚗 {trip.carType}</span>
-          <span>⏱️ {trip.estimatedDurationMinutes} دقيقة تقريبًا</span>
+          <span>⏱️ {trip.estimatedDurationMinutes} {t('tripDetails.approxMinutes')}</span>
         </div>
 
         {(trip.originLat !== 0 || trip.originLng !== 0) && (
@@ -234,7 +236,7 @@ export default function TripDetailsPage() {
         <hr className="my-4 border-border" />
 
         <div className="mb-4 flex items-center justify-between">
-          <span className="font-semibold text-text-primary">عدد المقاعد</span>
+          <span className="font-semibold text-text-primary">{t('tripDetails.seatsCount')}</span>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSeats((s) => Math.max(1, s - 1))}
@@ -253,7 +255,7 @@ export default function TripDetailsPage() {
         </div>
 
         <div className="mb-4">
-          <p className="mb-2 font-semibold text-text-primary">طريقة الدفع</p>
+          <p className="mb-2 font-semibold text-text-primary">{t('tripDetails.paymentMethod')}</p>
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => setPaymentMethod('cash')}
@@ -261,7 +263,7 @@ export default function TripDetailsPage() {
                 paymentMethod === 'cash' ? 'border-primary bg-primary-light text-primary' : 'border-border text-text-secondary'
               }`}
             >
-              💵 نقدي
+              💵 {t('tripDetails.cash')}
             </button>
             <button
               onClick={() => setPaymentMethod('wallet')}
@@ -269,14 +271,14 @@ export default function TripDetailsPage() {
                 paymentMethod === 'wallet' ? 'border-primary bg-primary-light text-primary' : 'border-border text-text-secondary'
               }`}
             >
-              👛 المحفظة
+              👛 {t('tripDetails.wallet')}
             </button>
           </div>
         </div>
 
         <div className="mb-4">
         <div className="mb-4">
-          <p className="mb-2 font-semibold text-text-primary">نقطة الاستلام</p>
+          <p className="mb-2 font-semibold text-text-primary">{t('tripDetails.pickupPoint')}</p>
           <button
             type="button"
             onClick={() => setPickingLocation(true)}
@@ -286,17 +288,17 @@ export default function TripDetailsPage() {
           >
             <span className="text-xl">{pickupPoint ? '✅' : '📍'}</span>
             <span className={pickupPoint ? 'font-semibold text-success' : 'text-text-secondary'}>
-              {pickupPoint ? 'اتحدد بالظبط - دوس عشان تغيّره' : 'حدد مكانك بالظبط عشان السائق يلاقيك بسهولة'}
+              {pickupPoint ? t('tripDetails.pickupSet') : t('tripDetails.pickupNotSet')}
             </span>
           </button>
         </div>
 
-        <p className="mb-2 font-semibold text-text-primary">كوبون خصم (اختياري)</p>
+        <p className="mb-2 font-semibold text-text-primary">{t('tripDetails.couponOptional')}</p>
           <div className="flex gap-3">
             <input
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-              placeholder="اكتب كود الكوبون"
+              placeholder={t('tripDetails.couponPlaceholder')}
               className="flex-1 rounded-xl border-2 border-border px-4 py-2.5 focus:border-primary focus:outline-none"
             />
             <button
@@ -304,7 +306,7 @@ export default function TripDetailsPage() {
               onClick={applyCoupon}
               className="rounded-xl border-2 border-primary px-4 py-2.5 font-semibold text-primary"
             >
-              تطبيق
+              {t('tripDetails.apply')}
             </button>
           </div>
           {couponMessage && (
@@ -313,20 +315,20 @@ export default function TripDetailsPage() {
         </div>
 
         <div className="mb-4 flex items-center justify-between rounded-xl bg-card p-4">
-          <span className="font-semibold text-text-primary">الإجمالي</span>
+          <span className="font-semibold text-text-primary">{t('tripDetails.total')}</span>
           <span className="text-xl font-bold text-primary">{total.toFixed(0)} ج.م</span>
         </div>
 
         {error && <p className="mb-4 text-sm text-danger">{error}</p>}
 
         <Button onClick={handleBook} loading={loading} disabled={trip.availableSeats < 1 || !pickupPoint}>
-          احجز الآن
+          {t('tripDetails.bookNow')}
         </Button>
       </main>
 
       {pickingLocation && (
         <LocationPicker
-          title="حدد نقطة استلامك بالظبط"
+          title={t('tripDetails.pickupPickerTitle')}
           initialLat={pickupPoint?.lat}
           initialLng={pickupPoint?.lng}
           onClose={() => setPickingLocation(false)}
@@ -351,6 +353,8 @@ function BookingSuccessView({
   confirmedBookingId: string | null
   onNavigate: (path: string) => void
 }) {
+  const { t } = useTranslation()
+
   useEffect(() => {
     const colors = ['#1E40AF', '#1D4ED8', '#22C55E', '#F59E0B']
     confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 }, colors })
@@ -364,15 +368,15 @@ function BookingSuccessView({
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4 text-center">
       <div className="text-6xl">🎉</div>
-      <h1 className="text-2xl font-bold text-text-primary">تم الحجز بنجاح</h1>
-      <p className="text-text-secondary">حجزك بانتظار موافقة السائق، هتوصلك إشعار فور ما يتم التأكيد</p>
+      <h1 className="text-2xl font-bold text-text-primary">{t('tripDetails.bookingSuccessTitle')}</h1>
+      <p className="text-text-secondary">{t('tripDetails.bookingSuccessSubtitle')}</p>
       <div className="flex gap-3">
         <Button variant="secondary" onClick={() => onNavigate('/')} fullWidth={false}>
-          الرئيسية
+          {t('tripDetails.home')}
         </Button>
         {confirmedBookingId && (
           <Button onClick={() => onNavigate(`/track/${confirmedBookingId}`)} fullWidth={false}>
-            تتبّع السائق 🚗
+            {t('tripDetails.trackDriver')} 🚗
           </Button>
         )}
       </div>
