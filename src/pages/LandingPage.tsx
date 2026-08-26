@@ -161,14 +161,23 @@ export default function LandingPage() {
                 i === 0
                   ? 'relative pb-1 font-semibold text-white after:absolute after:bottom-0 after:right-0 after:h-0.5 after:w-full after:rounded-full after:bg-gradient-to-l after:from-primary after:to-secondary'
                   : 'hover:text-white transition-colors'
-              return isRoute ? (
-                <button key={link.label} onClick={() => navigate(link.href)} className={className}>
+
+              // روابط "#section" لازم تنزل للقسم بجافاسكريبت مباشرة، مش
+              // بـ href عادي، لأن علامة # بقت متحجزة لنظام التنقّل
+              // (Hash Router) بعد ما حوّلنا ليه عشان مشكلة الـ 404
+              function handleClick() {
+                if (isRoute) {
+                  navigate(link.href)
+                  return
+                }
+                const id = link.href.replace('#', '')
+                document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+              }
+
+              return (
+                <button key={link.label} onClick={handleClick} className={className}>
                   {link.label}
                 </button>
-              ) : (
-                <a key={link.label} href={link.href} className={className}>
-                  {link.label}
-                </a>
               )
             })}
           </nav>
