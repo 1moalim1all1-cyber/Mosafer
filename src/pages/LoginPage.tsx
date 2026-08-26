@@ -34,7 +34,14 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-bg px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-bg px-4">
+      <button
+        onClick={() => navigate('/')}
+        className="absolute right-4 top-4 flex items-center gap-1 text-sm font-semibold text-text-secondary hover:text-primary sm:right-6 sm:top-6"
+        aria-label={t('common.backToHome')}
+      >
+        → {t('common.backToHome')}
+      </button>
       <div className="w-full max-w-md">
         <div className="mb-8 flex flex-col items-center text-center">
           <img

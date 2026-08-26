@@ -42,7 +42,8 @@
     "searchError": "Something went wrong while searching",
     "noResultsTitle": "No trips match these criteria",
     "noResultsSubtitle": "Try a different date or fewer passengers",
-    "backToSearch": "Back to Search"
+    "backToSearch": "Back to Search",
+    "tripDate": "Trip Date"
   },
   "auth": {
     "welcomeBack": "Welcome Back",
@@ -89,7 +90,8 @@
     "noFavorites": "You haven't added any trips to favorites yet",
     "chat": "Chat",
     "chatEmpty": "Start the conversation with your first message",
-    "typeMessage": "Type your message..."
+    "typeMessage": "Type your message...",
+    "backToHome": "Home"
   },
   "home": {
     "whereTo": "Where to?",
@@ -126,7 +128,10 @@
     "deposit": "Deposit",
     "withdraw": "Withdraw",
     "transactions": "Transactions",
-    "noTransactions": "No transactions yet"
+    "noTransactions": "No transactions yet",
+    "transferredAmount": "Amount Transferred",
+    "availableBalance": "Available Balance",
+    "amount": "Amount"
   },
   "profile": {
     "title": "Profile",

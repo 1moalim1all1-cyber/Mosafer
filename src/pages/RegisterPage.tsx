@@ -58,7 +58,14 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-10">
+    <div className="relative mx-auto max-w-md px-4 py-10">
+      <button
+        onClick={() => navigate('/')}
+        className="mb-4 flex items-center gap-1 text-sm font-semibold text-text-secondary hover:text-primary"
+        aria-label={t('common.backToHome')}
+      >
+        → {t('common.backToHome')}
+      </button>
       <h1 className="mb-6 text-center text-2xl font-bold text-text-primary">
         {role === 'driver' ? t('auth.createDriverAccount') : t('auth.createPassengerAccount')}
       </h1>

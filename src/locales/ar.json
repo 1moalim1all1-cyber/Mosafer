@@ -42,7 +42,8 @@
     "searchError": "حصل خطأ أثناء البحث",
     "noResultsTitle": "مفيش رحلات متاحة على المعايير دي",
     "noResultsSubtitle": "جرّب تاريخ تاني أو قلّل عدد الركاب المطلوبين",
-    "backToSearch": "رجوع للبحث"
+    "backToSearch": "رجوع للبحث",
+    "tripDate": "تاريخ الرحلة"
   },
   "auth": {
     "welcomeBack": "أهلاً بيك تاني",
@@ -89,7 +90,8 @@
     "noFavorites": "لسه مضفتش أي رحلة للمفضلة",
     "chat": "المحادثة",
     "chatEmpty": "ابدأ المحادثة بأول رسالة",
-    "typeMessage": "اكتب رسالتك..."
+    "typeMessage": "اكتب رسالتك...",
+    "backToHome": "الرئيسية"
   },
   "home": {
     "whereTo": "مسافر فين؟",
@@ -126,7 +128,10 @@
     "deposit": "إيداع",
     "withdraw": "سحب",
     "transactions": "العمليات",
-    "noTransactions": "مفيش عمليات لسه"
+    "noTransactions": "مفيش عمليات لسه",
+    "transferredAmount": "المبلغ اللي حوّلته",
+    "availableBalance": "رصيدك المتاح",
+    "amount": "المبلغ"
   },
   "profile": {
     "title": "الملف الشخصي",

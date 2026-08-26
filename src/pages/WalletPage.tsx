@@ -97,20 +97,20 @@ export default function WalletPage() {
 
       <main className="mx-auto max-w-lg px-4 py-6">
         <div className="mb-6 rounded-2xl bg-gradient-to-br from-primary to-secondary p-6 text-white shadow-lg shadow-primary/20">
-          <p className="text-sm text-white/70">الرصيد الحالي</p>
-          <p className="mb-4 text-3xl font-bold">{balance.toFixed(0)} ج.م</p>
+          <p className="text-sm text-white/70">{t('wallet.balance')}</p>
+          <p className="mb-4 text-3xl font-bold">{balance.toFixed(0)} {t('common.currency')}</p>
           <div className="flex gap-3">
             <button
               onClick={() => setShowModal('deposit')}
               className="flex-1 rounded-xl border-2 border-white/50 py-2.5 font-semibold hover:bg-card/10"
             >
-              إيداع
+              {t('wallet.deposit')}
             </button>
             <button
               onClick={() => setShowModal('withdraw')}
               className="flex-1 rounded-xl border-2 border-white/50 py-2.5 font-semibold hover:bg-card/10"
             >
-              سحب
+              {t('wallet.withdraw')}
             </button>
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function WalletPage() {
                 </div>
                 <span className={`font-bold ${color}`}>
                   {isCredit ? '+' : '-'}
-                  {tx.amount.toFixed(0)} ج.م
+                  {tx.amount.toFixed(0)} {t('common.currency')}
                 </span>
               </div>
               {(tx.method || tx.accountNumber || tx.senderNumber) && (
@@ -183,7 +183,7 @@ export default function WalletPage() {
                 )}
                 <div className="flex flex-col gap-3">
                   <Input
-                    label="المبلغ اللي حوّلته (ج.م)"
+                    label={`${t('wallet.transferredAmount')} (${t('common.currency')})`}
                     type="number"
                     value={depositAmount}
                     onChange={(e) => setDepositAmount(e.target.value)}
@@ -232,10 +232,10 @@ export default function WalletPage() {
             ) : (
               <>
                 <h3 className="mb-4 text-lg font-bold text-text-primary">سحب من المحفظة</h3>
-                <p className="mb-4 text-sm text-text-secondary">رصيدك المتاح: {balance.toFixed(0)} ج.م</p>
+                <p className="mb-4 text-sm text-text-secondary">{t('wallet.availableBalance')}: {balance.toFixed(0)} {t('common.currency')}</p>
                 <div className="flex flex-col gap-3">
                   <Input
-                    label="المبلغ (ج.م)"
+                    label={`${t('wallet.amount')} (${t('common.currency')})`}
                     type="number"
                     value={withdrawAmount}
                     onChange={(e) => setWithdrawAmount(e.target.value)}

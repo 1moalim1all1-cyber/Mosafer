@@ -36,6 +36,7 @@ import { useTranslation } from 'react-i18next'
 import { changeLanguage } from '../lib/i18n'
 import { useCountry } from '../hooks/useCountry'
 import { CountrySelector } from '../components/CountrySelector'
+import { COUNTRIES } from '../lib/countries'
 import { Globe } from 'lucide-react'
 
 function getFeatures(t: (key: string) => string) {
@@ -66,13 +67,15 @@ function getStatIcons(t: (key: string) => string) {
   ]
 }
 
-const NAV_LINKS = [
-  { label: 'الرئيسية', href: '#home' },
-  { label: 'كيف تعمل', href: '/how-it-works' },
-  { label: 'الرحلات', href: '#trips' },
-  { label: 'للسائقين', href: '#driver-cta' },
-  { label: 'تواصل معنا', href: '/page/contact' },
-]
+function getNavLinks(t: (key: string) => string) {
+  return [
+    { label: t('landing.home'), href: '#home' },
+    { label: t('nav.howItWorks'), href: '/how-it-works' },
+    { label: t('nav.trips'), href: '#trips' },
+    { label: t('nav.forDrivers'), href: '#driver-cta' },
+    { label: t('nav.contact'), href: '/page/contact' },
+  ]
+}
 
 export default function LandingPage() {
   const navigate = useNavigate()
@@ -80,6 +83,10 @@ export default function LandingPage() {
   const [country, setCountry] = useCountry()
   const [seats, setSeats] = useState(1)
   const [tripTab, setTripTab] = useState<'رحلة واحدة' | 'رحلة ذهاب وعودة' | 'رحلات متعددة'>('رحلة واحدة')
+  const [origin, setOrigin] = useState('')
+  const [destination, setDestination] = useState('')
+  const todayStr = new Date().toISOString().split('T')[0]
+  const [date, setDate] = useState(todayStr)
 
   const [swapAnimating, setSwapAnimating] = useState(false)
   const [trips, setTrips] = useState<Trip[]>([])
@@ -93,13 +100,19 @@ export default function LandingPage() {
     })
   }, [country])
 
+  // لو الدولة اتغيّرت، المحافظات المختارة قبل كده ممكن متبقاش موجودة
+  // في القائمة الجديدة، فبنصفّرها
+  useEffect(() => {
+    setOrigin('')
+    setDestination('')
+  }, [country])
+
 
   function swapLocations() {
     setSwapAnimating(true)
     setTimeout(() => setSwapAnimating(false), 300)
-    // الحقول لسه شكلية في صفحة الهبوط (المستخدم لازم يسجّل دخول قبل
-    // ما يقدر يبحث فعليًا) - الزرار هنا بصري بس دلوقتي، هيشتغل حقيقي
-    // لما نضيف حقول اختيار فعلية بدل placeholders
+    setOrigin(destination)
+    setDestination(origin)
   }
   const [heroImageUrl, setHeroImageUrl] = useState(`${import.meta.env.BASE_URL}hero-clean.png`)
   const [heroTitle, setHeroTitle] = useState('سافر بسهولة..\nواحجز مكانك في ثواني')
@@ -161,7 +174,7 @@ export default function LandingPage() {
           </div>
 
           <nav className="hidden items-center gap-6 text-sm text-white/80 lg:flex">
-            {NAV_LINKS.map((link, i) => {
+            {getNavLinks(t).map((link, i) => {
               const isRoute = link.href.startsWith('/')
               const className =
                 i === 0
@@ -291,10 +304,21 @@ export default function LandingPage() {
 
               <div className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[1fr_auto_1fr_1fr_1fr]">
                 <div className="rounded-xl border border-border bg-tertiary px-3 py-2.5 transition hover:border-primary">
-                  <p className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
-                    <MapPin size={11} className="text-primary" /> من
-                  </p>
-                  <p className="text-sm text-text-secondary">{t('landing.selectOrigin')}</p>
+                  <label className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
+                    <MapPin size={11} className="text-primary" /> {t('search.from')}
+                  </label>
+                  <select
+                    value={origin}
+                    onChange={(e) => setOrigin(e.target.value)}
+                    className="w-full bg-transparent text-sm text-text-primary focus:outline-none"
+                  >
+                    <option value="">{t('landing.selectOrigin')}</option>
+                    {COUNTRIES[country].regions.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <button
@@ -306,17 +330,34 @@ export default function LandingPage() {
                 </button>
 
                 <div className="rounded-xl border border-border bg-tertiary px-3 py-2.5 transition hover:border-primary">
-                  <p className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
-                    <MapPin size={11} className="text-primary" /> إلى
-                  </p>
-                  <p className="text-sm text-text-secondary">{t('landing.selectDestination')}</p>
+                  <label className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
+                    <MapPin size={11} className="text-primary" /> {t('search.to')}
+                  </label>
+                  <select
+                    value={destination}
+                    onChange={(e) => setDestination(e.target.value)}
+                    className="w-full bg-transparent text-sm text-text-primary focus:outline-none"
+                  >
+                    <option value="">{t('landing.selectDestination')}</option>
+                    {COUNTRIES[country].regions.map((r) => (
+                      <option key={r} value={r}>
+                        {r}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="rounded-xl border border-border bg-tertiary px-3 py-2.5 transition hover:border-primary">
-                  <p className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
-                    <Calendar size={11} className="text-primary" /> تاريخ الرحلة
-                  </p>
-                  <p className="text-sm text-text-secondary">{t('landing.selectDate')}</p>
+                  <label className="mb-0.5 flex items-center gap-1 text-[11px] font-semibold text-text-secondary">
+                    <Calendar size={11} className="text-primary" /> {t('search.tripDate')}
+                  </label>
+                  <input
+                    type="date"
+                    value={date}
+                    min={todayStr}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="w-full bg-transparent text-sm text-text-primary focus:outline-none [color-scheme:dark]"
+                  />
                 </div>
 
                 <div className="flex items-center justify-between rounded-xl border border-border bg-tertiary px-2 py-2">
@@ -326,7 +367,7 @@ export default function LandingPage() {
                   >
                     <Minus size={12} />
                   </button>
-                  <span className="text-sm font-semibold">{seats} راكب</span>
+                  <span className="text-sm font-semibold">{seats} {t('home.seats')}</span>
                   <button
                     onClick={() => setSeats((s) => Math.min(8, s + 1))}
                     className="flex h-6 w-6 items-center justify-center rounded-full border border-border text-text-secondary"
