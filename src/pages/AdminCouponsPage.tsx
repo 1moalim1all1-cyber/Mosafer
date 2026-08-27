@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { subscribeCoupons, addCoupon, toggleCouponActive, deleteCoupon, type CouponRow } from '../lib/admin'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 
 export default function AdminCouponsPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [items, setItems] = useState<CouponRow[]>([])
   const [code, setCode] = useState('')
   const [value, setValue] = useState('')
@@ -33,28 +35,28 @@ export default function AdminCouponsPage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
-        <h1 className="text-lg font-bold text-text-primary">إدارة الكوبونات</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('admin.couponsTitle')}</h1>
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">
         <div className="mb-6 rounded-2xl border border-border bg-card p-4">
-          <h2 className="mb-3 font-bold text-text-primary">كوبون جديد</h2>
+          <h2 className="mb-3 font-bold text-text-primary">{t('admin.newCoupon')}</h2>
           <div className="flex flex-col gap-3">
-            <Input label="الكود" value={code} onChange={(e) => setCode(e.target.value)} />
+            <Input label={t('admin.code')} value={code} onChange={(e) => setCode(e.target.value)} />
             <div className="grid grid-cols-2 gap-3">
               <select
                 value={discountType}
                 onChange={(e) => setDiscountType(e.target.value as 'percentage' | 'fixed')}
                 className="rounded-xl border-2 border-border px-3 py-2.5"
               >
-                <option value="percentage">نسبة %</option>
-                <option value="fixed">مبلغ ثابت</option>
+                <option value="percentage">{t('admin.percentage')}</option>
+                <option value="fixed">{t('admin.fixedAmount')}</option>
               </select>
-              <Input label="" placeholder="القيمة" type="number" value={value} onChange={(e) => setValue(e.target.value)} />
+              <Input label="" placeholder={t('admin.value')} type="number" value={value} onChange={(e) => setValue(e.target.value)} />
             </div>
-            <Input label="أقصى عدد استخدام" type="number" value={maxUses} onChange={(e) => setMaxUses(e.target.value)} />
+            <Input label={t('admin.maxUses')} type="number" value={maxUses} onChange={(e) => setMaxUses(e.target.value)} />
             <Button onClick={handleAdd} fullWidth={false}>
-              إضافة الكوبون
+              {t('admin.addCoupon')}
             </Button>
           </div>
         </div>
@@ -64,13 +66,13 @@ export default function AdminCouponsPage() {
             <div>
               <p className="font-bold text-text-primary">{c.code}</p>
               <p className="text-sm text-text-secondary">
-                {c.discountType === 'percentage' ? `${c.value}%` : `${c.value} ج.م`} · استخدم {c.usedCount}/{c.maxUses}
+                {c.discountType === 'percentage' ? `${c.value}%` : `${c.value} ${t('common.currency')}`} · {t('admin.used')} {c.usedCount}/{c.maxUses}
               </p>
             </div>
             <div className="flex items-center gap-3">
               <label className="flex items-center gap-2 text-sm text-text-secondary">
                 <input type="checkbox" checked={c.isActive} onChange={(e) => toggleCouponActive(c.id, e.target.checked)} />
-                فعّال
+                {t('admin.active')}
               </label>
               <button onClick={() => deleteCoupon(c.id)} className="text-danger">
                 🗑️

@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { subscribePendingDrivers, approveDriver, rejectDriver, type PendingDriver } from '../lib/admin'
 import { fetchUserProfile } from '../lib/users'
 import type { AppUser } from '../types/user'
 import { Button } from '../components/ui/Button'
 
 function DriverRow({ driver }: { driver: PendingDriver }) {
+  const { t } = useTranslation()
   const [user, setUser] = useState<AppUser | null>(null)
   const [expanded, setExpanded] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -19,31 +21,31 @@ function DriverRow({ driver }: { driver: PendingDriver }) {
     try {
       await approveDriver(driver.uid)
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'حصل خطأ')
+      alert(err instanceof Error ? err.message : t('admin.genericError'))
     } finally {
       setLoading(false)
     }
   }
 
   async function handleReject() {
-    const reason = prompt('سبب الرفض:')
+    const reason = prompt(t('admin.rejectReasonPrompt'))
     if (!reason) return
     setLoading(true)
     try {
       await rejectDriver(driver.uid, reason)
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'حصل خطأ')
+      alert(err instanceof Error ? err.message : t('admin.genericError'))
     } finally {
       setLoading(false)
     }
   }
 
   const docs = [
-    { label: 'بطاقة الرقم القومي', url: driver.nationalIdImageUrl },
-    { label: 'رخصة القيادة', url: driver.licenseImageUrl },
-    { label: 'رخصة السيارة', url: driver.vehicleLicenseImageUrl },
-    { label: 'صورة السيارة', url: driver.vehicleImageUrl },
-    { label: 'التحقق الشخصي', url: driver.selfieVerificationUrl },
+    { label: t('admin.docNationalId'), url: driver.nationalIdImageUrl },
+    { label: t('admin.docLicense'), url: driver.licenseImageUrl },
+    { label: t('admin.docVehicleLicense'), url: driver.vehicleLicenseImageUrl },
+    { label: t('admin.docVehicleImage'), url: driver.vehicleImageUrl },
+    { label: t('admin.docSelfie'), url: driver.selfieVerificationUrl },
   ]
 
   return (
@@ -66,7 +68,7 @@ function DriverRow({ driver }: { driver: PendingDriver }) {
                 {d.url ? (
                   <img src={d.url} alt={d.label} className="h-24 w-full rounded-lg object-cover" />
                 ) : (
-                  <div className="flex h-24 items-center justify-center rounded-lg bg-bg text-text-secondary">لا يوجد</div>
+                  <div className="flex h-24 items-center justify-center rounded-lg bg-bg text-text-secondary">{t('admin.notAvailable')}</div>
                 )}
                 <p className="mt-1 text-center text-xs text-text-secondary">{d.label}</p>
               </div>
@@ -74,10 +76,10 @@ function DriverRow({ driver }: { driver: PendingDriver }) {
           </div>
           <div className="mt-4 flex gap-3">
             <Button variant="danger" onClick={handleReject} loading={loading}>
-              رفض
+              {t('admin.reject')}
             </Button>
             <Button variant="success" onClick={handleApprove} loading={loading}>
-              اعتماد
+              {t('admin.approve')}
             </Button>
           </div>
         </>
@@ -88,6 +90,7 @@ function DriverRow({ driver }: { driver: PendingDriver }) {
 
 export default function AdminDriverQueuePage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [drivers, setDrivers] = useState<PendingDriver[]>([])
 
   useEffect(() => subscribePendingDrivers(setDrivers), [])
@@ -98,11 +101,11 @@ export default function AdminDriverQueuePage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
-        <h1 className="text-lg font-bold text-text-primary">مراجعة السائقين</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('admin.driverQueueTitle')}</h1>
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">
-        {drivers.length === 0 && <p className="py-12 text-center text-text-secondary">مفيش سائقين بانتظار المراجعة دلوقتي</p>}
+        {drivers.length === 0 && <p className="py-12 text-center text-text-secondary">{t('admin.noPendingDrivers')}</p>}
         {drivers.map((d) => (
           <DriverRow key={d.uid} driver={d} />
         ))}

@@ -18,7 +18,7 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [gender, setGender] = useState<Gender>('male')
-  const [referralCode, setReferralCode] = useState('')
+  const [referralCode, setReferralCode] = useState(searchParams.get('ref') ?? '')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 

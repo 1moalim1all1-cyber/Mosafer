@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { subscribePendingWalletRequests, resolveWalletRequest, type WalletRequestRow } from '../lib/admin'
 import { fetchUserProfile } from '../lib/users'
 import type { AppUser } from '../types/user'
 import { Button } from '../components/ui/Button'
 
 function RequestRow({ request }: { request: WalletRequestRow }) {
+  const { t } = useTranslation()
   const [user, setUser] = useState<AppUser | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -18,7 +20,7 @@ function RequestRow({ request }: { request: WalletRequestRow }) {
     try {
       await resolveWalletRequest(request.userId, request.txId, approve)
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'حصل خطأ')
+      alert(err instanceof Error ? err.message : t('admin.genericError'))
     } finally {
       setLoading(false)
     }
@@ -33,14 +35,14 @@ function RequestRow({ request }: { request: WalletRequestRow }) {
             request.type === 'deposit' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
           }`}
         >
-          {request.type === 'deposit' ? 'إيداع' : 'سحب'}
+          {request.type === 'deposit' ? t('wallet.deposit') : t('wallet.withdraw')}
         </span>
       </div>
-      <p className="mb-2 text-lg font-bold text-primary">{request.amount.toFixed(0)} ج.م</p>
+      <p className="mb-2 text-lg font-bold text-primary">{request.amount.toFixed(0)} {t('common.currency')}</p>
 
       {request.type === 'withdraw' && request.accountNumber && (
         <div className="mb-3 rounded-lg bg-warning/5 p-3">
-          <p className="text-xs text-text-secondary">ابعت الفلوس دي على</p>
+          <p className="text-xs text-text-secondary">{t('admin.sendMoneyTo')}</p>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-text-primary">{request.method}</p>
@@ -51,11 +53,11 @@ function RequestRow({ request }: { request: WalletRequestRow }) {
             <button
               onClick={() => {
                 navigator.clipboard.writeText(request.accountNumber ?? '')
-                alert('اتنسخ الرقم')
+                alert(t('admin.numberCopied'))
               }}
               className="rounded-lg border border-border px-3 py-1.5 text-sm font-semibold text-primary"
             >
-              📋 نسخ
+              📋 {t('admin.copy')}
             </button>
           </div>
         </div>
@@ -63,16 +65,16 @@ function RequestRow({ request }: { request: WalletRequestRow }) {
 
       {request.type === 'deposit' && request.senderNumber && (
         <p className="mb-3 text-sm text-text-secondary">
-          حوّل من رقم: <span dir="ltr">{request.senderNumber}</span>
+          {t('admin.transferredFrom')} <span dir="ltr">{request.senderNumber}</span>
         </p>
       )}
 
       <div className="flex gap-3">
         <Button variant="danger" onClick={() => handle(false)} loading={loading}>
-          رفض
+          {t('admin.reject')}
         </Button>
         <Button variant="success" onClick={() => handle(true)} loading={loading}>
-          {request.type === 'withdraw' ? 'تم التحويل' : 'موافقة'}
+          {request.type === 'withdraw' ? t('admin.transferDone') : t('admin.approveAction')}
         </Button>
       </div>
     </div>
@@ -81,6 +83,7 @@ function RequestRow({ request }: { request: WalletRequestRow }) {
 
 export default function AdminWalletRequestsPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [requests, setRequests] = useState<WalletRequestRow[]>([])
 
   useEffect(() => subscribePendingWalletRequests(setRequests), [])
@@ -91,11 +94,11 @@ export default function AdminWalletRequestsPage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
-        <h1 className="text-lg font-bold text-text-primary">طلبات المحفظة</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('admin.walletRequestsTitle')}</h1>
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">
-        {requests.length === 0 && <p className="py-12 text-center text-text-secondary">مفيش طلبات معلّقة دلوقتي</p>}
+        {requests.length === 0 && <p className="py-12 text-center text-text-secondary">{t('admin.noPendingRequests')}</p>}
         {requests.map((r) => (
           <RequestRow key={r.txId} request={r} />
         ))}

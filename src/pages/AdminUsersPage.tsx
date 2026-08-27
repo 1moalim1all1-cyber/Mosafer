@@ -1,22 +1,30 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Search, ShieldCheck, ShieldX, ShieldAlert } from 'lucide-react'
 import { subscribeAllUsers, setUserStatus, type ManagedUser } from '../lib/admin'
 
-const ROLE_LABELS: Record<ManagedUser['role'], string> = {
-  passenger: 'راكب',
-  driver: 'سائق',
-  admin: 'أدمن',
+function getRoleLabels(t: (key: string) => string): Record<ManagedUser['role'], string> {
+  return {
+    passenger: t('auth.passenger'),
+    driver: t('auth.driver'),
+    admin: t('admin.roleAdmin'),
+  }
 }
 
-const STATUS_CONFIG: Record<ManagedUser['status'], { label: string; color: string }> = {
-  active: { label: 'نشط', color: 'text-success' },
-  suspended: { label: 'موقوف مؤقتًا', color: 'text-warning' },
-  banned: { label: 'محظور', color: 'text-danger' },
+function getStatusConfig(t: (key: string) => string): Record<ManagedUser['status'], { label: string; color: string }> {
+  return {
+    active: { label: t('admin.statusActive'), color: 'text-success' },
+    suspended: { label: t('admin.statusSuspended'), color: 'text-warning' },
+    banned: { label: t('admin.statusBanned'), color: 'text-danger' },
+  }
 }
 
 export default function AdminUsersPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
+  const ROLE_LABELS = getRoleLabels(t)
+  const STATUS_CONFIG = getStatusConfig(t)
   const [users, setUsers] = useState<ManagedUser[]>([])
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<'all' | ManagedUser['role']>('all')
@@ -48,7 +56,7 @@ export default function AdminUsersPage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
-        <h1 className="text-lg font-bold text-text-primary">إدارة المستخدمين</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('admin.usersTitle')}</h1>
       </header>
 
       <div className="sticky top-0 z-10 border-b border-border bg-card px-4 py-3">
@@ -57,7 +65,7 @@ export default function AdminUsersPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="دوّر بالاسم أو رقم الهاتف"
+            placeholder={t('admin.searchByNamePhone')}
             className="flex-1 outline-none"
           />
         </div>
@@ -70,20 +78,20 @@ export default function AdminUsersPage() {
                 roleFilter === r ? 'border-primary bg-primary-light text-primary' : 'border-border text-text-secondary'
               }`}
             >
-              {r === 'all' ? 'الكل' : ROLE_LABELS[r]}
+              {r === 'all' ? t('admin.all') : ROLE_LABELS[r]}
             </button>
           ))}
         </div>
       </div>
 
       <main className="mx-auto max-w-lg px-4 py-6">
-        <p className="mb-3 text-sm text-text-secondary">{filtered.length} مستخدم</p>
+        <p className="mb-3 text-sm text-text-secondary">{filtered.length} {t('admin.usersCount')}</p>
 
         {filtered.map((u) => (
           <div key={u.uid} className="mb-3 rounded-2xl border border-border bg-card p-4">
             <div className="mb-2 flex items-center justify-between">
               <div>
-                <p className="font-semibold text-text-primary">{u.fullName || 'بدون اسم'}</p>
+                <p className="font-semibold text-text-primary">{u.fullName || t('admin.noName')}</p>
                 <p dir="ltr" className="text-sm text-text-secondary">
                   {u.phone}
                 </p>
@@ -94,7 +102,7 @@ export default function AdminUsersPage() {
             </div>
 
             <div className="mb-3 flex items-center justify-between text-sm text-text-secondary">
-              <span>⭐ {u.avgRating.toFixed(1)} · {u.totalTrips} رحلة</span>
+              <span>⭐ {u.avgRating.toFixed(1)} · {u.totalTrips} {t('admin.tripsCount')}</span>
               <span className={`font-semibold ${STATUS_CONFIG[u.status].color}`}>{STATUS_CONFIG[u.status].label}</span>
             </div>
 
@@ -105,21 +113,21 @@ export default function AdminUsersPage() {
                   disabled={busyUid === u.uid || u.status === 'active'}
                   className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-success/40 py-2 text-xs font-semibold text-success disabled:opacity-40"
                 >
-                  <ShieldCheck size={14} /> تفعيل
+                  <ShieldCheck size={14} /> {t('admin.activate')}
                 </button>
                 <button
                   onClick={() => changeStatus(u.uid, 'suspended')}
                   disabled={busyUid === u.uid || u.status === 'suspended'}
                   className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-warning/40 py-2 text-xs font-semibold text-warning disabled:opacity-40"
                 >
-                  <ShieldAlert size={14} /> إيقاف مؤقت
+                  <ShieldAlert size={14} /> {t('admin.suspend')}
                 </button>
                 <button
                   onClick={() => changeStatus(u.uid, 'banned')}
                   disabled={busyUid === u.uid || u.status === 'banned'}
                   className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-danger/40 py-2 text-xs font-semibold text-danger disabled:opacity-40"
                 >
-                  <ShieldX size={14} /> حظر
+                  <ShieldX size={14} /> {t('admin.ban')}
                 </button>
               </div>
             )}

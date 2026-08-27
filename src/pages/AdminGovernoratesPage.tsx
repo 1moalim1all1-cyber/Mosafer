@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { subscribeGovernorates, addGovernorate, toggleGovernorateActive, deleteGovernorate } from '../lib/admin'
 import { Button } from '../components/ui/Button'
 
 export default function AdminGovernoratesPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [items, setItems] = useState<{ id: string; name: string; isActive: boolean }[]>([])
   const [newName, setNewName] = useState('')
 
@@ -22,7 +24,7 @@ export default function AdminGovernoratesPage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
-        <h1 className="text-lg font-bold text-text-primary">إدارة المحافظات</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('admin.governoratesTitle')}</h1>
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">
@@ -30,11 +32,11 @@ export default function AdminGovernoratesPage() {
           <input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="اسم المحافظة الجديدة"
+            placeholder={t('admin.newGovernorateName')}
             className="flex-1 rounded-xl border-2 border-border px-4 py-2.5 focus:border-primary focus:outline-none"
           />
           <Button onClick={handleAdd} fullWidth={false}>
-            إضافة
+            {t('admin.add')}
           </Button>
         </div>
 
@@ -48,7 +50,7 @@ export default function AdminGovernoratesPage() {
                   checked={g.isActive}
                   onChange={(e) => toggleGovernorateActive(g.id, e.target.checked)}
                 />
-                فعّالة
+                {t('admin.active')}
               </label>
               <button onClick={() => deleteGovernorate(g.id)} className="text-danger">
                 🗑️
