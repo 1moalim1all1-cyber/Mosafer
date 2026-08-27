@@ -1,22 +1,27 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/useAuth'
 import { subscribeDriverTrips, subscribeDriverStatus } from '../lib/driverActions'
 import type { Trip } from '../types/trip'
 import { Button } from '../components/ui/Button'
 
-const STATUS_LABELS: Record<Trip['status'], { label: string; color: string }> = {
-  active: { label: 'نشطة', color: 'text-success' },
-  full: { label: 'مكتملة المقاعد', color: 'text-primary' },
-  completed: { label: 'منتهية', color: 'text-text-secondary' },
-  cancelled: { label: 'ملغاة', color: 'text-danger' },
-  expired: { label: 'انتهى موعدها', color: 'text-text-secondary' },
-  pending: { label: 'قيد المراجعة', color: 'text-warning' },
+function getStatusLabels(t: (key: string) => string): Record<Trip['status'], { label: string; color: string }> {
+  return {
+    active: { label: t('admin.statusActiveTrip'), color: 'text-success' },
+    full: { label: t('admin.statusFull'), color: 'text-primary' },
+    completed: { label: t('admin.statusCompleted'), color: 'text-text-secondary' },
+    cancelled: { label: t('admin.statusCancelled'), color: 'text-danger' },
+    expired: { label: t('admin.statusExpired'), color: 'text-text-secondary' },
+    pending: { label: t('admin.statusPending'), color: 'text-warning' },
+  }
 }
 
 export default function DriverDashboardPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t, i18n } = useTranslation()
+  const STATUS_LABELS = getStatusLabels(t)
   const [trips, setTrips] = useState<Trip[]>([])
   const [approved, setApproved] = useState<boolean | null>(null)
 
@@ -33,23 +38,23 @@ export default function DriverDashboardPage() {
   return (
     <div className="min-h-screen bg-bg pb-24">
       <header className="flex items-center justify-between border-b border-border bg-card px-4 py-4">
-        <h1 className="text-lg font-bold text-text-primary">لوحة السائق</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('driver.dashboardTitle')}</h1>
         <button onClick={() => navigate('/')} className="text-sm font-semibold text-primary">
-          الرئيسية
+          {t('landing.home')}
         </button>
       </header>
 
       {approved === false && (
         <div className="flex items-center justify-between bg-warning/10 px-4 py-3">
-          <span className="text-sm text-text-primary">حسابك لسه تحت المراجعة، مش هتقدر تنشر رحلات لحد الاعتماد</span>
+          <span className="text-sm text-text-primary">{t('driver.pendingReviewBanner')}</span>
           <button onClick={() => navigate('/driver/pending-approval')} className="text-sm font-semibold text-primary">
-            التفاصيل
+            {t('driver.details')}
           </button>
         </div>
       )}
 
       <main className="mx-auto max-w-lg px-4 py-6">
-        {trips.length === 0 && <p className="py-12 text-center text-text-secondary">لسه معملتش أي رحلة</p>}
+        {trips.length === 0 && <p className="py-12 text-center text-text-secondary">{t('driver.noTripsYet')}</p>}
 
         {trips.map((trip) => (
           <button
@@ -62,7 +67,7 @@ export default function DriverDashboardPage() {
                 {trip.originCity} → {trip.destinationCity}
               </p>
               <p className="text-sm text-text-secondary">
-                {new Intl.DateTimeFormat('ar-EG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(
+                {new Intl.DateTimeFormat(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(
                   trip.departureTime,
                 )}
               </p>
@@ -72,7 +77,7 @@ export default function DriverDashboardPage() {
                 {STATUS_LABELS[trip.status].label}
               </p>
               <p className="text-sm text-text-secondary">
-                {trip.availableSeats}/{trip.totalSeats} متاح
+                {trip.availableSeats}/{trip.totalSeats} {t('driver.available')}
               </p>
             </div>
           </button>
@@ -82,7 +87,7 @@ export default function DriverDashboardPage() {
       {approved && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2">
           <Button onClick={() => navigate('/driver/create-trip')} fullWidth={false} icon="➕">
-            رحلة جديدة
+            {t('driver.newTrip')}
           </Button>
         </div>
       )}

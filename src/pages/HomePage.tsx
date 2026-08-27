@@ -81,7 +81,7 @@ export default function HomePage() {
       <div className="bg-gradient-to-br from-primary to-secondary px-4 pb-10 pt-6 text-white">
         <div className="mx-auto max-w-lg">
           <h2 className="mb-1 text-2xl font-bold">{t('home.whereTo')}</h2>
-          <p className="text-sm text-white/70">شارك رحلتك مع آلاف الركاب والسائقين في مصر</p>
+          <p className="text-sm text-white/70">{t('home.heroSubtitle')}</p>
           {completedCount >= 5 && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-card/15 px-4 py-2 backdrop-blur-sm">
               <Users2 size={16} />

@@ -206,7 +206,7 @@ export default function LandingPage() {
             <button
               onClick={() => changeLanguage(i18n.language === 'ar' ? 'en' : 'ar')}
               className="flex items-center gap-1 rounded-full border border-white/20 px-3 py-1.5 text-sm font-semibold text-white/80 hover:text-white"
-              aria-label="تغيير اللغة"
+              aria-label={t('common.changeLanguage')}
             >
               <Globe size={14} />
               {i18n.language === 'ar' ? 'EN' : 'عربي'}

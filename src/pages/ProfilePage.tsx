@@ -65,14 +65,14 @@ export default function ProfilePage() {
               <button
                 onClick={() => window.open(getReferralLink(), '_blank')}
                 className="text-2xl font-bold tracking-widest underline decoration-dotted underline-offset-4"
-                aria-label="فتح رابط الدعوة"
+                aria-label={t('profile.openReferralLink')}
               >
                 {user.referralCode}
               </button>
-              <button onClick={copyCode} className="text-lg" aria-label="نسخ الكود">
+              <button onClick={copyCode} className="text-lg" aria-label={t('profile.copyCode')}>
                 📋
               </button>
-              <button onClick={shareCode} className="text-lg" aria-label="مشاركة الكود">
+              <button onClick={shareCode} className="text-lg" aria-label={t('profile.shareCode')}>
                 📤
               </button>
             </div>

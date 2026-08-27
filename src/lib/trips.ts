@@ -5,6 +5,7 @@ import {
   orderBy,
   limit,
   getDocs,
+  addDoc,
   doc,
   onSnapshot,
   updateDoc,
@@ -145,6 +146,27 @@ export async function updateTripLiveLocation(tripId: string, lat: number, lng: n
     driverLiveLng: lng,
     driverLiveUpdatedAt: Timestamp.now(),
   })
+}
+
+/**
+ * بتسجّل نقطة في مسار الرحلة الكامل (سجل GPS) - منفصلة عن الموقع
+ * "الحالي" اللي بيتحدّث باستمرار، عشان نقدر نرسم خط الرحلة كلها بعد
+ * كده لو احتجنا نراجعها (مثلاً في حالة خلاف). بتتنادى بمعدّل محدود
+ * (مش كل تحديث GPS) عشان منستهلكش حد الكتابة المجاني في Firebase.
+ */
+export async function recordLocationHistoryPoint(tripId: string, lat: number, lng: number) {
+  await addDoc(collection(db, 'trips', tripId, 'locationHistory'), {
+    lat,
+    lng,
+    recordedAt: Timestamp.now(),
+  })
+}
+
+/** بترجع كل نقاط المسار المسجّلة لرحلة معيّنة، مرتبة زمنيًا، لرسمها كخط على الخريطة */
+export async function fetchLocationHistory(tripId: string): Promise<{ lat: number; lng: number }[]> {
+  const q = query(collection(db, 'trips', tripId, 'locationHistory'), orderBy('recordedAt'))
+  const snap = await getDocs(q)
+  return snap.docs.map((d) => ({ lat: d.data().lat as number, lng: d.data().lng as number }))
 }
 
 export async function stopTripLiveLocation(tripId: string) {

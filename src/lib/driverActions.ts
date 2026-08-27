@@ -261,6 +261,8 @@ function mapBookingDoc(id: string, data: Record<string, unknown>) {
     paymentMethod: data.paymentMethod as string,
     paymentStatus: data.paymentStatus as string,
     pinVerified: Boolean(data.pinVerified),
+    pickupLat: (data.pickupLat as number) ?? null,
+    pickupLng: (data.pickupLng as number) ?? null,
     createdAt: created?.toDate ? created.toDate() : new Date(),
   }
 }

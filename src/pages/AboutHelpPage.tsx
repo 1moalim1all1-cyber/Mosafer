@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 const ITEMS = [
   { path: '/how-it-works', icon: '🧭', label: 'إزاي يشتغل مسافر' },
@@ -11,6 +12,7 @@ const ITEMS = [
 
 export default function AboutHelpPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   return (
     <div className="min-h-screen bg-bg">
@@ -18,7 +20,7 @@ export default function AboutHelpPage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
-        <h1 className="text-lg font-bold text-text-primary">عن مسافر ومساعدة</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('common.aboutHelpTitle')}</h1>
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">

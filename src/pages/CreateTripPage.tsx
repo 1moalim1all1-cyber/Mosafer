@@ -1,5 +1,6 @@
 import { useState, type FormEvent, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/useAuth'
 import { createTrip, subscribeDriverStatus } from '../lib/driverActions'
 import { Button } from '../components/ui/Button'
@@ -10,6 +11,7 @@ import { COUNTRIES, DEFAULT_COUNTRY, type CountryCode } from '../lib/countries'
 export default function CreateTripPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   // النهارده بصيغة YYYY-MM-DD - نفس صيغة حقل input[type=date]، عشان
   // يتحط افتراضيًا لكن يفضل قابل للتغيير عادي لو السائق عايز تاريخ تاني
@@ -98,7 +100,7 @@ export default function CreateTripPage() {
       })
       navigate('/driver')
     } catch {
-      setError('حصل خطأ أثناء نشر الرحلة')
+      setError(t('driver.publishError'))
     } finally {
       setLoading(false)
     }
@@ -106,22 +108,22 @@ export default function CreateTripPage() {
 
   return (
     <div className="mx-auto max-w-lg px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-text-primary">إنشاء رحلة جديدة</h1>
+      <h1 className="mb-6 text-2xl font-bold text-text-primary">{t('driver.createTripTitle')}</h1>
 
       {isApproved === false && (
         <div className="mb-6 rounded-xl border border-warning/40 bg-warning/10 p-4 text-center">
           <p className="mb-3 text-text-primary">
-            حسابك لسه تحت المراجعة، مش هتقدر تنشر أي رحلة لحد ما فريق مسافر يعتمد مستنداتك
+            {t('driver.pendingCreateBanner')}
           </p>
           <Button onClick={() => navigate('/driver/pending-approval')} fullWidth={false}>
-            تفاصيل حالة الاعتماد
+            {t('driver.approvalStatusDetails')}
           </Button>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
-          <label className="mb-1.5 block text-sm font-semibold text-text-primary">الدولة</label>
+          <label className="mb-1.5 block text-sm font-semibold text-text-primary">{t('driver.country')}</label>
           <div className="flex gap-2">
             {Object.values(COUNTRIES).map((c) => (
               <button
@@ -143,13 +145,13 @@ export default function CreateTripPage() {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-semibold text-text-primary">من</label>
+          <label className="mb-1.5 block text-sm font-semibold text-text-primary">{t('search.from')}</label>
           <select
             value={origin}
             onChange={(e) => setOrigin(e.target.value)}
             className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 focus:border-primary focus:outline-none"
           >
-            <option value="">اختار المحافظة</option>
+            <option value="">{t('search.selectGovernorate')}</option>
             {COUNTRIES[country].regions.map((g) => (
               <option key={g} value={g}>
                 {g}
@@ -163,18 +165,18 @@ export default function CreateTripPage() {
               originPoint ? 'border-success/40 bg-success/5 text-success' : 'border-border text-text-secondary'
             }`}
           >
-            {originPoint ? '✅ اتحدد بالظبط من الخريطة' : '🗺️ حدد الموقع بالظبط من الخريطة'}
+            {originPoint ? t('driver.locationPicked') : t('driver.pickLocationOnMap')}
           </button>
         </div>
 
         <div>
-          <label className="mb-1.5 block text-sm font-semibold text-text-primary">إلى</label>
+          <label className="mb-1.5 block text-sm font-semibold text-text-primary">{t('search.to')}</label>
           <select
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
             className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 focus:border-primary focus:outline-none"
           >
-            <option value="">اختار المحافظة</option>
+            <option value="">{t('search.selectGovernorate')}</option>
             {COUNTRIES[country].regions.map((g) => (
               <option key={g} value={g}>
                 {g}
@@ -188,32 +190,32 @@ export default function CreateTripPage() {
               destinationPoint ? 'border-success/40 bg-success/5 text-success' : 'border-border text-text-secondary'
             }`}
           >
-            {destinationPoint ? '✅ اتحدد بالظبط من الخريطة' : '🗺️ حدد الموقع بالظبط من الخريطة'}
+            {destinationPoint ? t('driver.locationPicked') : t('driver.pickLocationOnMap')}
           </button>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Input label="التاريخ" type="date" value={date} min={todayStr} onChange={(e) => setDate(e.target.value)} />
-          <Input label="الوقت" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+          <Input label={t('driver.date')} type="date" value={date} min={todayStr} onChange={(e) => setDate(e.target.value)} />
+          <Input label={t('driver.time')} type="time" value={time} onChange={(e) => setTime(e.target.value)} />
         </div>
 
         <Input
-          label={`السعر للمقعد الواحد (${COUNTRIES[country].currencyAr})`}
+          label={t('driver.pricePerSeat', { currency: COUNTRIES[country].currencyAr })}
           type="number"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
         />
-        <Input label="عدد المقاعد المتاحة" type="number" value={seats} onChange={(e) => setSeats(e.target.value)} />
-        <Input label="المدة المتوقعة (دقيقة)" type="number" value={duration} onChange={(e) => setDuration(e.target.value)} />
+        <Input label={t('driver.availableSeatsCount')} type="number" value={seats} onChange={(e) => setSeats(e.target.value)} />
+        <Input label={t('driver.estimatedDuration')} type="number" value={duration} onChange={(e) => setDuration(e.target.value)} />
 
         <label className="flex items-center justify-between rounded-xl border border-success/30 bg-success/5 p-4">
-          <span className="font-semibold text-text-primary">♻️ راجع فاضي</span>
+          <span className="font-semibold text-text-primary">{t('driver.returnEmptyTrip')}</span>
           <input type="checkbox" checked={isReturnEmptyTrip} onChange={(e) => setIsReturnEmptyTrip(e.target.checked)} className="h-5 w-5" />
         </label>
 
         {user?.gender === 'female' && (
           <label className="flex items-center justify-between rounded-xl border border-pink-300 bg-pink-50 p-4">
-            <span className="font-semibold text-text-primary">👩 رحلة سيدات فقط</span>
+            <span className="font-semibold text-text-primary">{t('driver.womenOnlyTrip')}</span>
             <input type="checkbox" checked={isWomenOnly} onChange={(e) => setIsWomenOnly(e.target.checked)} className="h-5 w-5" />
           </label>
         )}
@@ -221,13 +223,13 @@ export default function CreateTripPage() {
         {error && <p className="text-sm text-danger">{error}</p>}
 
         <Button type="submit" loading={loading} disabled={isApproved === false}>
-          نشر الرحلة
+          {t('driver.publishTrip')}
         </Button>
       </form>
 
       {pickingLocation && (
         <LocationPicker
-          title={pickingLocation === 'origin' ? 'حدد نقطة الانطلاق بالظبط' : 'حدد نقطة الوصول بالظبط'}
+          title={pickingLocation === 'origin' ? t('driver.originPointTitle') : t('driver.destinationPointTitle')}
           initialLat={pickingLocation === 'origin' ? originPoint?.lat : destinationPoint?.lat}
           initialLng={pickingLocation === 'origin' ? originPoint?.lng : destinationPoint?.lng}
           onClose={() => setPickingLocation(null)}

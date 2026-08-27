@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
-import { updateTripLiveLocation, stopTripLiveLocation } from '../lib/trips'
+import { updateTripLiveLocation, stopTripLiveLocation, recordLocationHistoryPoint } from '../lib/trips'
 
 export function LiveLocationToggle({ tripId }: { tripId: string }) {
   const [isSharing, setIsSharing] = useState(false)
   const watchIdRef = useRef<number | null>(null)
+  const lastHistoryWriteRef = useRef<number>(0)
 
   function startSharing() {
     if (!navigator.geolocation) {
@@ -13,6 +14,15 @@ export function LiveLocationToggle({ tripId }: { tripId: string }) {
     const id = navigator.geolocation.watchPosition(
       (pos) => {
         updateTripLiveLocation(tripId, pos.coords.latitude, pos.coords.longitude)
+
+        // نسجّل نقطة في مسار الرحلة الكامل كل 20 ثانية بس (مش كل
+        // تحديث GPS)، عشان نرسم خط الرحلة كلها بعدين من غير ما
+        // نستهلك حد الكتابة المجاني في Firebase بسرعة
+        const now = Date.now()
+        if (now - lastHistoryWriteRef.current > 20_000) {
+          lastHistoryWriteRef.current = now
+          recordLocationHistoryPoint(tripId, pos.coords.latitude, pos.coords.longitude)
+        }
       },
       () => {
         alert('محتاجين صلاحية الموقع عشان تشارك موقعك مع الراكب')

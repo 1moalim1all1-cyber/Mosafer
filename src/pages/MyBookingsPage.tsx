@@ -65,7 +65,7 @@ export default function MyBookingsPage() {
       <main className="mx-auto max-w-lg px-4 py-6">
         {bookings.length === 0 && (
           <div className="py-12 text-center">
-            <p className="mb-4 text-text-secondary">لسه معملتش أي حجز</p>
+            <p className="mb-4 text-text-secondary">{t('bookings.noBookingsYet2')}</p>
             <Button onClick={() => navigate('/')} fullWidth={false}>
               ابحث عن رحلة
             </Button>
@@ -85,7 +85,7 @@ export default function MyBookingsPage() {
             </p>
             {b.status === 'confirmed' && b.startPin && !b.pinVerified && (
               <div className="mb-3 rounded-xl bg-primary-light p-3 text-center">
-                <p className="mb-1 text-xs text-text-secondary">قول الكود ده للسائق وقت ما يوصلك</p>
+                <p className="mb-1 text-xs text-text-secondary">{t('bookings.sayThisCode')}</p>
                 <p dir="ltr" className="text-2xl font-bold tracking-[0.3em] text-primary">
                   {b.startPin}
                 </p>

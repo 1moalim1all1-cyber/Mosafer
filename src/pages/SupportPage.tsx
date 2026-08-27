@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { addDoc, collection, Timestamp } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { fetchAppSettings } from '../lib/admin'
@@ -8,6 +9,7 @@ import { Button } from '../components/ui/Button'
 
 export default function SupportPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { user } = useAuth()
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
@@ -41,36 +43,36 @@ export default function SupportPage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
-        <h1 className="text-lg font-bold text-text-primary">الدعم والشكاوى</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('support.title')}</h1>
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">
         {contact && (contact.whatsappNumber || contact.supportEmail) && (
           <div className="mb-6 rounded-2xl border border-border bg-card p-4">
-            <p className="mb-2 font-semibold text-text-primary">تواصل مباشر</p>
+            <p className="mb-2 font-semibold text-text-primary">{t('support.directContact')}</p>
             {contact.whatsappNumber && <p className="text-text-secondary">💬 {contact.whatsappNumber}</p>}
             {contact.supportEmail && <p className="text-text-secondary">✉️ {contact.supportEmail}</p>}
           </div>
         )}
 
-        <p className="mb-2 font-semibold text-text-primary">أو ابعتلنا شكوى/اقتراح</p>
+        <p className="mb-2 font-semibold text-text-primary">{t('support.orSendComplaint')}</p>
         {sent ? (
           <div className="rounded-2xl border border-success/40 bg-success/5 p-4 text-center">
             <p className="mb-2 text-2xl">✅</p>
-            <p className="font-semibold text-text-primary">تم إرسال رسالتك</p>
-            <p className="text-sm text-text-secondary">هنرد عليك في أقرب وقت</p>
+            <p className="font-semibold text-text-primary">{t('support.messageSentTitle')}</p>
+            <p className="text-sm text-text-secondary">{t('support.messageSentSubtitle')}</p>
           </div>
         ) : (
           <>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="اكتب مشكلتك أو اقتراحك هنا..."
+              placeholder={t('support.messagePlaceholder')}
               rows={5}
               className="mb-4 w-full rounded-xl border-2 border-border p-3 focus:border-primary focus:outline-none"
             />
             <Button onClick={handleSend} loading={sending} disabled={!message.trim()}>
-              إرسال
+              {t('support.send')}
             </Button>
           </>
         )}

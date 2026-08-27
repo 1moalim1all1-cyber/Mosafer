@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { fetchFaqItems } from '../lib/pages'
 
 export default function FaqPage() {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [items, setItems] = useState<{ question: string; answer: string }[]>([])
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
@@ -17,7 +19,7 @@ export default function FaqPage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
-        <h1 className="text-lg font-bold text-text-primary">الأسئلة الشائعة</h1>
+        <h1 className="text-lg font-bold text-text-primary">{t('common.faqTitle')}</h1>
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">

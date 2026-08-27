@@ -159,27 +159,27 @@ export default function WalletPage() {
             {submitted ? (
               <div className="text-center">
                 <p className="mb-2 text-4xl">✅</p>
-                <p className="mb-2 font-bold text-text-primary">تم إرسال طلبك بنجاح</p>
-                <p className="text-sm text-text-secondary">هنتأكد من التحويل ونضيف الرصيد في أقرب وقت</p>
+                <p className="mb-2 font-bold text-text-primary">{t('wallet.requestSentTitle')}</p>
+                <p className="text-sm text-text-secondary">{t('wallet.requestSentSubtitle')}</p>
                 <div className="mt-4">
                   <Button onClick={closeModal} fullWidth={false}>
-                    تمام
+                    {t('wallet.ok')}
                   </Button>
                 </div>
               </div>
             ) : (
               <>
-                <h3 className="mb-4 text-lg font-bold text-text-primary">إيداع في المحفظة</h3>
+                <h3 className="mb-4 text-lg font-bold text-text-primary">{t('wallet.depositTitle')}</h3>
                 {settings?.depositPhoneNumber ? (
                   <div className="mb-4 rounded-xl bg-primary-light p-4 text-center">
-                    <p className="mb-1 text-sm text-text-secondary">حوّل المبلغ الأول على</p>
+                    <p className="mb-1 text-sm text-text-secondary">{t('wallet.transferFirstTo')}</p>
                     <p className="text-lg font-bold text-primary">{settings.depositMethodName}</p>
                     <p dir="ltr" className="text-xl font-bold text-primary">
                       {settings.depositPhoneNumber}
                     </p>
                   </div>
                 ) : (
-                  <p className="mb-4 text-sm text-danger">لسه الإدارة معملتش إعداد رقم استقبال الإيداعات</p>
+                  <p className="mb-4 text-sm text-danger">{t('wallet.depositNotConfigured')}</p>
                 )}
                 <div className="flex flex-col gap-3">
                   <Input
@@ -189,16 +189,16 @@ export default function WalletPage() {
                     onChange={(e) => setDepositAmount(e.target.value)}
                   />
                   <Input
-                    label="رقمك اللي حوّلت منه"
+                    label={t('wallet.yourSenderNumber')}
                     value={senderNumber}
                     onChange={(e) => setSenderNumber(e.target.value)}
                     dir="ltr"
-                    hint="عشان نتأكد من التحويل بسرعة"
+                    hint={t('wallet.senderNumberHint')}
                   />
                 </div>
                 <div className="mt-4 flex gap-3">
                   <Button variant="secondary" onClick={closeModal} fullWidth>
-                    إلغاء
+                    {t('wallet.cancel')}
                   </Button>
                   <Button
                     onClick={handleDeposit}
@@ -206,7 +206,7 @@ export default function WalletPage() {
                     disabled={!depositAmount || !senderNumber.trim()}
                     fullWidth
                   >
-                    تأكيد إني حوّلت
+                    {t('wallet.confirmTransferred')}
                   </Button>
                 </div>
               </>
@@ -221,17 +221,17 @@ export default function WalletPage() {
             {submitted ? (
               <div className="text-center">
                 <p className="mb-2 text-4xl">✅</p>
-                <p className="mb-2 font-bold text-text-primary">تم إرسال طلب السحب</p>
-                <p className="text-sm text-text-secondary">هيتراجع الطلب والفلوس هتوصلك على الرقم اللي كتبته</p>
+                <p className="mb-2 font-bold text-text-primary">{t('wallet.withdrawSentTitle')}</p>
+                <p className="text-sm text-text-secondary">{t('wallet.withdrawSentSubtitle')}</p>
                 <div className="mt-4">
                   <Button onClick={closeModal} fullWidth={false}>
-                    تمام
+                    {t('wallet.ok')}
                   </Button>
                 </div>
               </div>
             ) : (
               <>
-                <h3 className="mb-4 text-lg font-bold text-text-primary">سحب من المحفظة</h3>
+                <h3 className="mb-4 text-lg font-bold text-text-primary">{t('wallet.withdrawTitle')}</h3>
                 <p className="mb-4 text-sm text-text-secondary">{t('wallet.availableBalance')}: {balance.toFixed(0)} {t('common.currency')}</p>
                 <div className="flex flex-col gap-3">
                   <Input
@@ -241,7 +241,7 @@ export default function WalletPage() {
                     onChange={(e) => setWithdrawAmount(e.target.value)}
                   />
                   <div>
-                    <label className="mb-1.5 block text-sm font-semibold text-text-primary">هتستلم إزاي؟</label>
+                    <label className="mb-1.5 block text-sm font-semibold text-text-primary">{t('wallet.howReceive')}</label>
                     <select
                       value={withdrawMethod}
                       onChange={(e) => setWithdrawMethod(e.target.value)}
@@ -255,18 +255,18 @@ export default function WalletPage() {
                     </select>
                   </div>
                   <Input
-                    label={withdrawMethod === 'تحويل بنكي' ? 'رقم الحساب / IBAN' : 'رقم الموبايل اللي هتستلم عليه'}
+                    label={withdrawMethod === 'تحويل بنكي' ? t('wallet.ibanLabel') : t('wallet.phoneReceiveLabel')}
                     value={accountNumber}
                     onChange={(e) => setAccountNumber(e.target.value)}
                     dir="ltr"
                   />
                 </div>
                 {Number(withdrawAmount) > balance && (
-                  <p className="mt-2 text-sm text-danger">المبلغ أكبر من رصيدك المتاح</p>
+                  <p className="mt-2 text-sm text-danger">{t('wallet.amountExceedsBalance')}</p>
                 )}
                 <div className="mt-4 flex gap-3">
                   <Button variant="secondary" onClick={closeModal} fullWidth>
-                    إلغاء
+                    {t('wallet.cancel')}
                   </Button>
                   <Button
                     onClick={handleWithdraw}
@@ -274,7 +274,7 @@ export default function WalletPage() {
                     disabled={!withdrawAmount || !accountNumber.trim() || Number(withdrawAmount) > balance}
                     fullWidth
                   >
-                    إرسال طلب السحب
+                    {t('wallet.sendWithdrawRequest')}
                   </Button>
                 </div>
               </>
