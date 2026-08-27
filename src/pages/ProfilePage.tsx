@@ -63,9 +63,9 @@ export default function ProfilePage() {
             <p className="mb-2 text-sm text-white/70">{t('profile.referralSubtitle')}</p>
             <div className="flex items-center justify-center gap-2">
               <button
-                onClick={() => window.open(getReferralLink(), '_blank')}
+                onClick={shareCode}
                 className="text-2xl font-bold tracking-widest underline decoration-dotted underline-offset-4"
-                aria-label={t('profile.openReferralLink')}
+                aria-label={t('profile.shareCode')}
               >
                 {user.referralCode}
               </button>
