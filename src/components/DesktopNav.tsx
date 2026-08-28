@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Search, CarFront, Wallet, UserCircle, LayoutDashboard, Bell, Globe } from 'lucide-react'
+import { Search, CarFront, Wallet, UserCircle, LayoutDashboard, Bell, Globe, Users2 } from 'lucide-react'
 import { useAuth } from '../contexts/useAuth'
 import { changeLanguage } from '../lib/i18n'
 
@@ -18,6 +18,7 @@ export function DesktopNav() {
 
   const links = [
     { path: '/', icon: Search, label: t('bottomNav.home') },
+    { path: '/community', icon: Users2, label: t('community.title') },
     { path: '/my-bookings', icon: CarFront, label: t('bottomNav.myTrips') },
     { path: '/wallet', icon: Wallet, label: t('bottomNav.wallet') },
     { path: '/notifications', icon: Bell, label: t('notifications.title') },

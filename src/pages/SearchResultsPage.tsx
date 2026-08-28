@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { searchTrips } from '../lib/trips'
+import { saveTripAlert } from '../lib/tripAlerts'
 import type { Trip } from '../types/trip'
 import { TripCard } from '../components/TripCard'
 import { Button } from '../components/ui/Button'
@@ -20,6 +21,7 @@ export default function SearchResultsPage() {
   const [trips, setTrips] = useState<Trip[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [alertSaved, setAlertSaved] = useState(false)
 
   useEffect(() => {
     if (!origin || !destination) return
@@ -76,9 +78,24 @@ export default function SearchResultsPage() {
           <div className="py-12 text-center">
             <p className="mb-2 text-lg font-semibold text-text-primary">{t('search.noResultsTitle')}</p>
             <p className="mb-4 text-sm text-text-secondary">{t('search.noResultsSubtitle')}</p>
-            <Button variant="secondary" onClick={() => navigate('/')} fullWidth={false}>
-              {t('search.backToSearch')}
-            </Button>
+            <div className="flex flex-col items-center gap-3">
+              <Button variant="secondary" onClick={() => navigate('/')} fullWidth={false}>
+                {t('search.backToSearch')}
+              </Button>
+              {alertSaved ? (
+                <p className="text-sm font-semibold text-success">🔔 {t('search.alertSaved')}</p>
+              ) : (
+                <button
+                  onClick={async () => {
+                    await saveTripAlert({ country: 'egypt', originCity: origin, destinationCity: destination })
+                    setAlertSaved(true)
+                  }}
+                  className="text-sm font-semibold text-primary"
+                >
+                  🔔 {t('search.notifyMeTitle')}
+                </button>
+              )}
+            </div>
           </div>
         )}
 

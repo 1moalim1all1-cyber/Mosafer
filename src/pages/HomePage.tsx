@@ -9,7 +9,7 @@ import { subscribeUnreadCount } from '../lib/notifications'
 import { subscribeAvailableTrips, subscribeCompletedTripsCount } from '../lib/trips'
 import type { Trip } from '../types/trip'
 import { Animated3DCar } from '../components/Animated3DCar'
-import { Users2, Bell, MapPin, ArrowLeftRight, Users, Search } from 'lucide-react'
+import { Users2, Bell, MapPin, ArrowLeftRight, Users, Search, CarFront } from 'lucide-react'
 
 const GOVERNORATES = [
   'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحر الأحمر', 'البحيرة',
@@ -171,6 +171,27 @@ export default function HomePage() {
             {t('search.searchButton')}
           </Button>
         </div>
+        </div>
+
+        {/* ---- قسم "رايح فين؟" - مدخل واضح لمجتمع الرحلات (طلب/عرض) ---- */}
+        <div className="mt-8 rounded-2xl border border-border bg-card p-5">
+          <h2 className="mb-4 text-lg font-bold text-text-primary">{t('community.whereTo')}</h2>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={() => navigate('/community/new-request')}
+              className="flex flex-col items-center gap-2 rounded-xl border-2 border-border py-5 transition hover:border-primary hover:bg-primary-light"
+            >
+              <Search size={26} className="text-primary" />
+              <span className="text-sm font-semibold text-text-primary">{t('community.searchForTrip')}</span>
+            </button>
+            <button
+              onClick={() => navigate('/role-selection')}
+              className="flex flex-col items-center gap-2 rounded-xl border-2 border-border py-5 transition hover:border-primary hover:bg-primary-light"
+            >
+              <CarFront size={26} className="text-primary" />
+              <span className="text-sm font-semibold text-text-primary">{t('community.iAmGoingHaveSeats')}</span>
+            </button>
+          </div>
         </div>
 
         <h2 className="mb-4 mt-8 text-xl font-bold text-text-primary">{t('home.availableTripsNow')}</h2>

@@ -155,6 +155,32 @@ service cloud.firestore {
     }
 
     // ---- Ratings ----
+    match /tripRequests/{requestId} {
+      // القراءة عامة زي الرحلات العادية - عشان السائقين كلهم يشوفوا
+      // الطلبات ويعرضوا عليها
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.passengerId == request.auth.uid && isActiveAccount();
+      allow update: if isOwner(resource.data.passengerId) || isAdmin();
+      allow delete: if isOwner(resource.data.passengerId) || isAdmin();
+    }
+
+    match /tripOffers/{offerId} {
+      // القراءة: بس صاحب الطلب (الراكب) أو صاحب العرض (السائق) نفسه،
+      // مش عامة زي الرحلات - العروض فيها سعر وتفاصيل خاصة بالطرفين
+      allow read: if isSignedIn() && (isOwner(resource.data.passengerId) || isOwner(resource.data.driverId));
+      allow create: if isSignedIn() && request.resource.data.driverId == request.auth.uid && isActiveAccount();
+      // بس الراكب صاحب الطلب يقدر يغيّر حالة العرض (قبول/رفض)
+      allow update: if isSignedIn() && isOwner(resource.data.passengerId);
+    }
+
+    match /tripAlerts/{alertId} {
+      // التنبيهات المحفوظة خاصة بصاحبها بس - لكن لازم أي سائق يقدر
+      // يقرأها (query) عشان الفحص التلقائي وقت نشر رحلة جديدة يشتغل
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn();
+    }
+
     match /ratings/{ratingId} {
       // قراءة عامة (حتى لزائر مش مسجّل دخول) عشان تبان في قسم "آراء
       // المستخدمين" بصفحة الهبوط - نفس منطق الرحلات العادية بالظبط

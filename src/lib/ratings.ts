@@ -35,6 +35,22 @@ export async function submitRating(params: {
  * تعليق فعلي بس (مش أي تقييم عشوائي)، عشان القسم يبقى ذو معنى ومفيدش
  * أي بيانات مزيّفة.
  */
+/**
+ * تقييمات مستخدم معيّن (للملف الشخصي العام) - بتعليق بس، عشان تبقى
+ * مفيدة للعرض
+ */
+export async function fetchUserReviews(userId: string, count = 10) {
+  const q = query(collection(db, 'ratings'), where('toUserId', '==', userId), limit(count * 2))
+  const snap = await getDocs(q)
+  return snap.docs
+    .map((d) => {
+      const data = d.data()
+      return { id: d.id, stars: data.stars as number, comment: (data.comment as string) ?? '' }
+    })
+    .filter((r) => r.comment.trim().length > 0)
+    .slice(0, count)
+}
+
 export async function fetchTopTestimonials(count = 6) {
   const q = query(collection(db, 'ratings'), where('stars', '>=', 4), limit(count * 3))
   const snap = await getDocs(q)

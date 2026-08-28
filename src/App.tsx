@@ -55,6 +55,10 @@ const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'))
 const AdminDriverQueuePage = lazy(() => import('./pages/AdminDriverQueuePage'))
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'))
 const AdminTripsPage = lazy(() => import('./pages/AdminTripsPage'))
+const TripsCommunityPage = lazy(() => import('./pages/TripsCommunityPage'))
+const CreateTripRequestPage = lazy(() => import('./pages/CreateTripRequestPage'))
+const MyTripRequestsPage = lazy(() => import('./pages/MyTripRequestsPage'))
+const PublicProfilePage = lazy(() => import('./pages/PublicProfilePage'))
 const AdminWalletRequestsPage = lazy(() => import('./pages/AdminWalletRequestsPage'))
 const AdminGovernoratesPage = lazy(() => import('./pages/AdminGovernoratesPage'))
 const AdminCouponsPage = lazy(() => import('./pages/AdminCouponsPage'))
@@ -330,6 +334,38 @@ function AppShell() {
             element={
               <ProtectedRoute>
                 <FavoritesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/community"
+            element={
+              <ProtectedRoute>
+                <TripsCommunityPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/community/new-request"
+            element={
+              <ProtectedRoute>
+                <CreateTripRequestPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/community/my-requests"
+            element={
+              <ProtectedRoute>
+                <MyTripRequestsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/:userId"
+            element={
+              <ProtectedRoute>
+                <PublicProfilePage />
               </ProtectedRoute>
             }
           />

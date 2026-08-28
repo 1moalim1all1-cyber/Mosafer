@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/useAuth'
 import { createTrip, subscribeDriverStatus } from '../lib/driverActions'
+import { notifyMatchingTripAlerts } from '../lib/tripAlerts'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { LocationPicker } from '../components/LocationPicker'
@@ -98,6 +99,16 @@ export default function CreateTripPage() {
         carType: 'اقتصادية',
         country,
       })
+
+      // نفحص لو فيه حد محفوظ تنبيه على نفس المسار ده، ونبعتله إشعار
+      // تلقائي - بدون ما نمنع نشر الرحلة لو الفحص فشل لأي سبب
+      notifyMatchingTripAlerts({
+        country,
+        originCity: origin,
+        destinationCity: destination,
+        driverName: user.fullName,
+      }).catch(() => {})
+
       navigate('/driver')
     } catch {
       setError(t('driver.publishError'))
