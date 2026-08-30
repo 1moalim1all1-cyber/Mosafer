@@ -30,6 +30,12 @@ export async function createBooking(params: {
   const { tripId, seatsBooked, paymentMethod, couponCode, pickupLat, pickupLng } = params
   const uid = auth.currentUser?.uid
   if (!uid) throw new Error('لازم تسجّل دخول الأول')
+  if (paymentMethod !== 'cash') {
+    throw new Error('الدفع بالمحفظة متوقف مؤقتًا لحين تشغيل الخادم الآمن')
+  }
+  if (couponCode?.trim()) {
+    throw new Error('الكوبونات متوقفة مؤقتًا في المرحلة الأولى')
+  }
 
   const tripRef = doc(db, 'trips', tripId)
   const bookingRef = doc(collection(db, 'bookings'))
@@ -115,6 +121,7 @@ export async function createBooking(params: {
       tx.update(tripRef, {
         availableSeats: newAvailable,
         status: newAvailable === 0 ? 'full' : 'active',
+        lastBookingId: bookingRef.id,
       })
 
       if (appliedCouponRef) {
@@ -170,6 +177,7 @@ export async function cancelBooking(bookingId: string): Promise<void> {
         tx.update(tripRef, {
           availableSeats: (trip.availableSeats as number) + (booking.seatsBooked as number),
           status: 'active',
+          lastBookingId: bookingId,
         })
       }
 
