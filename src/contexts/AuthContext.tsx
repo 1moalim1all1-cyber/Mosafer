@@ -120,18 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const now = Timestamp.now()
-      let welcomeBonus = 20
-      try {
-        const settingsSnap = await getDoc(doc(db, 'appSettings', 'general'))
-        if (settingsSnap.exists()) {
-          welcomeBonus = Number(settingsSnap.data().welcomeBonusAmount ?? 20)
-        }
-      } catch {
-        welcomeBonus = 20
-      }
-      welcomeBonus = Math.min(Math.max(welcomeBonus, 0), 200)
-
-      const batch = writeBatch(db)
+      // Phase one: balances are server/admin controlled. New wallets start at zero.\n      const welcomeBonus = 0\n\n      const batch = writeBatch(db)
       batch.set(doc(db, 'users', uid), {
         role: input.role,
         fullName: input.fullName.trim(),
