@@ -49,7 +49,10 @@ service cloud.firestore {
         request.resource.data.role in ['passenger', 'driver'] &&
         request.resource.data.status == 'active' &&
         request.resource.data.isPhoneVerified == false &&
-        request.resource.data.isEmailVerified == false;
+        request.resource.data.isEmailVerified == false &&
+        request.resource.data.trustScore == 0 &&
+        request.resource.data.totalTrips == 0 &&
+        request.resource.data.avgRating == 0;
       allow update: if isAdmin() || (
         isOwner(userId) &&
         changedKeys().hasOnly([
@@ -205,10 +208,7 @@ service cloud.firestore {
       allow read: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) &&
         request.resource.data.balance is number &&
-        request.resource.data.balance >= 0 &&
-        request.resource.data.balance <= 200 &&
-        request.resource.data.balance ==
-          get(/databases/$(database)/documents/appSettings/general).data.welcomeBonusAmount;
+        request.resource.data.balance == 0;
       allow update: if isAdmin();
       allow delete: if false;
 
