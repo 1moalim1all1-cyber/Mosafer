@@ -120,7 +120,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const now = Timestamp.now()
-      // Phase one: balances are server/admin controlled. New wallets start at zero.\n      const welcomeBonus = 0\n\n      const batch = writeBatch(db)
+      // Phase one: balances are server/admin controlled. New wallets start at zero.
+      const welcomeBonus = 0
+
+      const batch = writeBatch(db)
       batch.set(doc(db, 'users', uid), {
         role: input.role,
         fullName: input.fullName.trim(),
