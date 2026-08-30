@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import confetti from 'canvas-confetti'
-import { collection, query, where, limit, getDocs, Timestamp } from 'firebase/firestore'
-import { db } from '../lib/firebase'
 import { subscribeToTrip } from '../lib/trips'
 import { fetchUserProfile } from '../lib/users'
 import { createBooking } from '../lib/booking'
@@ -26,15 +24,12 @@ export default function TripDetailsPage() {
   const [trip, setTrip] = useState<Trip | null | undefined>(undefined)
   const [driver, setDriver] = useState<AppUser | null>(null)
   const [seats, setSeats] = useState(1)
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash')
+  const paymentMethod: PaymentMethod = 'cash'
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [openingChat, setOpeningChat] = useState(false)
   const [favorites, setFavorites] = useState<string[]>([])
-  const [couponCode, setCouponCode] = useState('')
-  const [couponMessage, setCouponMessage] = useState<string | null>(null)
-  const [couponDiscount, setCouponDiscount] = useState(0)
   const [pickupPoint, setPickupPoint] = useState<{ lat: number; lng: number } | null>(null)
   const [pickingLocation, setPickingLocation] = useState(false)
   const [confirmedBookingId, setConfirmedBookingId] = useState<string | null>(null)
@@ -66,39 +61,6 @@ export default function TripDetailsPage() {
     return unsubscribe
   }, [tripId])
 
-  async function applyCoupon() {
-    if (!trip || !couponCode.trim()) return
-    const code = couponCode.trim().toUpperCase()
-    setCouponMessage(null)
-    setCouponDiscount(0)
-
-    try {
-      const q = query(collection(db, 'coupons'), where('code', '==', code), limit(1))
-      const snap = await getDocs(q)
-      if (snap.empty) {
-        setCouponMessage(t('tripDetails.couponNotFound'))
-        return
-      }
-      const coupon = snap.docs[0].data()
-      const isActive = coupon.isActive === true
-      const notExpired = !coupon.expiresAt || (coupon.expiresAt as Timestamp).toDate() > new Date()
-      const notExhausted = (coupon.usedCount ?? 0) < (coupon.maxUses ?? 0)
-
-      if (!isActive || !notExpired || !notExhausted) {
-        setCouponMessage(t('tripDetails.couponExpired'))
-        return
-      }
-
-      const original = trip.pricePerSeat * seats
-      const discount = coupon.discountType === 'percentage' ? original * (coupon.value / 100) : coupon.value
-      const finalDiscount = Math.min(discount, original)
-      setCouponDiscount(finalDiscount)
-      setCouponMessage(`${t('tripDetails.couponApplied')} ${finalDiscount.toFixed(0)} ${t('common.currency')}`)
-    } catch {
-      setCouponMessage(t('tripDetails.genericError'))
-    }
-  }
-
   async function handleBook() {
     if (!trip || !user) return
     if (!pickupPoint) {
@@ -112,7 +74,6 @@ export default function TripDetailsPage() {
         tripId: trip.id,
         seatsBooked: seats,
         paymentMethod,
-        couponCode: couponCode.trim() || undefined,
         pickupLat: pickupPoint.lat,
         pickupLng: pickupPoint.lng,
       })
@@ -142,7 +103,7 @@ export default function TripDetailsPage() {
   }
 
   const timeFormat = new Intl.DateTimeFormat('ar-EG', { hour: '2-digit', minute: '2-digit', weekday: 'long', day: 'numeric', month: 'long' })
-  const total = Math.max(0, trip.pricePerSeat * seats - couponDiscount)
+  const total = trip.pricePerSeat * seats
 
   if (success) {
     return <BookingSuccessView confirmedBookingId={confirmedBookingId} onNavigate={navigate} />
@@ -258,21 +219,15 @@ export default function TripDetailsPage() {
           <p className="mb-2 font-semibold text-text-primary">{t('tripDetails.paymentMethod')}</p>
           <div className="grid grid-cols-2 gap-3">
             <button
-              onClick={() => setPaymentMethod('cash')}
               className={`rounded-xl border-2 py-3 font-semibold ${
                 paymentMethod === 'cash' ? 'border-primary bg-primary-light text-primary' : 'border-border text-text-secondary'
               }`}
             >
               💵 {t('tripDetails.cash')}
             </button>
-            <button
-              onClick={() => setPaymentMethod('wallet')}
-              className={`rounded-xl border-2 py-3 font-semibold ${
-                paymentMethod === 'wallet' ? 'border-primary bg-primary-light text-primary' : 'border-border text-text-secondary'
-              }`}
-            >
-              👛 {t('tripDetails.wallet')}
-            </button>
+            <div className="rounded-xl border-2 border-border bg-bg px-3 py-3 text-center text-sm text-text-secondary">
+              👛 المحفظة قريبًا بعد تشغيل الحماية
+            </div>
           </div>
         </div>
 
@@ -293,25 +248,9 @@ export default function TripDetailsPage() {
           </button>
         </div>
 
-        <p className="mb-2 font-semibold text-text-primary">{t('tripDetails.couponOptional')}</p>
-          <div className="flex gap-3">
-            <input
-              value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-              placeholder={t('tripDetails.couponPlaceholder')}
-              className="flex-1 rounded-xl border-2 border-border px-4 py-2.5 focus:border-primary focus:outline-none"
-            />
-            <button
-              type="button"
-              onClick={applyCoupon}
-              className="rounded-xl border-2 border-primary px-4 py-2.5 font-semibold text-primary"
-            >
-              {t('tripDetails.apply')}
-            </button>
-          </div>
-          {couponMessage && (
-            <p className={`mt-2 text-sm ${couponDiscount > 0 ? 'text-success' : 'text-danger'}`}>{couponMessage}</p>
-          )}
+        <p className="rounded-xl bg-warning/10 p-3 text-sm text-text-secondary">
+          الكوبونات متوقفة مؤقتًا في المرحلة الأولى لحماية الحجوزات.
+        </p>
         </div>
 
         <div className="mb-4 flex items-center justify-between rounded-xl bg-card p-4">
