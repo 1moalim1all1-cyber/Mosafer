@@ -219,7 +219,6 @@ export default function TripDetailsPage() {
           <p className="mb-2 font-semibold text-text-primary">{t('tripDetails.paymentMethod')}</p>
           <div className="grid grid-cols-2 gap-3">
             <button
-              onClick={() => setPaymentMethod('cash')}
               className={`rounded-xl border-2 py-3 font-semibold ${
                 paymentMethod === 'cash' ? 'border-primary bg-primary-light text-primary' : 'border-border text-text-secondary'
               }`}
