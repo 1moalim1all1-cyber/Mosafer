@@ -265,14 +265,9 @@ export default function TripDetailsPage() {
             >
               💵 {t('tripDetails.cash')}
             </button>
-            <button
-              onClick={() => setPaymentMethod('wallet')}
-              className={`rounded-xl border-2 py-3 font-semibold ${
-                paymentMethod === 'wallet' ? 'border-primary bg-primary-light text-primary' : 'border-border text-text-secondary'
-              }`}
-            >
-              👛 {t('tripDetails.wallet')}
-            </button>
+            <div className="rounded-xl border-2 border-border bg-bg px-3 py-3 text-center text-sm text-text-secondary">
+              👛 المحفظة قريبًا بعد تشغيل الحماية
+            </div>
           </div>
         </div>
 
@@ -293,25 +288,9 @@ export default function TripDetailsPage() {
           </button>
         </div>
 
-        <p className="mb-2 font-semibold text-text-primary">{t('tripDetails.couponOptional')}</p>
-          <div className="flex gap-3">
-            <input
-              value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-              placeholder={t('tripDetails.couponPlaceholder')}
-              className="flex-1 rounded-xl border-2 border-border px-4 py-2.5 focus:border-primary focus:outline-none"
-            />
-            <button
-              type="button"
-              onClick={applyCoupon}
-              className="rounded-xl border-2 border-primary px-4 py-2.5 font-semibold text-primary"
-            >
-              {t('tripDetails.apply')}
-            </button>
-          </div>
-          {couponMessage && (
-            <p className={`mt-2 text-sm ${couponDiscount > 0 ? 'text-success' : 'text-danger'}`}>{couponMessage}</p>
-          )}
+        <p className="rounded-xl bg-warning/10 p-3 text-sm text-text-secondary">
+          الكوبونات متوقفة مؤقتًا في المرحلة الأولى لحماية الحجوزات.
+        </p>
         </div>
 
         <div className="mb-4 flex items-center justify-between rounded-xl bg-card p-4">
