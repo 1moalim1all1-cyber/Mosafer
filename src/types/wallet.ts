@@ -20,7 +20,7 @@ export interface WalletTransaction {
   method: 'card' | 'bank_transfer' | 'booking' | 'refund' | 'admin';
   status: 'pending' | 'completed' | 'failed' | 'cancelled';
   reference?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: string;
   completedAt?: string;
 }

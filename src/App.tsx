@@ -37,6 +37,8 @@ import { useAuth } from './contexts/useAuth'
 import { SplashScreen } from './components/SplashScreen'
 import { DesktopNav } from './components/DesktopNav'
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary'
+import { WhatsAppButton } from './components/WhatsAppButton'
+import { PageTransition } from './components/PageTransition'
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const RoleSelectionPage = lazy(() => import('./pages/RoleSelectionPage'))
@@ -73,9 +75,9 @@ const TrackTripPage = lazy(() => import('./pages/TrackTripPage'))
 const StaticPageView = lazy(() => import('./pages/StaticPageView'))
 const HowItWorksPage = lazy(() => import('./pages/HowItWorksPage'))
 const LandingPage = lazy(() => import('./pages/LandingPage'))
-
-import { WhatsAppButton } from './components/WhatsAppButton'
-import { PageTransition } from './components/PageTransition'
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
+const ChatsPage = lazy(() => import('./pages/ChatsPage'))
+const AdminReportsPage = lazy(() => import('./pages/AdminReportsPage'))
 
 export default function App() {
   return (
@@ -137,6 +139,14 @@ function AppShell() {
             element={
               <GuestOnlyRoute>
                 <RegisterPage />
+              </GuestOnlyRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <GuestOnlyRoute>
+                <ForgotPasswordPage />
               </GuestOnlyRoute>
             }
           />
@@ -314,6 +324,16 @@ function AppShell() {
             }
           />
           <Route
+            path="/admin/reports"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <AdminReportsPage />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/notifications"
             element={
               <ProtectedRoute>
@@ -326,6 +346,14 @@ function AppShell() {
             element={
               <ProtectedRoute>
                 <ChatPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chats"
+            element={
+              <ProtectedRoute>
+                <ChatsPage />
               </ProtectedRoute>
             }
           />

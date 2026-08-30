@@ -44,7 +44,7 @@ export default function ChatPage() {
         {messages.map((m) => {
           const isMe = m.senderId === user?.uid
           return (
-            <div key={m.id} className={`mb-2 flex ${isMe ? 'justify-start' : 'justify-end'}`}>
+            <div key={m.id} dir="ltr" className={`mb-2 flex ${isMe ? 'justify-end' : 'justify-start'}`}>
               <div
                 className={`max-w-[75%] rounded-2xl px-4 py-2.5 ${
                   isMe ? 'bg-primary text-white' : 'border border-border bg-card text-text-primary'

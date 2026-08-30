@@ -7,7 +7,7 @@ import {
   updateProfile,
   type User as FirebaseUser,
 } from 'firebase/auth'
-import { doc, getDoc, updateDoc, collection, query, where, limit, getDocs, Timestamp, writeBatch } from 'firebase/firestore'
+import { doc, getDoc, collection, query, where, limit, getDocs, Timestamp, writeBatch } from 'firebase/firestore'
 import { auth, db } from '../lib/firebase'
 import type { AppUser, Gender, UserRole } from '../types/user'
 import { AuthContext } from './authContextInstance'
@@ -120,6 +120,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const now = Timestamp.now()
+      let welcomeBonus = 20
+      try {
+        const settingsSnap = await getDoc(doc(db, 'appSettings', 'general'))
+        if (settingsSnap.exists()) {
+          welcomeBonus = Number(settingsSnap.data().welcomeBonusAmount ?? 20)
+        }
+      } catch {
+        welcomeBonus = 20
+      }
+      welcomeBonus = Math.min(Math.max(welcomeBonus, 0), 200)
+
       const batch = writeBatch(db)
       batch.set(doc(db, 'users', uid), {
         role: input.role,
@@ -139,23 +150,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         referredByUid,
         createdAt: now,
       })
-      batch.set(doc(db, 'wallets', uid), { balance: 0, currency: 'EGP', createdAt: now })
+      batch.set(doc(db, 'wallets', uid), { balance: welcomeBonus, currency: 'EGP', createdAt: now })
       await batch.commit()
-
-      // الرصيد الترحيبي - كان بيتحط تلقائيًا عبر Cloud Function، دلوقتي
-      // بيتحط مباشرة من المتصفح بعد إنشاء الحساب (نفس القيمة القابلة
-      // للتحكم من لوحة الإدارة). مكافأة دعوة الصديق مؤجلة مؤقتًا لحد ما
-      // نرجع نستخدم Cloud Functions، لأنها بتحتاج تعديل رصيد مستخدم
-      // تاني (صاحب الكود) وده محتاج تحقق سيرفري حقيقي.
-      try {
-        const settingsSnap = await getDoc(doc(db, 'appSettings', 'general'))
-        const welcomeBonus = settingsSnap.exists() ? (settingsSnap.data().welcomeBonusAmount ?? 20) : 20
-        if (welcomeBonus > 0) {
-          await updateDoc(doc(db, 'wallets', uid), { balance: welcomeBonus })
-        }
-      } catch {
-        // لو فشلت خطوة الرصيد الترحيبي لأي سبب، منمنعش التسجيل نفسه
-      }
 
       await updateProfile(credential.user, { displayName: input.fullName.trim() })
 

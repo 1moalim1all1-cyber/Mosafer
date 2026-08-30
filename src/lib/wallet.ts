@@ -1,4 +1,4 @@
-import { doc, collection, addDoc, onSnapshot, orderBy, query, limit, Timestamp } from 'firebase/firestore'
+import { doc, collection, addDoc, onSnapshot, orderBy, query, limit, Timestamp, getDoc, getDocs, where } from 'firebase/firestore'
 import { db } from './firebase'
 
 export interface WalletTransaction {
@@ -62,6 +62,23 @@ export async function requestDeposit(uid: string, amount: number, senderNumber: 
  * عشان الإدارة تقدر تبعتله الفلوس مباشرة من غير ما تدوّر عليه.
  */
 export async function requestWithdraw(uid: string, amount: number, method: string, accountNumber: string) {
+  if (amount <= 0) throw new Error('أدخل مبلغ صحيح')
+
+  const walletRef = doc(db, 'wallets', uid)
+  const walletSnap = await getDoc(walletRef)
+  const balance = (walletSnap.data()?.balance ?? 0) as number
+
+  const pendingSnap = await getDocs(
+    query(collection(db, 'wallets', uid, 'walletTransactions'), where('status', '==', 'pending')),
+  )
+  const pendingWithdrawals = pendingSnap.docs
+    .filter((d) => d.data().type === 'withdraw')
+    .reduce((sum, d) => sum + Number(d.data().amount ?? 0), 0)
+
+  if (amount + pendingWithdrawals > balance) {
+    throw new Error('المبلغ أكبر من الرصيد المتاح بعد خصم طلبات السحب المعلّقة')
+  }
+
   await addDoc(collection(db, 'wallets', uid, 'walletTransactions'), {
     type: 'withdraw',
     amount,

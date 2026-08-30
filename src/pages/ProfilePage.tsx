@@ -96,6 +96,9 @@ export default function ProfilePage() {
           <Button variant="secondary" onClick={() => navigate('/my-bookings')}>
             {t('bottomNav.myTrips')}
           </Button>
+          <Button variant="secondary" onClick={() => navigate('/chats')}>
+            {t('common.chats')}
+          </Button>
           <Button variant="secondary" onClick={() => navigate('/favorites')}>
             {t('profile.favorites')}
           </Button>

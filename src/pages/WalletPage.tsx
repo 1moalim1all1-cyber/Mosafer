@@ -72,6 +72,8 @@ export default function WalletPage() {
     try {
       await requestWithdraw(user.uid, Number(withdrawAmount), withdrawMethod, accountNumber.trim())
       setSubmitted(true)
+    } catch (err) {
+      alert(err instanceof Error ? err.message : t('common.error'))
     } finally {
       setLoading(false)
     }

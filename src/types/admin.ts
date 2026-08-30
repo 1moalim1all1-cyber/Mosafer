@@ -57,7 +57,7 @@ export interface SystemLog {
   adminId: string;
   targetType: 'user' | 'driver' | 'trip' | 'booking' | 'admin';
   targetId: string;
-  changes?: Record<string, any>;
+  changes?: Record<string, unknown>;
   timestamp: string;
   ipAddress?: string;
 }

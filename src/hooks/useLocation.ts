@@ -1,89 +1,90 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Location } from '../types';
+import { useState, useCallback, useEffect } from 'react'
+
+export interface GeoPoint {
+  latitude: number
+  longitude: number
+}
 
 export function useLocation() {
-  const [location, setLocation] = useState<Location | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [watching, setWatching] = useState(false);
-  const [watchId, setWatchId] = useState<number | null>(null);
+  const [location, setLocation] = useState<GeoPoint | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [watching, setWatching] = useState(false)
+  const [watchId, setWatchId] = useState<number | null>(null)
 
   const getCurrentLocation = useCallback(async () => {
-    setLoading(true);
+    setLoading(true)
     try {
       if (!navigator.geolocation) {
-        setError('Geolocation is not supported by this browser');
-        return;
+        setError('Geolocation is not supported by this browser')
+        return
       }
       navigator.geolocation.getCurrentPosition(
         (position) => {
           setLocation({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
-          });
-          setError(null);
+          })
+          setError(null)
         },
         (err) => {
-          setError(err.message);
-        }
-      );
+          setError(err.message)
+        },
+      )
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, []);
+  }, [])
 
   const watchLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      setError('Geolocation is not supported by this browser');
-      return;
+      setError('Geolocation is not supported by this browser')
+      return
     }
     const id = navigator.geolocation.watchPosition(
       (position) => {
         setLocation({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
-        });
-        setError(null);
+        })
+        setError(null)
       },
       (err) => {
-        setError(err.message);
-      }
-    );
-    setWatchId(id);
-    setWatching(true);
-  }, []);
+        setError(err.message)
+      },
+    )
+    setWatchId(id)
+    setWatching(true)
+  }, [])
 
   const stopWatching = useCallback(() => {
     if (watchId !== null) {
-      navigator.geolocation.clearWatch(watchId);
-      setWatching(false);
-      setWatchId(null);
+      navigator.geolocation.clearWatch(watchId)
+      setWatching(false)
+      setWatchId(null)
     }
-  }, [watchId]);
+  }, [watchId])
 
   const calculateDistance = useCallback(
     (lat2: number, lon2: number): number => {
-      if (!location) return 0;
-      const R = 6371;
-      const dLat = ((lat2 - location.latitude) * Math.PI) / 180;
-      const dLon = ((lon2 - location.longitude) * Math.PI) / 180;
+      if (!location) return 0
+      const R = 6371
+      const dLat = ((lat2 - location.latitude) * Math.PI) / 180
+      const dLon = ((lon2 - location.longitude) * Math.PI) / 180
       const a =
         Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos((location.latitude * Math.PI) / 180) *
-          Math.cos((lat2 * Math.PI) / 180) *
-          Math.sin(dLon / 2) *
-          Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
+        Math.cos((location.latitude) * Math.PI / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+      return R * c
     },
-    [location]
-  );
+    [location],
+  )
 
   useEffect(() => {
     return () => {
-      stopWatching();
-    };
-  }, [stopWatching]);
+      stopWatching()
+    }
+  }, [stopWatching])
 
   return {
     location,
@@ -94,5 +95,5 @@ export function useLocation() {
     watchLocation,
     stopWatching,
     calculateDistance,
-  };
+  }
 }

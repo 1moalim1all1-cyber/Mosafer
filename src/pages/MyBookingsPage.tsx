@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/useAuth'
 import { subscribePassengerBookings } from '../lib/bookings'
-import { cancelBooking } from '../lib/booking'
+import { cancelBooking, claimBookingRefund } from '../lib/booking'
 import { hasRated } from '../lib/ratings'
 import type { Booking } from '../types/booking'
 import { Button } from '../components/ui/Button'
@@ -33,6 +33,13 @@ export default function MyBookingsPage() {
     if (!user) return
     return subscribePassengerBookings(user.uid, setBookings)
   }, [user])
+
+  useEffect(() => {
+    if (!user) return
+    const pending = bookings.filter((b) => b.paymentStatus === 'refund_pending')
+    if (pending.length === 0) return
+    void Promise.all(pending.map((b) => claimBookingRefund(b.id).catch(() => undefined)))
+  }, [bookings, user])
 
   async function openRating(booking: Booking) {
     if (!user) return

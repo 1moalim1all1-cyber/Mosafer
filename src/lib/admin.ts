@@ -335,3 +335,34 @@ export function subscribeAllTrips(callback: (trips: ManagedTrip[]) => void, coun
 export async function deleteTrip(tripId: string) {
   await deleteDoc(doc(db, 'trips', tripId))
 }
+
+export interface SupportReport {
+  id: string
+  reporterId: string
+  message: string
+  status: 'pending' | 'resolved' | 'closed'
+  createdAt: Date
+}
+
+export function subscribeSupportReports(callback: (items: SupportReport[]) => void) {
+  const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(200))
+  return onSnapshot(q, (snap) => {
+    callback(
+      snap.docs.map((d) => {
+        const data = d.data()
+        const created = data.createdAt as { toDate?: () => Date }
+        return {
+          id: d.id,
+          reporterId: data.reporterId ?? '',
+          message: data.message ?? '',
+          status: data.status ?? 'pending',
+          createdAt: created?.toDate ? created.toDate() : new Date(),
+        }
+      }),
+    )
+  })
+}
+
+export async function setReportStatus(reportId: string, status: SupportReport['status']) {
+  await updateDoc(doc(db, 'reports', reportId), { status })
+}

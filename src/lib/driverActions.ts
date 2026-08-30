@@ -142,45 +142,45 @@ export async function markTripCompleted(tripId: string) {
       const trip = tripSnap.data()
       if (trip.driverId !== uid) throw new Error('الرحلة دي مش بتاعتك')
 
-      tx.update(tripRef, { status: 'completed' })
-
-      // زيادة العداد الاجتماعي العام - بيظهر في الصفحة الرئيسية لكل
-      // المستخدمين ("أكتر من X رحلة اتعملت")، بيبني ثقة فورية
-      tx.set(doc(db, 'stats', 'public'), { completedTripsCount: increment(1) }, { merge: true })
-
       const driverRef = doc(db, 'users', uid)
-      tx.update(driverRef, { totalTrips: increment(1) })
+      const driverWalletRef = doc(db, 'wallets', uid)
+      await tx.get(driverRef)
+      const driverWalletSnap = await tx.get(driverWalletRef)
 
       const isReturnEmpty = Boolean(trip.isReturnEmptyTrip)
       const commissionPercent = isReturnEmpty
         ? (settings.commissionReturnEmptyPercent ?? 5)
         : (settings.commissionStandardPercent ?? 10)
 
+      let paidEarnings = 0
       for (const bookingDoc of bookingsSnap.docs) {
         const booking = bookingDoc.data()
-        tx.update(bookingDoc.ref, { status: 'completed' })
-
-        // ملحوظة: مش بنعدّل عدد رحلات الراكب هنا لأن قواعد الأمان بترفض
-        // أي حساب يعدّل بيانات حساب تاني (وده صح ومقصود) - عدد رحلات
-        // السائق بس هو اللي بيتحدّث، لأنه بيعدّل حسابه هو نفسه.
         if (booking.paymentStatus === 'paid') {
           const commission = (booking.totalPrice as number) * (commissionPercent / 100)
-          const earnings = (booking.totalPrice as number) - commission
-
-          const driverWalletRef = doc(db, 'wallets', uid)
-          const driverWalletSnap = await tx.get(driverWalletRef)
-          const currentBalance = (driverWalletSnap.data()?.balance ?? 0) as number
-          const newBalance = currentBalance + earnings
-          tx.update(driverWalletRef, { balance: newBalance })
-          tx.set(doc(collection(driverWalletRef, 'walletTransactions')), {
-            type: 'payment',
-            amount: earnings,
-            balanceAfter: newBalance,
-            relatedBookingId: bookingDoc.id,
-            status: 'completed',
-            createdAt: serverTimestamp(),
-          })
+          paidEarnings += (booking.totalPrice as number) - commission
         }
+      }
+
+      tx.update(tripRef, { status: 'completed' })
+      tx.set(doc(db, 'stats', 'public'), { completedTripsCount: increment(1) }, { merge: true })
+      tx.update(driverRef, { totalTrips: increment(1) })
+
+      for (const bookingDoc of bookingsSnap.docs) {
+        tx.update(bookingDoc.ref, { status: 'completed' })
+      }
+
+      if (paidEarnings > 0) {
+        const currentBalance = (driverWalletSnap.data()?.balance ?? 0) as number
+        const newBalance = currentBalance + paidEarnings
+        tx.update(driverWalletRef, { balance: newBalance })
+        tx.set(doc(collection(driverWalletRef, 'walletTransactions')), {
+          type: 'payment',
+          amount: paidEarnings,
+          balanceAfter: newBalance,
+          relatedTripId: tripId,
+          status: 'completed',
+          createdAt: serverTimestamp(),
+        })
       }
     })
   } catch (err) {
@@ -200,15 +200,14 @@ export async function respondToBooking(bookingId: string, accept: boolean) {
       const booking = bookingSnap.data()
       if (booking.status !== 'pending') throw new Error('الحجز ده اترد عليه بالفعل')
 
+      const tripRef = doc(db, 'trips', booking.tripId)
+      const tripSnap = await tx.get(tripRef)
+
       if (accept) {
         tx.update(bookingRef, { status: 'confirmed' })
         return
       }
 
-      tx.update(bookingRef, { status: 'rejected' })
-
-      const tripRef = doc(db, 'trips', booking.tripId)
-      const tripSnap = await tx.get(tripRef)
       if (tripSnap.exists()) {
         const trip = tripSnap.data()
         tx.update(tripRef, {
@@ -217,21 +216,11 @@ export async function respondToBooking(bookingId: string, accept: boolean) {
         })
       }
 
-      if (booking.paymentStatus === 'paid') {
-        const walletRef = doc(db, 'wallets', booking.passengerId)
-        const walletSnap = await tx.get(walletRef)
-        const currentBalance = (walletSnap.data()?.balance ?? 0) as number
-        const newBalance = currentBalance + (booking.totalPrice as number)
-        tx.update(walletRef, { balance: newBalance })
-        tx.set(doc(collection(walletRef, 'walletTransactions')), {
-          type: 'refund',
-          amount: booking.totalPrice,
-          balanceAfter: newBalance,
-          relatedBookingId: bookingId,
-          status: 'completed',
-          createdAt: serverTimestamp(),
-        })
+      const bookingUpdate: Record<string, string> = { status: 'rejected' }
+      if (booking.paymentStatus === 'paid' && booking.paymentMethod === 'wallet') {
+        bookingUpdate.paymentStatus = 'refund_pending'
       }
+      tx.update(bookingRef, bookingUpdate)
     })
   } catch (err) {
     if (err instanceof Error) throw err

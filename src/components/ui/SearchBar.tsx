@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import type { KeyboardEvent } from 'react'
 import { Search, X } from 'lucide-react';
 
 interface SearchBarProps {
@@ -18,7 +18,7 @@ export function SearchBar({
   disabled = false,
   loading = false,
 }: SearchBarProps) {
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && onSearch) {
       onSearch(value);
     }

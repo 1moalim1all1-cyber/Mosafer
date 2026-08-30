@@ -20,21 +20,30 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.gender;
     }
 
-    // حساب موقوف أو محظور من الإدارة مايقدرش يحجز أو ينشر رحلات جديدة
     function isActiveAccount() {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active';
+    }
+
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
     }
 
     // ---- Users ----
     match /users/{userId} {
       allow read: if isSignedIn();
       allow create: if isOwner(userId);
-      allow update: if isAdmin() || isOwner(userId);
+      allow update: if isAdmin() || (
+        isOwner(userId) &&
+        request.resource.data.role == resource.data.role &&
+        request.resource.data.status == resource.data.status &&
+        request.resource.data.referralCode == resource.data.referralCode
+      );
       allow delete: if isAdmin();
 
       match /notifications/{notificationId} {
         allow read: if isOwner(userId) || isAdmin();
-        allow write: if isOwner(userId) || isAdmin();
+        allow create: if isSignedIn();
+        allow update, delete: if isOwner(userId) || isAdmin();
       }
     }
 
@@ -48,9 +57,6 @@ service cloud.firestore {
 
     // ---- Trips ----
     match /trips/{tripId} {
-      // القراءة متاحة للجميع (حتى زائر مش مسجّل دخول) للرحلات العادية،
-      // عشان تظهر في صفحة الهبوط - رحلات السيدات فقط لازم تسجيل دخول
-      // وتحقق من الجنس، حفاظًا على الخصوصية
       allow read: if resource.data.isWomenOnly == false ||
         (isSignedIn() && (userGender() == 'female' || isAdmin()));
 
@@ -59,15 +65,16 @@ service cloud.firestore {
         isActiveAccount() &&
         get(/databases/$(database)/documents/drivers/$(request.auth.uid)).data.verificationStatus == 'approved';
 
-      allow update: if isSignedIn();
+      allow update: if isAdmin() ||
+        (isSignedIn() && resource.data.driverId == request.auth.uid) ||
+        (isSignedIn() && changedKeys().hasOnly(['availableSeats', 'status']));
+
       allow delete: if isOwner(resource.data.driverId) || isAdmin();
 
-      // مسار الرحلة الكامل (سجل GPS) - أي مستخدم مسجّل دخول يقدر يكتب
-      // نقطة (السائق وقت المشاركة)، والقراءة مفتوحة لمين مسجّل دخول
-      // بس (مش عامة زي الرحلة نفسها، لأنه بيانات موقع أدق وأحسّاسية)
       match /locationHistory/{pointId} {
         allow read: if isSignedIn();
-        allow create: if isSignedIn();
+        allow create: if isSignedIn() &&
+          get(/databases/$(database)/documents/trips/$(tripId)).data.driverId == request.auth.uid;
       }
     }
 
@@ -88,8 +95,11 @@ service cloud.firestore {
     // ---- Wallets ----
     match /wallets/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-      allow create: if isOwner(userId) && request.resource.data.balance == 0;
-      allow update: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) &&
+        request.resource.data.balance is number &&
+        request.resource.data.balance >= 0 &&
+        request.resource.data.balance <= 200;
+      allow update: if isAdmin() || isOwner(userId);
       allow delete: if false;
 
       match /walletTransactions/{txId} {
@@ -119,7 +129,12 @@ service cloud.firestore {
     }
     match /coupons/{docId} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        changedKeys().hasOnly(['usedCount']) &&
+        request.resource.data.usedCount == resource.data.usedCount + 1
+      );
     }
     match /pages/{docId} {
       allow read: if true;
@@ -149,15 +164,14 @@ service cloud.firestore {
            get(/databases/$(database)/documents/chats/$(chatId)).data.driverId == request.auth.uid ||
            isAdmin());
         allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid;
-        allow update: if isSignedIn();
+        allow update: if isSignedIn() &&
+          (get(/databases/$(database)/documents/chats/$(chatId)).data.passengerId == request.auth.uid ||
+           get(/databases/$(database)/documents/chats/$(chatId)).data.driverId == request.auth.uid);
         allow delete: if isAdmin();
       }
     }
 
-    // ---- Ratings ----
     match /tripRequests/{requestId} {
-      // القراءة عامة زي الرحلات العادية - عشان السائقين كلهم يشوفوا
-      // الطلبات ويعرضوا عليها
       allow read: if true;
       allow create: if isSignedIn() && request.resource.data.passengerId == request.auth.uid && isActiveAccount();
       allow update: if isOwner(resource.data.passengerId) || isAdmin();
@@ -165,34 +179,26 @@ service cloud.firestore {
     }
 
     match /tripOffers/{offerId} {
-      // القراءة: بس صاحب الطلب (الراكب) أو صاحب العرض (السائق) نفسه،
-      // مش عامة زي الرحلات - العروض فيها سعر وتفاصيل خاصة بالطرفين
       allow read: if isSignedIn() && (isOwner(resource.data.passengerId) || isOwner(resource.data.driverId));
       allow create: if isSignedIn() && request.resource.data.driverId == request.auth.uid && isActiveAccount();
-      // بس الراكب صاحب الطلب يقدر يغيّر حالة العرض (قبول/رفض)
       allow update: if isSignedIn() && isOwner(resource.data.passengerId);
     }
 
     match /tripAlerts/{alertId} {
-      // التنبيهات المحفوظة خاصة بصاحبها بس - لكن لازم أي سائق يقدر
-      // يقرأها (query) عشان الفحص التلقائي وقت نشر رحلة جديدة يشتغل
       allow read: if isSignedIn();
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow delete: if isSignedIn();
+      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
     match /ratings/{ratingId} {
-      // قراءة عامة (حتى لزائر مش مسجّل دخول) عشان تبان في قسم "آراء
-      // المستخدمين" بصفحة الهبوط - نفس منطق الرحلات العادية بالظبط
       allow read: if true;
       allow create: if isSignedIn() && request.resource.data.fromUserId == request.auth.uid;
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
 
-    // ---- Reports ----
     match /reports/{reportId} {
-      allow read: if isAdmin();
+      allow read: if isAdmin() || (isSignedIn() && resource.data.reporterId == request.auth.uid);
       allow create: if isSignedIn();
       allow update: if isAdmin();
     }

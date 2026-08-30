@@ -161,6 +161,10 @@ export async function cancelBooking(bookingId: string): Promise<void> {
 
       const tripRef = doc(db, 'trips', booking.tripId)
       const tripSnap = await tx.get(tripRef)
+      const walletRef = doc(db, 'wallets', booking.passengerId)
+      const shouldRefund = booking.paymentStatus === 'paid'
+      const walletSnap = shouldRefund ? await tx.get(walletRef) : null
+
       if (tripSnap.exists()) {
         const trip = tripSnap.data()
         tx.update(tripRef, {
@@ -169,9 +173,7 @@ export async function cancelBooking(bookingId: string): Promise<void> {
         })
       }
 
-      if (booking.paymentStatus === 'paid') {
-        const walletRef = doc(db, 'wallets', booking.passengerId)
-        const walletSnap = await tx.get(walletRef)
+      if (shouldRefund && walletSnap) {
         const currentBalance = (walletSnap.data()?.balance ?? 0) as number
         const newBalance = currentBalance + (booking.totalPrice as number)
         tx.update(walletRef, { balance: newBalance })
@@ -183,9 +185,46 @@ export async function cancelBooking(bookingId: string): Promise<void> {
           status: 'completed',
           createdAt: serverTimestamp(),
         })
+        tx.update(bookingRef, { status: 'cancelled', paymentStatus: 'refunded' })
+      } else {
+        tx.update(bookingRef, { status: 'cancelled' })
       }
+    })
+  } catch (err) {
+    if (err instanceof Error) throw err
+    throw new Error('حصل خطأ، حاول تاني')
+  }
+}
 
-      tx.update(bookingRef, { status: 'cancelled' })
+/** الراكب بيسترد رصيد محفظته بنفسه بعد رفض السائق - عشان قواعد الأمان تمنع السائق من تعديل محفظة حد تاني */
+export async function claimBookingRefund(bookingId: string): Promise<void> {
+  const uid = auth.currentUser?.uid
+  if (!uid) throw new Error('لازم تسجّل دخول الأول')
+
+  const bookingRef = doc(db, 'bookings', bookingId)
+  try {
+    await runTransaction(db, async (tx) => {
+      const bookingSnap = await tx.get(bookingRef)
+      if (!bookingSnap.exists()) throw new Error('الحجز ده مش موجود')
+      const booking = bookingSnap.data()
+      if (booking.passengerId !== uid) throw new Error('الحجز ده مش بتاعك')
+      if (booking.paymentStatus !== 'refund_pending') return
+      if (booking.paymentMethod !== 'wallet') return
+
+      const walletRef = doc(db, 'wallets', uid)
+      const walletSnap = await tx.get(walletRef)
+      const currentBalance = (walletSnap.data()?.balance ?? 0) as number
+      const newBalance = currentBalance + (booking.totalPrice as number)
+      tx.update(walletRef, { balance: newBalance })
+      tx.set(doc(collection(walletRef, 'walletTransactions')), {
+        type: 'refund',
+        amount: booking.totalPrice,
+        balanceAfter: newBalance,
+        relatedBookingId: bookingId,
+        status: 'completed',
+        createdAt: serverTimestamp(),
+      })
+      tx.update(bookingRef, { paymentStatus: 'refunded' })
     })
   } catch (err) {
     if (err instanceof Error) throw err

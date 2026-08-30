@@ -1,6 +1,6 @@
 export type BookingStatus = 'pending' | 'confirmed' | 'rejected' | 'cancelled' | 'completed'
 export type PaymentMethod = 'cash' | 'card' | 'wallet'
-export type PaymentStatus = 'pending' | 'paid' | 'refunded'
+export type PaymentStatus = 'pending' | 'paid' | 'refunded' | 'refund_pending'
 
 export interface Booking {
   id: string

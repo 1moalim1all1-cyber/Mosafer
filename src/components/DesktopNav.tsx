@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Search, CarFront, Wallet, UserCircle, LayoutDashboard, Bell, Globe, Users2 } from 'lucide-react'
+import { Search, CarFront, Wallet, UserCircle, LayoutDashboard, Bell, Globe, Users2, MessageCircle } from 'lucide-react'
 import { useAuth } from '../contexts/useAuth'
 import { changeLanguage } from '../lib/i18n'
 
@@ -22,6 +22,7 @@ export function DesktopNav() {
     { path: '/my-bookings', icon: CarFront, label: t('bottomNav.myTrips') },
     { path: '/wallet', icon: Wallet, label: t('bottomNav.wallet') },
     { path: '/notifications', icon: Bell, label: t('notifications.title') },
+    { path: '/chats', icon: MessageCircle, label: t('common.chats') },
   ]
 
   if (user?.role === 'driver') {

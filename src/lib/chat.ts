@@ -73,3 +73,53 @@ export async function sendMessage(chatId: string, senderId: string, text: string
     { merge: true },
   )
 }
+
+export interface ChatThread {
+  id: string
+  passengerId: string
+  driverId: string
+  lastMessage: string
+  lastMessageAt: Date
+}
+
+function mapChatDoc(id: string, data: Record<string, unknown>): ChatThread {
+  const last = data.lastMessageAt as { toDate?: () => Date }
+  return {
+    id,
+    passengerId: (data.passengerId as string) ?? '',
+    driverId: (data.driverId as string) ?? '',
+    lastMessage: (data.lastMessage as string) ?? '',
+    lastMessageAt: last?.toDate ? last.toDate() : new Date(0),
+  }
+}
+
+export function subscribeUserChats(uid: string, callback: (chats: ChatThread[]) => void) {
+  let asPassenger: ChatThread[] = []
+  let asDriver: ChatThread[] = []
+
+  function emit() {
+    const byId = new Map<string, ChatThread>()
+    for (const chat of [...asPassenger, ...asDriver]) byId.set(chat.id, chat)
+    callback([...byId.values()].sort((a, b) => b.lastMessageAt.getTime() - a.lastMessageAt.getTime()))
+  }
+
+  const unsubPassenger = onSnapshot(
+    query(collection(db, 'chats'), where('passengerId', '==', uid)),
+    (snap) => {
+      asPassenger = snap.docs.map((d) => mapChatDoc(d.id, d.data()))
+      emit()
+    },
+  )
+  const unsubDriver = onSnapshot(
+    query(collection(db, 'chats'), where('driverId', '==', uid)),
+    (snap) => {
+      asDriver = snap.docs.map((d) => mapChatDoc(d.id, d.data()))
+      emit()
+    },
+  )
+
+  return () => {
+    unsubPassenger()
+    unsubDriver()
+  }
+}

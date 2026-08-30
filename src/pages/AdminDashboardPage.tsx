@@ -19,6 +19,7 @@ export default function AdminDashboardPage() {
     { path: '/admin/wallet-requests', icon: '👛', label: t('admin.walletRequests') },
     { path: '/admin/governorates', icon: '🗺️', label: t('admin.manageGovernorates') },
     { path: '/admin/coupons', icon: '🏷️', label: t('admin.manageCoupons') },
+    { path: '/admin/reports', icon: '📨', label: t('admin.reportsTitle') },
     { path: '/admin/settings', icon: '⚙️', label: t('admin.generalSettings') },
   ]
 

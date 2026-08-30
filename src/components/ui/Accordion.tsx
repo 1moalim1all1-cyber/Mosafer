@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import { useState, type ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react';
 
 interface AccordionItem {

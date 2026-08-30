@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface RadioProps {
   value: string;
   checked: boolean;
