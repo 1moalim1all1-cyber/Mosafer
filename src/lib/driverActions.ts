@@ -213,6 +213,7 @@ export async function respondToBooking(bookingId: string, accept: boolean) {
         tx.update(tripRef, {
           availableSeats: (trip.availableSeats as number) + (booking.seatsBooked as number),
           status: 'active',
+          lastBookingId: bookingId,
         })
       }
 
