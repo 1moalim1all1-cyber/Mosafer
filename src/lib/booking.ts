@@ -39,7 +39,6 @@ export async function createBooking(params: {
 
   const tripRef = doc(db, 'trips', tripId)
   const bookingRef = doc(collection(db, 'bookings'))
-  const walletRef = doc(db, 'wallets', uid)
   const userRef = doc(db, 'users', uid)
 
   // لازم نلاقي مرجع الكوبون *قبل* الدخول في الـ Transaction، لأن
@@ -96,26 +95,7 @@ export async function createBooking(params: {
         }
       }
 
-      let paymentStatus: 'pending' | 'paid' = 'pending'
-
-      if (paymentMethod === 'wallet') {
-        const walletSnap = await tx.get(walletRef)
-        const currentBalance = (walletSnap.data()?.balance ?? 0) as number
-        if (currentBalance < totalPrice) {
-          throw new Error(`رصيد محفظتك مش كافي، رصيدك الحالي ${currentBalance.toFixed(0)} ج.م`)
-        }
-        const newBalance = currentBalance - totalPrice
-        tx.update(walletRef, { balance: newBalance })
-        tx.set(doc(collection(walletRef, 'walletTransactions')), {
-          type: 'payment',
-          amount: totalPrice,
-          balanceAfter: newBalance,
-          relatedBookingId: bookingRef.id,
-          status: 'completed',
-          createdAt: serverTimestamp(),
-        })
-        paymentStatus = 'paid'
-      }
+      const paymentStatus = 'pending' as const
 
       const newAvailable = currentAvailable - seatsBooked
       tx.update(tripRef, {
