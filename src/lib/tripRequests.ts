@@ -19,6 +19,14 @@ function mapDoc(id: string, data: Record<string, unknown>): TripRequest {
   }
 }
 
+/** الطلب يختفي من العرض العام بعد وقته، أو بنهاية يوم السفر لو الوقت اختياري. */
+export function isTripRequestCurrent(request: Pick<TripRequest, 'travelDate' | 'preferredTime' | 'status'>, now = new Date()) {
+  if (request.status !== 'active') return false
+  const endTime = request.preferredTime || '23:59:59'
+  const expiresAt = new Date(`${request.travelDate}T${endTime}`)
+  return !Number.isNaN(expiresAt.getTime()) && expiresAt.getTime() >= now.getTime()
+}
+
 export async function createTripRequest(input: {
   country: string
   originCity: string
@@ -49,16 +57,30 @@ export function subscribeActiveTripRequests(country: string, callback: (requests
     orderBy('createdAt', 'desc'),
     limit(count),
   )
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => mapDoc(d.id, d.data())))
+  let latestRequests: TripRequest[] = []
+  const emitCurrentRequests = () => callback(latestRequests.filter((request) => isTripRequestCurrent(request)))
+  const unsubscribe = onSnapshot(q, (snap) => {
+    latestRequests = snap.docs.map((d) => mapDoc(d.id, d.data()))
+    emitCurrentRequests()
   })
+  const expiryTimer = window.setInterval(emitCurrentRequests, 30_000)
+
+  return () => {
+    window.clearInterval(expiryTimer)
+    unsubscribe()
+  }
 }
 
 /** طلبات الرحلات بتاعة راكب معيّن (لشاشة "طلباتي") */
 export function subscribeMyTripRequests(passengerId: string, callback: (requests: TripRequest[]) => void) {
   const q = query(collection(db, 'tripRequests'), where('passengerId', '==', passengerId), orderBy('createdAt', 'desc'))
   return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => mapDoc(d.id, d.data())))
+    callback(snap.docs.map((d) => {
+      const request = mapDoc(d.id, d.data())
+      return request.status === 'active' && !isTripRequestCurrent(request)
+        ? { ...request, status: 'expired' as const }
+        : request
+    }))
   })
 }
 

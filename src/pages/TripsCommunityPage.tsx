@@ -103,7 +103,7 @@ export default function TripsCommunityPage() {
         </div>
       </header>
 
-      <div className="mx-auto flex max-w-lg gap-2 px-4 pt-4">
+      <div className="mx-auto flex w-full max-w-7xl gap-2 px-4 pt-6">
         <button
           onClick={() => setView('list')}
           className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border-2 py-2 text-sm font-semibold ${
@@ -122,9 +122,9 @@ export default function TripsCommunityPage() {
         </button>
       </div>
 
-      <main className="mx-auto max-w-lg px-4 py-6">
+      <main className="mx-auto w-full max-w-7xl px-4 py-6">
         {loading && (
-          <div className="flex flex-col gap-3">
+          <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-32 animate-pulse rounded-2xl bg-card" />
             ))}
@@ -139,10 +139,10 @@ export default function TripsCommunityPage() {
           </div>
         )}
 
-        {!loading && requests.length > 0 && view === 'list' && requests.map((r) => <RequestCard key={r.id} request={r} />)}
+        {!loading && requests.length > 0 && view === 'list' && <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">{requests.map((r) => <RequestCard key={r.id} request={r} />)}</div>}
 
         {!loading && requests.length > 0 && view === 'map' && (
-          <div className="overflow-hidden rounded-2xl border border-border" style={{ height: 420 }}>
+          <div className="overflow-hidden rounded-2xl border border-border" style={{ height: 'min(68vh, 680px)' }}>
             <MapContainer center={[26.8, 30.8]} zoom={country === 'saudi' ? 5 : 6} style={{ height: '100%', width: '100%' }}>
               <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
               {Object.entries(groupedByOrigin).map(([city, cityRequests]) => {

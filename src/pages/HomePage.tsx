@@ -78,8 +78,8 @@ export default function HomePage() {
         </div>
       </header>
 
-      <div className="bg-gradient-to-br from-primary to-secondary px-4 pb-10 pt-6 text-white">
-        <div className="mx-auto max-w-lg">
+      <div className="bg-gradient-to-br from-primary to-secondary px-4 pb-16 pt-8 text-white">
+        <div className="mx-auto max-w-7xl">
           <h2 className="mb-1 text-2xl font-bold">{t('home.whereTo')}</h2>
           <p className="text-sm text-white/70">{t('home.heroSubtitle')}</p>
           {completedCount >= 5 && (
@@ -91,8 +91,8 @@ export default function HomePage() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-lg px-4 pb-24 pt-6">
-        <div className="-mt-14 mb-8">
+      <main className="mx-auto grid w-full max-w-7xl gap-8 px-4 pb-24 pt-6 lg:grid-cols-[minmax(360px,460px)_minmax(0,1fr)] lg:items-start">
+        <section className="-mt-16 lg:sticky lg:top-24">
 
         <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-[0_8px_30px_rgba(15,23,42,0.08)]">
           <div className="relative">
@@ -171,10 +171,9 @@ export default function HomePage() {
             {t('search.searchButton')}
           </Button>
         </div>
-        </div>
 
         {/* ---- قسم "رايح فين؟" - مدخل واضح لمجتمع الرحلات (طلب/عرض) ---- */}
-        <div className="mt-8 rounded-2xl border border-border bg-card p-5">
+        <div className="mt-6 rounded-2xl border border-border bg-card p-5">
           <h2 className="mb-4 text-lg font-bold text-text-primary">{t('community.whereTo')}</h2>
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -193,11 +192,13 @@ export default function HomePage() {
             </button>
           </div>
         </div>
+        </section>
 
-        <h2 className="mb-4 mt-8 text-xl font-bold text-text-primary">{t('home.availableTripsNow')}</h2>
+        <section className="min-w-0">
+        <h2 className="mb-4 text-xl font-bold text-text-primary">{t('home.availableTripsNow')}</h2>
 
         {tripsLoading && (
-          <div className="space-y-4">
+          <div className="grid gap-4 xl:grid-cols-2">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-40 animate-pulse rounded-2xl bg-card" />
             ))}
@@ -211,7 +212,8 @@ export default function HomePage() {
           </div>
         )}
 
-        {!tripsLoading && availableTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)}
+        {!tripsLoading && <div className="grid gap-4 xl:grid-cols-2">{availableTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)}</div>}
+        </section>
       </main>
       <BottomNav />
     </div>

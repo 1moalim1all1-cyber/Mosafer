@@ -145,7 +145,7 @@ export default function MyTripRequestsPage() {
         </button>
       </header>
 
-      <main className="mx-auto max-w-lg px-4 py-6">
+      <main className="mx-auto w-full max-w-6xl px-4 py-6">
         {requests.length === 0 && (
           <div className="flex flex-col items-center py-16 text-center">
             <p className="mb-4 text-text-secondary">{t('community.noMyRequestsYet')}</p>
@@ -158,9 +158,11 @@ export default function MyTripRequestsPage() {
           </div>
         )}
 
-        {requests.map((r) => (
-          <RequestWithOffers key={r.id} request={r} statusConfig={STATUS_CONFIG} onCancel={handleCancel} />
-        ))}
+        <div className="grid gap-4 lg:grid-cols-2">
+          {requests.map((r) => (
+            <RequestWithOffers key={r.id} request={r} statusConfig={STATUS_CONFIG} onCancel={handleCancel} />
+          ))}
+        </div>
       </main>
 
       <BottomNav />
