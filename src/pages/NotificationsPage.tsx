@@ -14,6 +14,11 @@ const TYPE_ICONS: Record<string, string> = {
   promotion: '🏷️',
   walletUpdate: '👛',
   adminAlert: '📢',
+  new_booking: '💺',
+  booking_accepted: '✅',
+  booking_rejected: '❌',
+  trip_status: '🚗',
+  chat_message: '💬',
 }
 
 export default function NotificationsPage() {
@@ -21,6 +26,15 @@ export default function NotificationsPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const [notifications, setNotifications] = useState<AppNotification[]>([])
+
+  async function openNotification(notification: AppNotification) {
+    if (user && !notification.isRead) await markNotificationRead(user.uid, notification.id)
+    if (!notification.relatedId) return
+    if (notification.type === 'chat_message') navigate(`/chat/${notification.relatedId}`)
+    else if (notification.type === 'booking_accepted' || notification.type === 'booking_rejected') navigate('/my-bookings')
+    else if (notification.type === 'new_booking') navigate(`/driver/trip/${notification.relatedId}/bookings`)
+    else if (notification.type === 'trip_status') navigate(`/trip/${notification.relatedId}`)
+  }
 
   useEffect(() => {
     if (!user) return
@@ -44,13 +58,13 @@ export default function NotificationsPage() {
         </button>
       </header>
 
-      <main className="mx-auto max-w-lg">
+      <main className="mx-auto w-full max-w-5xl px-4 py-6">
         {notifications.length === 0 && <p className="py-12 text-center text-text-secondary">{t('notifications.noNotifications')}</p>}
         {notifications.map((n) => (
           <button
             key={n.id}
-            onClick={() => user && !n.isRead && markNotificationRead(user.uid, n.id)}
-            className={`flex w-full items-start gap-3 border-b border-border px-4 py-4 text-right ${
+            onClick={() => openNotification(n)}
+            className={`mb-3 flex w-full items-start gap-3 rounded-2xl border border-border px-4 py-4 text-right ${
               n.isRead ? 'bg-card' : 'bg-primary-light/40'
             }`}
           >

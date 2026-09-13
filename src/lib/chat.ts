@@ -9,6 +9,7 @@ import {
   limit,
   getDocs,
   setDoc,
+  getDoc,
   Timestamp,
 } from 'firebase/firestore'
 import { db } from './firebase'
@@ -72,6 +73,24 @@ export async function sendMessage(chatId: string, senderId: string, text: string
     { lastMessage: text, lastMessageAt: Timestamp.now() },
     { merge: true },
   )
+
+  const chatSnap = await getDoc(doc(db, 'chats', chatId))
+  if (chatSnap.exists()) {
+    const chat = chatSnap.data()
+    const receiverId = chat.passengerId === senderId ? chat.driverId : chat.passengerId
+    if (receiverId) {
+      await addDoc(collection(db, 'users', receiverId, 'notifications'), {
+        userId: receiverId,
+        actorId: senderId,
+        type: 'chat_message',
+        title: 'رسالة جديدة',
+        body: text.length > 80 ? `${text.slice(0, 80)}…` : text,
+        relatedId: chatId,
+        isRead: false,
+        createdAt: Timestamp.now(),
+      }).catch(() => undefined)
+    }
+  }
 }
 
 export interface ChatThread {

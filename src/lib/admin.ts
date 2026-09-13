@@ -58,15 +58,21 @@ export async function rejectDriver(driverId: string, reason: string) {
 }
 
 export async function fetchDashboardStats() {
-  const [activeTrips, pendingDrivers, totalUsers] = await Promise.all([
+  const [activeTrips, pendingDrivers, totalUsers, activeRequests, confirmedBookings, totalReports] = await Promise.all([
     getCountFromServer(query(collection(db, 'trips'), where('status', '==', 'active'))),
     getCountFromServer(query(collection(db, 'drivers'), where('verificationStatus', '==', 'pending'))),
     getCountFromServer(collection(db, 'users')),
+    getCountFromServer(query(collection(db, 'tripRequests'), where('status', '==', 'active'))),
+    getCountFromServer(query(collection(db, 'bookings'), where('status', '==', 'confirmed'))),
+    getCountFromServer(collection(db, 'reports')),
   ])
   return {
     activeTrips: activeTrips.data().count,
     pendingDrivers: pendingDrivers.data().count,
     totalUsers: totalUsers.data().count,
+    activeRequests: activeRequests.data().count,
+    confirmedBookings: confirmedBookings.data().count,
+    totalReports: totalReports.data().count,
   }
 }
 

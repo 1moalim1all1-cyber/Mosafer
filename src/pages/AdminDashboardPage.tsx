@@ -6,7 +6,14 @@ import { fetchDashboardStats } from '../lib/admin'
 export default function AdminDashboardPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [stats, setStats] = useState<{ activeTrips: number; pendingDrivers: number; totalUsers: number } | null>(null)
+  const [stats, setStats] = useState<{
+    activeTrips: number
+    pendingDrivers: number
+    totalUsers: number
+    activeRequests: number
+    confirmedBookings: number
+    totalReports: number
+  } | null>(null)
 
   useEffect(() => {
     fetchDashboardStats().then(setStats)
@@ -32,9 +39,9 @@ export default function AdminDashboardPage() {
         </button>
       </header>
 
-      <main className="mx-auto max-w-lg px-4 py-6">
+      <main className="mx-auto w-full max-w-7xl px-4 py-6">
         <h2 className="mb-3 font-bold text-text-primary">{t('admin.overview')}</h2>
-        <div className="mb-6 grid grid-cols-3 gap-3">
+        <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
           <div className="rounded-xl border border-success/30 bg-success/5 p-4 text-center">
             <p className="text-2xl font-bold text-success">{stats?.activeTrips ?? '-'}</p>
             <p className="text-xs text-text-secondary">{t('admin.activeTrips')}</p>
@@ -47,20 +54,34 @@ export default function AdminDashboardPage() {
             <p className="text-2xl font-bold text-primary">{stats?.totalUsers ?? '-'}</p>
             <p className="text-xs text-text-secondary">{t('admin.totalUsers')}</p>
           </div>
+          <div className="rounded-xl border border-primary/30 bg-primary-light p-4 text-center">
+            <p className="text-2xl font-bold text-primary">{stats?.activeRequests ?? '-'}</p>
+            <p className="text-xs text-text-secondary">طلبات ركاب نشطة</p>
+          </div>
+          <div className="rounded-xl border border-success/30 bg-success/5 p-4 text-center">
+            <p className="text-2xl font-bold text-success">{stats?.confirmedBookings ?? '-'}</p>
+            <p className="text-xs text-text-secondary">حجوزات مؤكدة</p>
+          </div>
+          <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 text-center">
+            <p className="text-2xl font-bold text-warning">{stats?.totalReports ?? '-'}</p>
+            <p className="text-xs text-text-secondary">بلاغات الدعم</p>
+          </div>
         </div>
 
         <h2 className="mb-3 font-bold text-text-primary">{t('admin.management')}</h2>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {links.map((link) => (
           <button
             key={link.path}
             onClick={() => navigate(link.path)}
-            className="mb-2 flex w-full items-center gap-3 rounded-xl border border-border bg-card p-4 text-right"
+            className="flex w-full items-center gap-3 rounded-xl border border-border bg-card p-4 text-right transition hover:border-primary"
           >
             <span className="text-xl">{link.icon}</span>
             <span className="flex-1 font-semibold text-text-primary">{link.label}</span>
             <span className="text-text-secondary">‹</span>
           </button>
         ))}
+        </div>
       </main>
     </div>
   )

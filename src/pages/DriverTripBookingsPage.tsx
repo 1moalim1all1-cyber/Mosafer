@@ -14,6 +14,7 @@ import { RatingModal } from '../components/RatingModal'
 import { LiveLocationToggle } from '../components/LiveLocationToggle'
 import { LiveMapViewport } from '../components/LiveMapViewport'
 import type { Trip } from '../types/trip'
+import { getOrCreateChat } from '../lib/chat'
 
 const pickupIcon = new L.DivIcon({
   html: '<div style="background:#2563EB;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
@@ -138,6 +139,9 @@ function BookingCard({ booking, onRate }: { booking: BookingRow; onRate: () => v
   const [pinInput, setPinInput] = useState('')
   const [pinError, setPinError] = useState(false)
   const [verifying, setVerifying] = useState(false)
+  const [openingChat, setOpeningChat] = useState(false)
+  const navigate = useNavigate()
+  const { user } = useAuth()
 
   useEffect(() => {
     fetchUserProfile(booking.passengerId).then(setPassenger)
@@ -161,6 +165,19 @@ function BookingCard({ booking, onRate }: { booking: BookingRow; onRate: () => v
       if (!ok) setPinError(true)
     } finally {
       setVerifying(false)
+    }
+  }
+
+  async function openChat() {
+    if (!user) return
+    setOpeningChat(true)
+    try {
+      const chatId = await getOrCreateChat(booking.passengerId, user.uid)
+      navigate(`/chat/${chatId}`)
+    } catch {
+      alert('تعذر فتح المحادثة، حاول تاني')
+    } finally {
+      setOpeningChat(false)
     }
   }
 
@@ -194,6 +211,11 @@ function BookingCard({ booking, onRate }: { booking: BookingRow; onRate: () => v
         >
           📞 اتصل بالراكب
         </a>
+      )}
+      {booking.status === 'confirmed' && (
+        <button onClick={openChat} disabled={openingChat} className="mb-3 flex w-full items-center justify-center gap-2 rounded-xl border border-primary/40 bg-primary-light py-2.5 text-sm font-semibold text-primary">
+          💬 راسل الراكب
+        </button>
       )}
       {booking.status === 'confirmed' && (
         booking.pinVerified ? (

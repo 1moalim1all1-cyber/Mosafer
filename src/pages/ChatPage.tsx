@@ -39,7 +39,7 @@ export default function ChatPage() {
         <h1 className="text-lg font-bold text-text-primary">{t('common.chat')}</h1>
       </header>
 
-      <main className="flex-1 overflow-y-auto px-4 py-4">
+      <main className="mx-auto w-full max-w-4xl flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 && <p className="py-12 text-center text-text-secondary">{t('common.chatEmpty')}</p>}
         {messages.map((m) => {
           const isMe = m.senderId === user?.uid
@@ -61,7 +61,7 @@ export default function ChatPage() {
         <div ref={bottomRef} />
       </main>
 
-      <form onSubmit={handleSend} className="flex gap-3 border-t border-border bg-card p-4">
+      <form onSubmit={handleSend} className="mx-auto flex w-full max-w-4xl gap-3 border-t border-border bg-card p-4">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}

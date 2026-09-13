@@ -10,6 +10,7 @@ import {
   runTransaction,
   Timestamp,
   serverTimestamp,
+  addDoc,
 } from 'firebase/firestore'
 import type { PaymentMethod } from '../types/booking'
 
@@ -54,10 +55,12 @@ export async function createBooking(params: {
   }
 
   try {
+    let bookedDriverId = ''
     await runTransaction(db, async (tx) => {
       const tripSnap = await tx.get(tripRef)
       if (!tripSnap.exists()) throw new Error('الرحلة دي مش موجودة')
       const trip = tripSnap.data()
+      bookedDriverId = trip.driverId as string
 
       if (trip.status !== 'active') throw new Error('الرحلة دي مش متاحة للحجز حاليًا')
       if (trip.driverId === uid) throw new Error('مستحيل تحجز في رحلتك إنت')
@@ -128,6 +131,18 @@ export async function createBooking(params: {
         createdAt: serverTimestamp(),
       })
     })
+    if (bookedDriverId) {
+      await addDoc(collection(db, 'users', bookedDriverId, 'notifications'), {
+        userId: bookedDriverId,
+        actorId: uid,
+        type: 'new_booking',
+        title: 'طلب حجز جديد',
+        body: `راكب طلب حجز ${seatsBooked} مقعد في رحلتك.`,
+        relatedId: tripId,
+        isRead: false,
+        createdAt: serverTimestamp(),
+      }).catch(() => undefined)
+    }
     return bookingRef.id
   } catch (err) {
     if (err instanceof Error) throw err

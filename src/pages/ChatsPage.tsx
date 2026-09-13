@@ -20,7 +20,7 @@ function ChatRow({ chat, uid }: { chat: ChatThread; uid: string }) {
   return (
     <button
       onClick={() => navigate(`/chat/${chat.id}`)}
-      className="mb-2 flex w-full flex-col rounded-2xl border border-border bg-card p-4 text-right"
+      className="flex w-full flex-col rounded-2xl border border-border bg-card p-4 text-right transition hover:border-primary"
     >
       <span className="font-semibold text-text-primary">{name}</span>
       <span className="truncate text-sm text-text-secondary">{chat.lastMessage || '—'}</span>
@@ -47,9 +47,9 @@ export default function ChatsPage() {
         </button>
         <h1 className="text-lg font-bold text-text-primary">{t('common.chats')}</h1>
       </header>
-      <main className="mx-auto max-w-lg px-4 py-6">
+      <main className="mx-auto w-full max-w-5xl px-4 py-6">
         {chats.length === 0 && <p className="py-12 text-center text-text-secondary">{t('common.noChats')}</p>}
-        {user && chats.map((chat) => <ChatRow key={chat.id} chat={chat} uid={user.uid} />)}
+        {user && <div className="grid gap-3 lg:grid-cols-2">{chats.map((chat) => <ChatRow key={chat.id} chat={chat} uid={user.uid} />)}</div>}
       </main>
       <BottomNav />
     </div>

@@ -9,6 +9,7 @@ import type { Booking } from '../types/booking'
 import { Button } from '../components/ui/Button'
 import { BottomNav } from '../components/BottomNav'
 import { RatingModal } from '../components/RatingModal'
+import { getOrCreateChat } from '../lib/chat'
 
 function getStatusLabels(t: (key: string) => string): Record<Booking['status'], { label: string; color: string }> {
   return {
@@ -28,6 +29,7 @@ export default function MyBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [cancellingId, setCancellingId] = useState<string | null>(null)
   const [ratingBooking, setRatingBooking] = useState<Booking | null>(null)
+  const [openingChatId, setOpeningChatId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!user) return
@@ -60,6 +62,19 @@ export default function MyBookingsPage() {
       alert(err instanceof Error ? err.message : 'حصل خطأ')
     } finally {
       setCancellingId(null)
+    }
+  }
+
+  async function openChat(booking: Booking) {
+    if (!user) return
+    setOpeningChatId(booking.id)
+    try {
+      const chatId = await getOrCreateChat(user.uid, booking.driverId)
+      navigate(`/chat/${chatId}`)
+    } catch {
+      alert('تعذر فتح المحادثة، حاول تاني')
+    } finally {
+      setOpeningChatId(null)
     }
   }
 
@@ -110,12 +125,10 @@ export default function MyBookingsPage() {
                 </button>
               )}
               {b.status === 'confirmed' && (
-                <button
-                  onClick={() => navigate(`/track/${b.id}`)}
-                  className="text-sm font-semibold text-success"
-                >
-                  🚗 {t('bookings.trackDriver')}
-                </button>
+                <>
+                  <button onClick={() => navigate(`/track/${b.id}`)} className="text-sm font-semibold text-success">🚗 {t('bookings.trackDriver')}</button>
+                  <button onClick={() => openChat(b)} disabled={openingChatId === b.id} className="text-sm font-semibold text-primary">💬 راسل السائق</button>
+                </>
               )}
               {b.status === 'completed' && (
                 <button onClick={() => openRating(b)} className="text-sm font-semibold text-warning">

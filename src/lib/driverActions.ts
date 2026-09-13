@@ -149,7 +149,7 @@ export async function markTripCompleted(tripId: string) {
       tripId,
       'تم إنهاء الرحلة',
       'وصلت الرحلة بنجاح. تقدر دلوقتي تقيّم السائق.',
-    )
+    ).catch(() => undefined)
   } catch (err) {
     if (err instanceof Error) throw err
     throw new Error('حصل خطأ، حاول تاني')
@@ -190,6 +190,23 @@ export async function respondToBooking(bookingId: string, accept: boolean) {
       }
       tx.update(bookingRef, bookingUpdate)
     })
+    const updatedBooking = await getDoc(bookingRef)
+    if (updatedBooking.exists()) {
+      const booking = updatedBooking.data()
+      const actorId = auth.currentUser?.uid
+      if (actorId) {
+        await addDoc(collection(db, 'users', booking.passengerId, 'notifications'), {
+          userId: booking.passengerId,
+          actorId,
+          type: accept ? 'booking_accepted' : 'booking_rejected',
+          title: accept ? 'تم قبول حجزك' : 'تم رفض الحجز',
+          body: accept ? 'السائق وافق على حجزك. تقدر تتواصل معاه وتتابع الرحلة.' : 'السائق لم يتمكن من قبول الحجز هذه المرة.',
+          relatedId: bookingId,
+          isRead: false,
+          createdAt: serverTimestamp(),
+        }).catch(() => undefined)
+      }
+    }
   } catch (err) {
     if (err instanceof Error) throw err
     throw new Error('حصل خطأ، حاول تاني')
@@ -204,9 +221,9 @@ export async function fetchDriverDocStatus(uid: string) {
 export async function updateTripStatus(tripId: string, status: Trip['status']) {
   await updateDoc(doc(db, 'trips', tripId), { status })
   if (status === 'driver_arriving') {
-    await notifyTripPassengers(tripId, 'السائق تحرك', 'السائق في طريقه لمكان الركوب. افتح التتبع لمشاهدة موقعه.')
+    await notifyTripPassengers(tripId, 'السائق تحرك', 'السائق في طريقه لمكان الركوب. افتح التتبع لمشاهدة موقعه.').catch(() => undefined)
   } else if (status === 'in_progress') {
-    await notifyTripPassengers(tripId, 'بدأت الرحلة', 'تم بدء الرحلة، وميزة التتبع المباشر متاحة الآن.')
+    await notifyTripPassengers(tripId, 'بدأت الرحلة', 'تم بدء الرحلة، وميزة التتبع المباشر متاحة الآن.').catch(() => undefined)
   }
 }
 
