@@ -55,7 +55,9 @@ export default function CreateTripRequestPage() {
 
     } catch (publishError) {
       console.error('Failed to publish trip request', publishError)
-      setError('تعذّر نشر الطلب. تأكد إن الحساب نشط وإن قواعد Firebase منشورة.')
+      const firebaseError = publishError as { code?: string; message?: string }
+      const errorCode = firebaseError.code || 'unknown'
+      setError(`تعذّر نشر الطلب — كود الخطأ: ${errorCode}`)
       setLoading(false)
       return
     }
