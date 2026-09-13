@@ -9,7 +9,11 @@ function mapDoc(id: string, data: Record<string, unknown>): TripRequest {
     passengerId: data.passengerId as string,
     country: data.country as string,
     originCity: data.originCity as string,
+    originLat: (data.originLat as number) ?? null,
+    originLng: (data.originLng as number) ?? null,
     destinationCity: data.destinationCity as string,
+    destinationLat: (data.destinationLat as number) ?? null,
+    destinationLng: (data.destinationLng as number) ?? null,
     travelDate: data.travelDate as string,
     preferredTime: (data.preferredTime as string) ?? undefined,
     seatsNeeded: (data.seatsNeeded as number) ?? 1,
@@ -30,7 +34,11 @@ export function isTripRequestCurrent(request: Pick<TripRequest, 'travelDate' | '
 export async function createTripRequest(input: {
   country: string
   originCity: string
+  originLat?: number
+  originLng?: number
   destinationCity: string
+  destinationLat?: number
+  destinationLng?: number
   travelDate: string
   preferredTime?: string
   seatsNeeded: number

@@ -69,7 +69,7 @@ export default function MyBookingsPage() {
         <h1 className="text-lg font-bold text-text-primary">{t('bookings.title')}</h1>
       </header>
 
-      <main className="mx-auto max-w-lg px-4 py-6">
+      <main className="mx-auto w-full max-w-6xl px-4 py-6">
         {bookings.length === 0 && (
           <div className="py-12 text-center">
             <p className="mb-4 text-text-secondary">{t('bookings.noBookingsYet2')}</p>
@@ -79,6 +79,7 @@ export default function MyBookingsPage() {
           </div>
         )}
 
+        <div className="grid gap-4 lg:grid-cols-2">
         {bookings.map((b) => (
           <div key={b.id} className="mb-3 rounded-2xl border border-border bg-card p-4">
             <div className="mb-2 flex items-center justify-between">
@@ -127,6 +128,7 @@ export default function MyBookingsPage() {
             </div>
           </div>
         ))}
+        </div>
       </main>
       <BottomNav />
 

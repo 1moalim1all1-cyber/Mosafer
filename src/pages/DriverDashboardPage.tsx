@@ -10,6 +10,8 @@ function getStatusLabels(t: (key: string) => string): Record<Trip['status'], { l
   return {
     active: { label: t('admin.statusActiveTrip'), color: 'text-success' },
     full: { label: t('admin.statusFull'), color: 'text-primary' },
+    driver_arriving: { label: 'السائق في الطريق', color: 'text-warning' },
+    in_progress: { label: 'الرحلة بدأت', color: 'text-success' },
     completed: { label: t('admin.statusCompleted'), color: 'text-text-secondary' },
     cancelled: { label: t('admin.statusCancelled'), color: 'text-danger' },
     expired: { label: t('admin.statusExpired'), color: 'text-text-secondary' },
@@ -53,14 +55,15 @@ export default function DriverDashboardPage() {
         </div>
       )}
 
-      <main className="mx-auto max-w-lg px-4 py-6">
+      <main className="mx-auto w-full max-w-6xl px-4 py-6">
         {trips.length === 0 && <p className="py-12 text-center text-text-secondary">{t('driver.noTripsYet')}</p>}
 
+        <div className="grid gap-4 lg:grid-cols-2">
         {trips.map((trip) => (
           <button
             key={trip.id}
             onClick={() => navigate(`/driver/trip/${trip.id}/bookings`)}
-            className="mb-3 flex w-full items-center justify-between rounded-2xl border border-border bg-card p-4 text-right"
+            className="flex w-full items-center justify-between rounded-2xl border border-border bg-card p-4 text-right transition hover:border-primary"
           >
             <div>
               <p className="font-semibold text-text-primary">
@@ -82,6 +85,7 @@ export default function DriverDashboardPage() {
             </div>
           </button>
         ))}
+        </div>
       </main>
 
       {approved && (

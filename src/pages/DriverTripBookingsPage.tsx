@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet'
 import L from 'leaflet'
-import { subscribeTripBookings, respondToBooking, markTripCompleted, verifyPassengerPin } from '../lib/driverActions'
+import { subscribeTripBookings, respondToBooking, markTripCompleted, verifyPassengerPin, updateTripStatus } from '../lib/driverActions'
 import { subscribeToTrip } from '../lib/trips'
 import { calculateDistanceKm, estimateEtaMinutes } from '../lib/geo'
 import { fetchUserProfile } from '../lib/users'
@@ -13,6 +13,7 @@ import { Button } from '../components/ui/Button'
 import { RatingModal } from '../components/RatingModal'
 import { LiveLocationToggle } from '../components/LiveLocationToggle'
 import { LiveMapViewport } from '../components/LiveMapViewport'
+import type { Trip } from '../types/trip'
 
 const pickupIcon = new L.DivIcon({
   html: '<div style="background:#2563EB;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
@@ -248,11 +249,30 @@ export default function DriverTripBookingsPage() {
   const [bookings, setBookings] = useState<BookingRow[]>([])
   const [completing, setCompleting] = useState(false)
   const [ratingBooking, setRatingBooking] = useState<BookingRow | null>(null)
+  const [trip, setTrip] = useState<Trip | null>(null)
+  const [changingStatus, setChangingStatus] = useState(false)
 
   useEffect(() => {
     if (!tripId) return
     return subscribeTripBookings(tripId, (rows) => setBookings(rows as BookingRow[]))
   }, [tripId])
+
+  useEffect(() => {
+    if (!tripId) return
+    return subscribeToTrip(tripId, setTrip)
+  }, [tripId])
+
+  async function changeStatus(status: Trip['status']) {
+    if (!tripId) return
+    setChangingStatus(true)
+    try {
+      await updateTripStatus(tripId, status)
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'تعذر تحديث حالة الرحلة')
+    } finally {
+      setChangingStatus(false)
+    }
+  }
 
   async function handleComplete() {
     if (!tripId) return
@@ -272,17 +292,30 @@ export default function DriverTripBookingsPage() {
     <div className="min-h-screen bg-bg">
       <header className="flex items-center justify-between border-b border-border bg-card px-4 py-4">
         <h1 className="text-lg font-bold text-text-primary">{t('driver.bookingRequests')}</h1>
-        <button onClick={handleComplete} disabled={completing} className="text-sm font-semibold text-primary">
-          إنهاء الرحلة
-        </button>
+        {trip?.status === 'in_progress' && <button onClick={handleComplete} disabled={completing} className="text-sm font-semibold text-primary">إنهاء الرحلة</button>}
       </header>
 
-      <main className="mx-auto max-w-lg px-4 py-6">
+      <main className="mx-auto w-full max-w-6xl px-4 py-6">
+        {trip && !['completed', 'cancelled', 'expired'].includes(trip.status) && (
+          <div className="mb-5 rounded-2xl border border-border bg-card p-4">
+            <p className="mb-3 font-bold text-text-primary">حالة الرحلة الحالية</p>
+            <div className="grid grid-cols-3 gap-2 text-center text-xs font-semibold">
+              <div className={`rounded-xl p-3 ${['active', 'full'].includes(trip.status) ? 'bg-primary text-white' : 'bg-primary-light text-primary'}`}>1. متاحة</div>
+              <div className={`rounded-xl p-3 ${trip.status === 'driver_arriving' ? 'bg-primary text-white' : 'bg-primary-light text-primary'}`}>2. في الطريق</div>
+              <div className={`rounded-xl p-3 ${trip.status === 'in_progress' ? 'bg-primary text-white' : 'bg-primary-light text-primary'}`}>3. بدأت</div>
+            </div>
+            {['active', 'full'].includes(trip.status) && <Button className="mt-3" onClick={() => changeStatus('driver_arriving')} loading={changingStatus}>تحركت لمكان الركاب</Button>}
+            {trip.status === 'driver_arriving' && <Button className="mt-3" onClick={() => changeStatus('in_progress')} loading={changingStatus}>بدأت الرحلة</Button>}
+            {trip.status === 'in_progress' && <Button className="mt-3" onClick={handleComplete} loading={completing}>إنهاء الرحلة</Button>}
+          </div>
+        )}
         {tripId && <LiveLocationToggle tripId={tripId} />}
         {bookings.length === 0 && <p className="py-12 text-center text-text-secondary">{t('driver.noBookingsYet')}</p>}
+        <div className="grid gap-4 lg:grid-cols-2">
         {bookings.map((b) => (
           <BookingCard key={b.id} booking={b} onRate={() => setRatingBooking(b)} />
         ))}
+        </div>
       </main>
 
       {ratingBooking && user && (

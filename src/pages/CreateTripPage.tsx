@@ -8,6 +8,7 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { LocationPicker } from '../components/LocationPicker'
 import { COUNTRIES, DEFAULT_COUNTRY, type CountryCode } from '../lib/countries'
+import { calculateDistanceKm, estimateEtaMinutes } from '../lib/geo'
 
 export default function CreateTripPage() {
   const { user } = useAuth()
@@ -35,6 +36,15 @@ export default function CreateTripPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [isApproved, setIsApproved] = useState<boolean | null>(null)
+
+  const routeDistanceKm = originPoint && destinationPoint
+    ? calculateDistanceKm(originPoint.lat, originPoint.lng, destinationPoint.lat, destinationPoint.lng)
+    : null
+  const calculatedDuration = routeDistanceKm == null ? null : estimateEtaMinutes(routeDistanceKm)
+
+  useEffect(() => {
+    if (calculatedDuration != null) setDuration(String(calculatedDuration))
+  }, [calculatedDuration])
 
   useEffect(() => {
     if (!user) return
@@ -118,7 +128,7 @@ export default function CreateTripPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-8">
+    <div className="mx-auto w-full max-w-5xl px-4 py-8">
       <h1 className="mb-6 text-2xl font-bold text-text-primary">{t('driver.createTripTitle')}</h1>
 
       {isApproved === false && (
@@ -132,8 +142,8 @@ export default function CreateTripPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div>
+      <form onSubmit={handleSubmit} className="grid gap-4 rounded-2xl border border-border bg-card p-4 sm:p-6 lg:grid-cols-2">
+        <div className="lg:col-span-2">
           <label className="mb-1.5 block text-sm font-semibold text-text-primary">{t('driver.country')}</label>
           <div className="flex gap-2">
             {Object.values(COUNTRIES).map((c) => (
@@ -205,7 +215,7 @@ export default function CreateTripPage() {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 lg:col-span-2">
           <Input label={t('driver.date')} type="date" value={date} min={todayStr} onChange={(e) => setDate(e.target.value)} />
           <Input label={t('driver.time')} type="time" value={time} onChange={(e) => setTime(e.target.value)} />
         </div>
@@ -217,7 +227,12 @@ export default function CreateTripPage() {
           onChange={(e) => setPrice(e.target.value)}
         />
         <Input label={t('driver.availableSeatsCount')} type="number" value={seats} onChange={(e) => setSeats(e.target.value)} />
-        <Input label={t('driver.estimatedDuration')} type="number" value={duration} onChange={(e) => setDuration(e.target.value)} />
+        <div>
+          <Input label={t('driver.estimatedDuration')} type="number" value={duration} onChange={(e) => setDuration(e.target.value)} />
+          {routeDistanceKm != null && (
+            <p className="mt-1 text-xs text-success">📍 مسافة تقريبية {routeDistanceKm.toFixed(1)} كم · مدة مقترحة {calculatedDuration} دقيقة</p>
+          )}
+        </div>
 
         <label className="flex items-center justify-between rounded-xl border border-success/30 bg-success/5 p-4">
           <span className="font-semibold text-text-primary">{t('driver.returnEmptyTrip')}</span>
@@ -231,11 +246,13 @@ export default function CreateTripPage() {
           </label>
         )}
 
-        {error && <p className="text-sm text-danger">{error}</p>}
+        {error && <p className="text-sm text-danger lg:col-span-2">{error}</p>}
 
-        <Button type="submit" loading={loading} disabled={isApproved === false}>
-          {t('driver.publishTrip')}
-        </Button>
+        <div className="lg:col-span-2">
+          <Button type="submit" loading={loading} disabled={isApproved === false}>
+            {t('driver.publishTrip')}
+          </Button>
+        </div>
       </form>
 
       {pickingLocation && (

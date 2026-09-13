@@ -9,6 +9,8 @@ function getStatusConfig(t: (key: string) => string): Record<string, { label: st
     pending: { label: t('admin.statusPending'), color: 'text-warning' },
     active: { label: t('admin.statusActiveTrip'), color: 'text-success' },
     full: { label: t('admin.statusFull'), color: 'text-primary' },
+    driver_arriving: { label: 'السائق في الطريق', color: 'text-warning' },
+    in_progress: { label: 'الرحلة جارية', color: 'text-success' },
     completed: { label: t('admin.statusCompleted'), color: 'text-text-secondary' },
     cancelled: { label: t('admin.statusCancelled'), color: 'text-danger' },
     expired: { label: t('admin.statusExpired'), color: 'text-text-secondary' },
@@ -63,11 +65,12 @@ export default function AdminTripsPage() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-lg px-4 py-6">
+      <main className="mx-auto w-full max-w-7xl px-4 py-6">
         <p className="mb-3 text-sm text-text-secondary">{filtered.length} {t('admin.tripsCountLabel')}</p>
 
         {filtered.length === 0 && <p className="py-12 text-center text-text-secondary">{t('admin.noMatchingTrips')}</p>}
 
+        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
         {filtered.map((trip) => (
           <div key={trip.id} className="mb-3 rounded-2xl border border-border bg-card p-4">
             <div className="mb-2 flex items-center justify-between">
@@ -93,6 +96,7 @@ export default function AdminTripsPage() {
             </button>
           </div>
         ))}
+        </div>
       </main>
     </div>
   )

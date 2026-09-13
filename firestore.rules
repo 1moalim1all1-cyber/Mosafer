@@ -216,6 +216,11 @@ service cloud.firestore {
               request.resource.data.status == 'confirmed' &&
               changedKeys().hasOnly(['pinVerified']) &&
               request.resource.data.pinVerified == true
+            ) ||
+            (
+              resource.data.status == 'confirmed' &&
+              request.resource.data.status == 'completed' &&
+              changedKeys().hasOnly(['status'])
             )
           )
         );

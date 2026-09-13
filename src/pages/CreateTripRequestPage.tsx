@@ -9,6 +9,8 @@ import { COUNTRIES } from '../lib/countries'
 import { CountrySelector } from '../components/CountrySelector'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
+import { LocationPicker } from '../components/LocationPicker'
+import { calculateDistanceKm, estimateEtaMinutes } from '../lib/geo'
 
 export default function CreateTripRequestPage() {
   const navigate = useNavigate()
@@ -27,6 +29,12 @@ export default function CreateTripRequestPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [matches, setMatches] = useState<MatchedTrip[] | null>(null)
+  const [originPoint, setOriginPoint] = useState<{ lat: number; lng: number } | null>(null)
+  const [destinationPoint, setDestinationPoint] = useState<{ lat: number; lng: number } | null>(null)
+  const [pickingLocation, setPickingLocation] = useState<'origin' | 'destination' | null>(null)
+  const routeDistanceKm = originPoint && destinationPoint
+    ? calculateDistanceKm(originPoint.lat, originPoint.lng, destinationPoint.lat, destinationPoint.lng)
+    : null
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -46,7 +54,11 @@ export default function CreateTripRequestPage() {
       await createTripRequest({
         country,
         originCity: origin,
+        originLat: originPoint?.lat,
+        originLng: originPoint?.lng,
         destinationCity: destination,
+        destinationLat: destinationPoint?.lat,
+        destinationLng: destinationPoint?.lng,
         travelDate,
         preferredTime: preferredTime || undefined,
         seatsNeeded: Number(seats),
@@ -123,8 +135,8 @@ export default function CreateTripRequestPage() {
       <h1 className="mb-2 text-2xl font-bold text-text-primary">{t('community.requestTripTitle')}</h1>
       <p className="mb-6 text-text-secondary">{t('community.requestTripSubtitle')}</p>
 
-      <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4 rounded-2xl border border-border bg-card/35 p-4 sm:p-6">
-        <div>
+      <form onSubmit={handleSubmit} className="grid w-full gap-4 rounded-2xl border border-border bg-card/35 p-4 sm:p-6 md:grid-cols-2">
+        <div className="md:col-span-2">
           <label className="mb-1.5 block text-sm font-semibold text-text-primary">{t('driver.country')}</label>
           <CountrySelector value={country} onChange={setCountry} />
         </div>
@@ -143,6 +155,9 @@ export default function CreateTripRequestPage() {
               </option>
             ))}
           </select>
+          <button type="button" onClick={() => setPickingLocation('origin')} className={`mt-2 rounded-lg border px-3 py-2 text-sm ${originPoint ? 'border-success/40 text-success' : 'border-border text-text-secondary'}`}>
+            {originPoint ? '✅ تم تحديد نقطة الركوب' : '📍 حدد نقطة الركوب على الخريطة'}
+          </button>
         </div>
 
         <div>
@@ -159,6 +174,9 @@ export default function CreateTripRequestPage() {
               </option>
             ))}
           </select>
+          <button type="button" onClick={() => setPickingLocation('destination')} className={`mt-2 rounded-lg border px-3 py-2 text-sm ${destinationPoint ? 'border-success/40 text-success' : 'border-border text-text-secondary'}`}>
+            {destinationPoint ? '✅ تم تحديد نقطة الوصول' : '📍 حدد نقطة الوصول على الخريطة'}
+          </button>
         </div>
 
         <Input label={t('driver.date')} type="date" value={travelDate} min={todayStr} onChange={(e) => setTravelDate(e.target.value)} />
@@ -170,7 +188,7 @@ export default function CreateTripRequestPage() {
         />
         <Input label={t('driver.availableSeatsCount')} type="number" min={1} value={seats} onChange={(e) => setSeats(e.target.value)} />
 
-        <div>
+        <div className="md:col-span-2">
           <label className="mb-1.5 block text-sm font-semibold text-text-primary">{t('community.notesOptional')}</label>
           <textarea
             value={notes}
@@ -180,12 +198,25 @@ export default function CreateTripRequestPage() {
           />
         </div>
 
-        {error && <p className="text-sm text-danger">{error}</p>}
+        {routeDistanceKm != null && <p className="text-sm text-success md:col-span-2">المسافة التقريبية {routeDistanceKm.toFixed(1)} كم · حوالي {estimateEtaMinutes(routeDistanceKm)} دقيقة</p>}
+        {error && <p className="text-sm text-danger md:col-span-2">{error}</p>}
 
-        <Button type="submit" loading={loading}>
-          {t('community.publishRequest')}
-        </Button>
+        <div className="md:col-span-2"><Button type="submit" loading={loading}>{t('community.publishRequest')}</Button></div>
       </form>
+
+      {pickingLocation && (
+        <LocationPicker
+          title={pickingLocation === 'origin' ? 'حدد نقطة الركوب' : 'حدد نقطة الوصول'}
+          initialLat={pickingLocation === 'origin' ? originPoint?.lat : destinationPoint?.lat}
+          initialLng={pickingLocation === 'origin' ? originPoint?.lng : destinationPoint?.lng}
+          onClose={() => setPickingLocation(null)}
+          onConfirm={(lat, lng) => {
+            if (pickingLocation === 'origin') setOriginPoint({ lat, lng })
+            else setDestinationPoint({ lat, lng })
+            setPickingLocation(null)
+          }}
+        />
+      )}
     </div>
   )
 }

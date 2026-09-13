@@ -5,7 +5,11 @@ export interface TripRequest {
   passengerId: string
   country: string
   originCity: string
+  originLat?: number | null
+  originLng?: number | null
   destinationCity: string
+  destinationLat?: number | null
+  destinationLng?: number | null
   travelDate: string // YYYY-MM-DD
   preferredTime?: string // HH:mm، اختياري
   seatsNeeded: number

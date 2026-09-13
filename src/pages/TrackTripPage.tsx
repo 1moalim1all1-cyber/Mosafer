@@ -185,6 +185,11 @@ export default function TrackTripPage() {
       </div>
 
       <div className="border-t border-border bg-card p-4">
+        <div className="mx-auto mb-4 grid max-w-3xl grid-cols-3 gap-2 text-center text-xs font-semibold">
+          <div className={`rounded-xl p-2 ${trip.status === 'driver_arriving' ? 'bg-primary text-white' : 'bg-primary-light text-primary'}`}>السائق في الطريق</div>
+          <div className={`rounded-xl p-2 ${trip.status === 'in_progress' ? 'bg-primary text-white' : 'bg-primary-light text-primary'}`}>الرحلة بدأت</div>
+          <div className={`rounded-xl p-2 ${trip.status === 'completed' ? 'bg-primary text-white' : 'bg-primary-light text-primary'}`}>تم الوصول</div>
+        </div>
         {booking.status === 'confirmed' && <PassengerLiveLocationToggle bookingId={booking.id} />}
         {!hasLiveDriver ? (
           <div className="mb-4 flex items-center gap-2 rounded-xl bg-warning/10 p-3">

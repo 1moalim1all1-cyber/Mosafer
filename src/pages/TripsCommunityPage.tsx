@@ -82,13 +82,6 @@ export default function TripsCommunityPage() {
     })
   }, [country])
 
-  // نجمّع الطلبات حسب مدينة الانطلاق عشان نعرض علامة واحدة لكل مدينة
-  // على الخريطة (مش تكديس علامات فوق بعض لو أكتر من طلب من نفس المكان)
-  const groupedByOrigin = requests.reduce<Record<string, TripRequest[]>>((acc, r) => {
-    acc[r.originCity] = acc[r.originCity] ? [...acc[r.originCity], r] : [r]
-    return acc
-  }, {})
-
   return (
     <div className="min-h-screen bg-bg pb-24">
       <header className="flex items-center justify-between border-b border-border bg-card px-4 py-4">
@@ -145,21 +138,20 @@ export default function TripsCommunityPage() {
           <div className="overflow-hidden rounded-2xl border border-border" style={{ height: 'min(68vh, 680px)' }}>
             <MapContainer center={[26.8, 30.8]} zoom={country === 'saudi' ? 5 : 6} style={{ height: '100%', width: '100%' }}>
               <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-              {Object.entries(groupedByOrigin).map(([city, cityRequests]) => {
-                const coords = REGION_COORDINATES[city]
+              {requests.map((request) => {
+                const coords = request.originLat != null && request.originLng != null
+                  ? { lat: request.originLat, lng: request.originLng }
+                  : REGION_COORDINATES[request.originCity]
                 if (!coords) return null
                 return (
-                  <Marker key={city} position={[coords.lat, coords.lng]} icon={requestMarkerIcon(cityRequests.length)}>
+                  <Marker key={request.id} position={[coords.lat, coords.lng]} icon={requestMarkerIcon(1)}>
                     <Popup>
-                      <p className="mb-1 font-bold">{city}</p>
-                      {cityRequests.map((r) => (
-                        <p key={r.id} className="text-xs">
-                          → {r.destinationCity} ·{' '}
+                      <p className="mb-1 font-bold">{request.originCity} → {request.destinationCity}</p>
+                        <p className="text-xs">
                           {new Intl.DateTimeFormat(i18n.language === 'ar' ? 'ar-EG' : 'en-US', { day: 'numeric', month: 'short' }).format(
-                            new Date(r.travelDate),
+                            new Date(request.travelDate),
                           )}
                         </p>
-                      ))}
                     </Popup>
                   </Marker>
                 )

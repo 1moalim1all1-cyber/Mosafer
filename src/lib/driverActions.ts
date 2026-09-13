@@ -10,7 +10,6 @@ import {
   onSnapshot,
   getDoc,
   getDocs,
-  increment,
   runTransaction,
   serverTimestamp,
 } from 'firebase/firestore'
@@ -133,56 +132,24 @@ export async function markTripCompleted(tripId: string) {
     const bookingsSnap = await getDocs(
       query(collection(db, 'bookings'), where('tripId', '==', tripId), where('status', '==', 'confirmed')),
     )
-    const settingsSnap = await getDoc(doc(db, 'appSettings', 'general'))
-    const settings = settingsSnap.exists() ? settingsSnap.data() : {}
-
     await runTransaction(db, async (tx) => {
       const tripSnap = await tx.get(tripRef)
       if (!tripSnap.exists()) throw new Error('الرحلة دي مش موجودة')
       const trip = tripSnap.data()
       if (trip.driverId !== uid) throw new Error('الرحلة دي مش بتاعتك')
 
-      const driverRef = doc(db, 'users', uid)
-      const driverWalletRef = doc(db, 'wallets', uid)
-      await tx.get(driverRef)
-      const driverWalletSnap = await tx.get(driverWalletRef)
-
-      const isReturnEmpty = Boolean(trip.isReturnEmptyTrip)
-      const commissionPercent = isReturnEmpty
-        ? (settings.commissionReturnEmptyPercent ?? 5)
-        : (settings.commissionStandardPercent ?? 10)
-
-      let paidEarnings = 0
-      for (const bookingDoc of bookingsSnap.docs) {
-        const booking = bookingDoc.data()
-        if (booking.paymentStatus === 'paid') {
-          const commission = (booking.totalPrice as number) * (commissionPercent / 100)
-          paidEarnings += (booking.totalPrice as number) - commission
-        }
-      }
-
       tx.update(tripRef, { status: 'completed' })
-      tx.set(doc(db, 'stats', 'public'), { completedTripsCount: increment(1) }, { merge: true })
-      tx.update(driverRef, { totalTrips: increment(1) })
 
       for (const bookingDoc of bookingsSnap.docs) {
         tx.update(bookingDoc.ref, { status: 'completed' })
       }
-
-      if (paidEarnings > 0) {
-        const currentBalance = (driverWalletSnap.data()?.balance ?? 0) as number
-        const newBalance = currentBalance + paidEarnings
-        tx.update(driverWalletRef, { balance: newBalance })
-        tx.set(doc(collection(driverWalletRef, 'walletTransactions')), {
-          type: 'payment',
-          amount: paidEarnings,
-          balanceAfter: newBalance,
-          relatedTripId: tripId,
-          status: 'completed',
-          createdAt: serverTimestamp(),
-        })
-      }
     })
+    await notifyPassengerIds(
+      [...new Set(bookingsSnap.docs.map((bookingDoc) => bookingDoc.data().passengerId as string))],
+      tripId,
+      'تم إنهاء الرحلة',
+      'وصلت الرحلة بنجاح. تقدر دلوقتي تقيّم السائق.',
+    )
   } catch (err) {
     if (err instanceof Error) throw err
     throw new Error('حصل خطأ، حاول تاني')
@@ -236,6 +203,32 @@ export async function fetchDriverDocStatus(uid: string) {
 
 export async function updateTripStatus(tripId: string, status: Trip['status']) {
   await updateDoc(doc(db, 'trips', tripId), { status })
+  if (status === 'driver_arriving') {
+    await notifyTripPassengers(tripId, 'السائق تحرك', 'السائق في طريقه لمكان الركوب. افتح التتبع لمشاهدة موقعه.')
+  } else if (status === 'in_progress') {
+    await notifyTripPassengers(tripId, 'بدأت الرحلة', 'تم بدء الرحلة، وميزة التتبع المباشر متاحة الآن.')
+  }
+}
+
+async function notifyTripPassengers(tripId: string, title: string, body: string) {
+  const bookingsSnap = await getDocs(query(collection(db, 'bookings'), where('tripId', '==', tripId), where('status', '==', 'confirmed')))
+  const passengerIds = [...new Set(bookingsSnap.docs.map((bookingDoc) => bookingDoc.data().passengerId as string))]
+  await notifyPassengerIds(passengerIds, tripId, title, body)
+}
+
+async function notifyPassengerIds(passengerIds: string[], tripId: string, title: string, body: string) {
+  const actorId = auth.currentUser?.uid
+  if (!actorId) return
+  await Promise.all(passengerIds.map((userId) => addDoc(collection(db, 'users', userId, 'notifications'), {
+    userId,
+    actorId,
+    type: 'trip_status',
+    title,
+    body,
+    relatedId: tripId,
+    isRead: false,
+    createdAt: serverTimestamp(),
+  })))
 }
 
 function mapBookingDoc(id: string, data: Record<string, unknown>) {
