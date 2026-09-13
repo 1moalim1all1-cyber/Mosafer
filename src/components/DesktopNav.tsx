@@ -34,13 +34,13 @@ export function DesktopNav() {
 
   return (
     <header className="sticky top-0 z-40 hidden border-b border-border bg-card/90 backdrop-blur-md lg:block">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+      <div className="mx-auto flex w-full max-w-7xl min-w-0 items-center justify-between gap-3 overflow-hidden px-4 py-3">
         <button onClick={() => navigate('/')} className="flex items-center gap-2">
           <img src={`${import.meta.env.BASE_URL}logo.jpeg`} alt="مسافر" className="h-9 w-9 rounded-xl object-cover" />
-          <span className="font-bold text-text-primary">مسافر</span>
+          <span className="hidden font-bold text-text-primary 2xl:inline">مسافر</span>
         </button>
 
-        <nav className="flex items-center gap-6 text-sm">
+        <nav className="flex min-w-0 flex-1 items-center justify-center gap-3 text-sm xl:gap-5">
           {links.map((link) => {
             const active = location.pathname === link.path
             return (
@@ -52,7 +52,7 @@ export function DesktopNav() {
                 }`}
               >
                 <link.icon size={16} />
-                {link.label}
+                <span className="hidden xl:inline">{link.label}</span>
               </button>
             )
           })}
@@ -72,7 +72,7 @@ export function DesktopNav() {
             className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-sm font-semibold text-text-primary hover:border-primary"
           >
             <UserCircle size={16} />
-            {user?.fullName ?? t('bottomNav.profile')}
+            <span className="hidden 2xl:inline">{user?.fullName ?? t('bottomNav.profile')}</span>
           </button>
           <button onClick={() => logout()} className="text-sm font-semibold text-danger">
             {t('profile.logout')}

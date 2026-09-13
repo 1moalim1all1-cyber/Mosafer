@@ -53,14 +53,21 @@ export default function CreateTripRequestPage() {
         notes: notes || undefined,
       })
 
+    } catch (publishError) {
+      console.error('Failed to publish trip request', publishError)
+      setError('تعذّر نشر الطلب. تأكد إن الحساب نشط وإن قواعد Firebase منشورة.')
+      setLoading(false)
+      return
+    }
+
+    try {
       const found = await findMatchingTrips({ country, originCity: origin, destinationCity: destination, travelDate, preferredTime })
-      if (found.length > 0) {
-        setMatches(found)
-      } else {
-        navigate('/community')
-      }
-    } catch {
-      setError(t('community.errorPublish'))
+      if (found.length > 0) setMatches(found)
+      else navigate('/community')
+    } catch (matchingError) {
+      // الطلب اتحفظ بالفعل؛ فشل البحث عن المطابقات لا يعني فشل النشر.
+      console.error('Trip request published, but matching failed', matchingError)
+      navigate('/community')
     } finally {
       setLoading(false)
     }
@@ -110,11 +117,11 @@ export default function CreateTripRequestPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-8 pb-24">
+    <div className="mx-auto w-full max-w-2xl px-4 py-8 pb-24">
       <h1 className="mb-2 text-2xl font-bold text-text-primary">{t('community.requestTripTitle')}</h1>
       <p className="mb-6 text-text-secondary">{t('community.requestTripSubtitle')}</p>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4 rounded-2xl border border-border bg-card/35 p-4 sm:p-6">
         <div>
           <label className="mb-1.5 block text-sm font-semibold text-text-primary">{t('driver.country')}</label>
           <CountrySelector value={country} onChange={setCountry} />
