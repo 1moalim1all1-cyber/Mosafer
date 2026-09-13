@@ -5,6 +5,8 @@ export function LiveLocationToggle({ tripId }: { tripId: string }) {
   const [isSharing, setIsSharing] = useState(false)
   const watchIdRef = useRef<number | null>(null)
   const lastHistoryWriteRef = useRef<number>(0)
+  const lastLocationWriteRef = useRef<number>(0)
+  const [error, setError] = useState('')
 
   function startSharing() {
     if (!navigator.geolocation) {
@@ -13,22 +15,26 @@ export function LiveLocationToggle({ tripId }: { tripId: string }) {
     }
     const id = navigator.geolocation.watchPosition(
       (pos) => {
-        updateTripLiveLocation(tripId, pos.coords.latitude, pos.coords.longitude)
+        const now = Date.now()
+        if (now - lastLocationWriteRef.current < 5000) return
+        lastLocationWriteRef.current = now
+        updateTripLiveLocation(tripId, pos.coords.latitude, pos.coords.longitude).catch(() => {
+          setError('تعذر تحديث الموقع. تأكد من الإنترنت وحاول مرة أخرى')
+        })
 
         // نسجّل نقطة في مسار الرحلة الكامل كل 20 ثانية بس (مش كل
         // تحديث GPS)، عشان نرسم خط الرحلة كلها بعدين من غير ما
         // نستهلك حد الكتابة المجاني في Firebase بسرعة
-        const now = Date.now()
         if (now - lastHistoryWriteRef.current > 20_000) {
           lastHistoryWriteRef.current = now
           recordLocationHistoryPoint(tripId, pos.coords.latitude, pos.coords.longitude)
         }
       },
       () => {
-        alert('محتاجين صلاحية الموقع عشان تشارك موقعك مع الراكب')
+        setError('محتاجين صلاحية الموقع عشان تشارك موقعك مع الراكب')
         setIsSharing(false)
       },
-      { enableHighAccuracy: true },
+      { enableHighAccuracy: true, maximumAge: 3000, timeout: 15000 },
     )
     watchIdRef.current = id
     setIsSharing(true)
@@ -65,6 +71,7 @@ export function LiveLocationToggle({ tripId }: { tripId: string }) {
           }`}
         />
       </button>
+      {error && <p className="absolute mt-16 text-xs text-danger">{error}</p>}
     </div>
   )
 }

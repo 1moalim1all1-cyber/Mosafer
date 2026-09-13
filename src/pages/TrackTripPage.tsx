@@ -8,6 +8,8 @@ import { subscribeToTrip, fetchLocationHistory } from '../lib/trips'
 import { fetchUserProfile } from '../lib/users'
 import { calculateDistanceKm, estimateEtaMinutes } from '../lib/geo'
 import { EmergencyButton } from '../components/EmergencyButton'
+import { PassengerLiveLocationToggle } from '../components/PassengerLiveLocationToggle'
+import { LiveMapViewport } from '../components/LiveMapViewport'
 import type { Booking } from '../types/booking'
 import type { Trip } from '../types/trip'
 import type { AppUser } from '../types/user'
@@ -23,6 +25,11 @@ const driverIcon = new L.DivIcon({
   className: '',
   iconSize: [40, 40],
   iconAnchor: [20, 20],
+})
+
+const passengerIcon = new L.DivIcon({
+  html: '<div style="background:#9333EA;width:38px;height:38px;border-radius:50%;border:3px solid white;box-shadow:0 2px 12px rgba(147,51,234,.55);display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>',
+  className: '', iconSize: [38, 38], iconAnchor: [19, 19],
 })
 
 function isLiveLocationFresh(updatedAt?: Date | null): boolean {
@@ -58,9 +65,11 @@ export default function TrackTripPage() {
 
   const pickupPoint: [number, number] | null = hasPickup ? [booking!.pickupLat!, booking!.pickupLng!] : null
   const driverPoint: [number, number] | null = hasLiveDriver ? [trip!.driverLiveLat!, trip!.driverLiveLng!] : null
+  const hasLivePassenger = isLiveLocationFresh(booking?.passengerLiveUpdatedAt) && booking?.passengerLiveLat != null && booking?.passengerLiveLng != null
+  const passengerPoint: [number, number] | null = hasLivePassenger ? [booking!.passengerLiveLat!, booking!.passengerLiveLng!] : pickupPoint
 
   const distanceKm =
-    pickupPoint && driverPoint ? calculateDistanceKm(driverPoint[0], driverPoint[1], pickupPoint[0], pickupPoint[1]) : null
+    passengerPoint && driverPoint ? calculateDistanceKm(driverPoint[0], driverPoint[1], passengerPoint[0], passengerPoint[1]) : null
   const isNear = distanceKm != null && distanceKm < 1
 
   // إشعار حقيقي من المتصفح لما السائق يقرب، حتى لو المستخدم مش واقف
@@ -118,7 +127,7 @@ export default function TrackTripPage() {
 
   const etaMinutes = distanceKm != null ? estimateEtaMinutes(distanceKm) : null
 
-  const center = driverPoint ?? pickupPoint ?? [30.0444, 31.2357]
+  const center = driverPoint ?? passengerPoint ?? [30.0444, 31.2357]
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
@@ -150,17 +159,19 @@ export default function TrackTripPage() {
 
       <div className="relative flex-1" style={{ minHeight: 320 }}>
         <MapContainer center={center} zoom={hasLiveDriver ? 14 : 11} style={{ height: '100%', width: '100%' }}>
+          <LiveMapViewport points={[driverPoint, passengerPoint].filter((point): point is [number, number] => point !== null)} />
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           />
-          {pickupPoint && driverPoint && (
-            <Polyline positions={[driverPoint, pickupPoint]} color="#1E40AF" weight={3} dashArray="6 8" />
+          {passengerPoint && driverPoint && (
+            <Polyline positions={[driverPoint, passengerPoint]} color="#7C3AED" weight={3} dashArray="6 8" />
           )}
           {pathHistory && pathHistory.length > 1 && (
             <Polyline positions={pathHistory} color="#9333EA" weight={4} opacity={0.7} />
           )}
           {pickupPoint && <Marker position={pickupPoint} icon={pickupIcon} />}
+          {hasLivePassenger && passengerPoint && <Marker position={passengerPoint} icon={passengerIcon} />}
           {driverPoint && <Marker position={driverPoint} icon={driverIcon} />}
         </MapContainer>
 
@@ -174,6 +185,7 @@ export default function TrackTripPage() {
       </div>
 
       <div className="border-t border-border bg-card p-4">
+        {booking.status === 'confirmed' && <PassengerLiveLocationToggle bookingId={booking.id} />}
         {!hasLiveDriver ? (
           <div className="mb-4 flex items-center gap-2 rounded-xl bg-warning/10 p-3">
             <span>⏳</span>

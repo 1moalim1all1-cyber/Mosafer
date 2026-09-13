@@ -111,7 +111,12 @@ service cloud.firestore {
           request.resource.data.driverId == resource.data.driverId &&
           changedKeys().hasOnly([
             'status', 'driverLiveLat', 'driverLiveLng', 'driverLiveUpdatedAt'
-          ])
+          ]) &&
+          (request.resource.data.driverLiveLat == null ||
+            (request.resource.data.driverLiveLat is number &&
+             request.resource.data.driverLiveLng is number &&
+             request.resource.data.driverLiveLat >= -90 && request.resource.data.driverLiveLat <= 90 &&
+             request.resource.data.driverLiveLng >= -180 && request.resource.data.driverLiveLng <= 180))
         ) ||
         (
           isActiveAccount() &&
@@ -179,9 +184,23 @@ service cloud.firestore {
         (
           isSignedIn() &&
           resource.data.passengerId == request.auth.uid &&
-          resource.data.status in ['pending', 'confirmed'] &&
-          request.resource.data.status == 'cancelled' &&
-          changedKeys().hasOnly(['status'])
+          (
+            (
+              resource.data.status in ['pending', 'confirmed'] &&
+              request.resource.data.status == 'cancelled' &&
+              changedKeys().hasOnly(['status'])
+            ) ||
+            (
+              resource.data.status == 'confirmed' &&
+              request.resource.data.status == resource.data.status &&
+              changedKeys().hasOnly(['passengerLiveLat', 'passengerLiveLng', 'passengerLiveUpdatedAt']) &&
+              (request.resource.data.passengerLiveLat == null ||
+                (request.resource.data.passengerLiveLat is number &&
+                 request.resource.data.passengerLiveLng is number &&
+                 request.resource.data.passengerLiveLat >= -90 && request.resource.data.passengerLiveLat <= 90 &&
+                 request.resource.data.passengerLiveLng >= -180 && request.resource.data.passengerLiveLng <= 180))
+            )
+          )
         ) ||
         (
           isApprovedDriver() &&

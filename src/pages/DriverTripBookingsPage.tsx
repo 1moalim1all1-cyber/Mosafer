@@ -12,6 +12,7 @@ import type { AppUser } from '../types/user'
 import { Button } from '../components/ui/Button'
 import { RatingModal } from '../components/RatingModal'
 import { LiveLocationToggle } from '../components/LiveLocationToggle'
+import { LiveMapViewport } from '../components/LiveMapViewport'
 
 const pickupIcon = new L.DivIcon({
   html: '<div style="background:#2563EB;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
@@ -41,6 +42,9 @@ interface BookingRow {
   pinVerified?: boolean
   pickupLat?: number | null
   pickupLng?: number | null
+  passengerLiveLat?: number | null
+  passengerLiveLng?: number | null
+  passengerLiveUpdatedAt?: Date | null
 }
 
 /**
@@ -48,7 +52,7 @@ interface BookingRow {
  * الحي (لو مفعّل مشاركة الموقع) - عشان التتبّع يبقى في الاتجاهين،
  * مش بس الراكب اللي بيشوف السائق.
  */
-function PickupMiniMap({ tripId, pickupLat, pickupLng }: { tripId: string; pickupLat: number; pickupLng: number }) {
+function PickupMiniMap({ tripId, pickupLat, pickupLng, passengerLiveLat, passengerLiveLng, passengerLiveUpdatedAt }: { tripId: string; pickupLat: number; pickupLng: number; passengerLiveLat?: number | null; passengerLiveLng?: number | null; passengerLiveUpdatedAt?: Date | null }) {
   const { t } = useTranslation()
   const [driverLat, setDriverLat] = useState<number | null>(null)
   const [driverLng, setDriverLng] = useState<number | null>(null)
@@ -65,7 +69,8 @@ function PickupMiniMap({ tripId, pickupLat, pickupLng }: { tripId: string; picku
     })
   }, [tripId])
 
-  const pickupPoint: [number, number] = [pickupLat, pickupLng]
+  const passengerIsLive = isLiveLocationFresh(passengerLiveUpdatedAt) && passengerLiveLat != null && passengerLiveLng != null
+  const pickupPoint: [number, number] = passengerIsLive ? [passengerLiveLat!, passengerLiveLng!] : [pickupLat, pickupLng]
   const driverPoint: [number, number] | null = isFresh && driverLat && driverLng ? [driverLat, driverLng] : null
   const distanceKm = driverPoint ? calculateDistanceKm(driverPoint[0], driverPoint[1], pickupLat, pickupLng) : null
 
@@ -78,6 +83,7 @@ function PickupMiniMap({ tripId, pickupLat, pickupLng }: { tripId: string; picku
       >
         <div style={{ height: 140 }} className="pointer-events-none">
           <MapContainer center={driverPoint ?? pickupPoint} zoom={13} style={{ height: '100%', width: '100%' }} attributionControl={false}>
+            <LiveMapViewport points={[driverPoint, pickupPoint].filter((point): point is [number, number] => point !== null)} />
             <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
             {driverPoint && <Polyline positions={[driverPoint, pickupPoint]} color="#1E40AF" weight={3} dashArray="6 8" />}
             <Marker position={pickupPoint} icon={pickupIcon} />
@@ -106,6 +112,7 @@ function PickupMiniMap({ tripId, pickupLat, pickupLng }: { tripId: string; picku
           </div>
           <div className="flex-1">
             <MapContainer center={driverPoint ?? pickupPoint} zoom={14} style={{ height: '100%', width: '100%' }}>
+              <LiveMapViewport points={[driverPoint, pickupPoint].filter((point): point is [number, number] => point !== null)} />
               <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
               {driverPoint && <Polyline positions={[driverPoint, pickupPoint]} color="#1E40AF" weight={3} dashArray="6 8" />}
               <Marker position={pickupPoint} icon={pickupIcon} />
@@ -176,7 +183,7 @@ function BookingCard({ booking, onRate }: { booking: BookingRow; onRate: () => v
         {booking.seatsBooked} مقاعد · {booking.totalPrice.toFixed(0)} ج.م
       </p>
       {booking.status === 'confirmed' && booking.pickupLat != null && booking.pickupLng != null && (
-        <PickupMiniMap tripId={booking.tripId} pickupLat={booking.pickupLat} pickupLng={booking.pickupLng} />
+        <PickupMiniMap tripId={booking.tripId} pickupLat={booking.pickupLat} pickupLng={booking.pickupLng} passengerLiveLat={booking.passengerLiveLat} passengerLiveLng={booking.passengerLiveLng} passengerLiveUpdatedAt={booking.passengerLiveUpdatedAt} />
       )}
 
       {booking.status === 'confirmed' && passenger?.phone && (

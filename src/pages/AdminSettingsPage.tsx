@@ -13,6 +13,7 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [uploadingHero, setUploadingHero] = useState(false)
+  const [uploadingField, setUploadingField] = useState<keyof AppSettings | null>(null)
 
   useEffect(() => {
     fetchAppSettings().then(setSettings)
@@ -28,6 +29,19 @@ export default function AdminSettingsPage() {
       alert(t('settings.uploadError'))
     } finally {
       setUploadingHero(false)
+    }
+  }
+
+  async function handleImageUpload(file: File, field: keyof AppSettings) {
+    if (!settings) return
+    setUploadingField(field)
+    try {
+      const url = await uploadImageToCloudinary(file, 'mosafer/landing')
+      setSettings((current) => current ? { ...current, [field]: url } : current)
+    } catch {
+      alert(t('settings.uploadError'))
+    } finally {
+      setUploadingField(null)
     }
   }
 
@@ -208,6 +222,15 @@ export default function AdminSettingsPage() {
           />
         </div>
 
+        <h2 className="mb-3 font-bold text-text-primary">روابط التطبيق والإنقاذ</h2>
+        <div className="mb-6 flex flex-col gap-3">
+          <Input label="رابط Google Play" value={settings.googlePlayUrl} onChange={(e) => setSettings({ ...settings, googlePlayUrl: e.target.value })} dir="ltr" />
+          <Input label="رابط App Store" value={settings.appStoreUrl} onChange={(e) => setSettings({ ...settings, appStoreUrl: e.target.value })} dir="ltr" />
+          <Input label="عنوان خدمة الإنقاذ" value={settings.emergencyTitle} onChange={(e) => setSettings({ ...settings, emergencyTitle: e.target.value })} />
+          <Input label="وصف خدمة الإنقاذ" value={settings.emergencySubtitle} onChange={(e) => setSettings({ ...settings, emergencySubtitle: e.target.value })} />
+          <Input label="رابط طلب الإنقاذ" value={settings.emergencyActionUrl} onChange={(e) => setSettings({ ...settings, emergencyActionUrl: e.target.value })} dir="ltr" />
+        </div>
+
         <h2 className="mb-3 font-bold text-text-primary">{t('settings.visibleStats')}</h2>
         <p className="mb-3 text-sm text-text-secondary">{t('settings.statsHint')}</p>
         <div className="mb-6 grid grid-cols-2 gap-3">
@@ -253,6 +276,47 @@ export default function AdminSettingsPage() {
               onChange={(e) => e.target.files?.[0] && handleHeroUpload(e.target.files[0])}
             />
           </label>
+        </div>
+
+        <h2 className="mb-3 font-bold text-text-primary">صور الصفحة الرئيسية</h2>
+        <div className="mb-6 grid gap-4 sm:grid-cols-2">
+          {([
+            ['logoImageUrl', 'لوجو مسافر'],
+            ['emergencyLogoUrl', 'لوجو خدمة الإنقاذ'],
+          ] as [keyof AppSettings, string][]).map(([field, label]) => (
+            <div key={field} className="rounded-xl border border-border bg-card p-3">
+              <p className="mb-2 text-sm font-semibold text-text-primary">{label}</p>
+              {settings[field] && <img src={String(settings[field])} alt="" className="mb-2 h-24 w-full rounded-lg object-contain" />}
+              <label className="flex cursor-pointer justify-center rounded-lg border-2 border-dashed border-border py-3 text-sm text-text-secondary hover:border-primary">
+                {uploadingField === field ? 'جاري الرفع...' : '📷 رفع أو تغيير الصورة'}
+                <input type="file" accept="image/*" className="hidden" disabled={uploadingField !== null} onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], field)} />
+              </label>
+            </div>
+          ))}
+        </div>
+
+        <h2 className="mb-3 font-bold text-text-primary">الشركاء</h2>
+        <p className="mb-3 text-sm text-text-secondary">تقدر تغيّر اسم ولوجو ورابط كل شريك. سيب الاسم فاضي لإخفائه.</p>
+        <div className="mb-6 flex flex-col gap-4">
+          {[1, 2, 3, 4, 5].map((number) => {
+            const nameField = `partner${number}Name` as keyof AppSettings
+            const logoField = `partner${number}LogoUrl` as keyof AppSettings
+            const urlField = `partner${number}Url` as keyof AppSettings
+            return (
+              <div key={number} className="rounded-xl border border-border bg-card p-4">
+                <p className="mb-3 font-semibold text-text-primary">الشريك {number}</p>
+                <div className="flex flex-col gap-3">
+                  <Input label="الاسم" value={String(settings[nameField])} onChange={(e) => setSettings({ ...settings, [nameField]: e.target.value })} />
+                  <Input label="الرابط" value={String(settings[urlField])} onChange={(e) => setSettings({ ...settings, [urlField]: e.target.value })} dir="ltr" />
+                  {settings[logoField] && <img src={String(settings[logoField])} alt="" className="h-20 w-full rounded-lg object-contain" />}
+                  <label className="flex cursor-pointer justify-center rounded-lg border-2 border-dashed border-border py-3 text-sm text-text-secondary hover:border-primary">
+                    {uploadingField === logoField ? 'جاري الرفع...' : '📷 رفع لوجو الشريك'}
+                    <input type="file" accept="image/*" className="hidden" disabled={uploadingField !== null} onChange={(e) => e.target.files?.[0] && handleImageUpload(e.target.files[0], logoField)} />
+                  </label>
+                </div>
+              </div>
+            )
+          })}
         </div>
 
         {saved && <p className="mb-4 text-sm font-semibold text-success">✅ {t('settings.saved')}</p>}

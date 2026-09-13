@@ -211,6 +211,13 @@ export interface AppSettings {
   heroImageUrl: string
   heroTitle: string
   heroSubtitle: string
+  logoImageUrl: string
+  googlePlayUrl: string
+  appStoreUrl: string
+  emergencyTitle: string
+  emergencySubtitle: string
+  emergencyLogoUrl: string
+  emergencyActionUrl: string
   statDrivers: string
   statTrips: string
   statUsers: string
@@ -222,6 +229,21 @@ export interface AppSettings {
   contactPhone: string
   contactEmail: string
   contactAddress: string
+  partner1Name: string
+  partner1LogoUrl: string
+  partner1Url: string
+  partner2Name: string
+  partner2LogoUrl: string
+  partner2Url: string
+  partner3Name: string
+  partner3LogoUrl: string
+  partner3Url: string
+  partner4Name: string
+  partner4LogoUrl: string
+  partner4Url: string
+  partner5Name: string
+  partner5LogoUrl: string
+  partner5Url: string
 }
 
 export async function fetchAppSettings(): Promise<AppSettings> {
@@ -239,6 +261,13 @@ export async function fetchAppSettings(): Promise<AppSettings> {
     heroImageUrl: data.heroImageUrl ?? '',
     heroTitle: data.heroTitle ?? 'رحلتك...\nتبدأ من هنا',
     heroSubtitle: data.heroSubtitle ?? 'احجز رحلتك بين جميع المحافظات بأمان وسهولة وبأفضل الأسعار',
+    logoImageUrl: data.logoImageUrl ?? '',
+    googlePlayUrl: data.googlePlayUrl ?? '',
+    appStoreUrl: data.appStoreUrl ?? '',
+    emergencyTitle: data.emergencyTitle ?? 'الإنقاذ السريع',
+    emergencySubtitle: data.emergencySubtitle ?? 'اطلب سيارة إنقاذ من مكانك',
+    emergencyLogoUrl: data.emergencyLogoUrl ?? '',
+    emergencyActionUrl: data.emergencyActionUrl ?? '',
     statDrivers: data.statDrivers ?? '+500',
     statTrips: data.statTrips ?? '+50K',
     statUsers: data.statUsers ?? '+100K',
@@ -250,6 +279,21 @@ export async function fetchAppSettings(): Promise<AppSettings> {
     contactPhone: data.contactPhone ?? '',
     contactEmail: data.contactEmail ?? '',
     contactAddress: data.contactAddress ?? 'القاهرة - مصر',
+    partner1Name: data.partner1Name ?? 'Mobil 1',
+    partner1LogoUrl: data.partner1LogoUrl ?? '',
+    partner1Url: data.partner1Url ?? '',
+    partner2Name: data.partner2Name ?? 'Michelin',
+    partner2LogoUrl: data.partner2LogoUrl ?? '',
+    partner2Url: data.partner2Url ?? '',
+    partner3Name: data.partner3Name ?? 'Castrol',
+    partner3LogoUrl: data.partner3LogoUrl ?? '',
+    partner3Url: data.partner3Url ?? '',
+    partner4Name: data.partner4Name ?? 'Shell Helix',
+    partner4LogoUrl: data.partner4LogoUrl ?? '',
+    partner4Url: data.partner4Url ?? '',
+    partner5Name: data.partner5Name ?? 'NGK',
+    partner5LogoUrl: data.partner5LogoUrl ?? '',
+    partner5Url: data.partner5Url ?? '',
   }
 }
 

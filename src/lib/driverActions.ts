@@ -240,6 +240,7 @@ export async function updateTripStatus(tripId: string, status: Trip['status']) {
 
 function mapBookingDoc(id: string, data: Record<string, unknown>) {
   const created = data.createdAt as { toDate?: () => Date }
+  const passengerLiveUpdatedAt = data.passengerLiveUpdatedAt as { toDate?: () => Date } | null
   return {
     id,
     tripId: data.tripId as string,
@@ -253,6 +254,9 @@ function mapBookingDoc(id: string, data: Record<string, unknown>) {
     pinVerified: Boolean(data.pinVerified),
     pickupLat: (data.pickupLat as number) ?? null,
     pickupLng: (data.pickupLng as number) ?? null,
+    passengerLiveLat: (data.passengerLiveLat as number) ?? null,
+    passengerLiveLng: (data.passengerLiveLng as number) ?? null,
+    passengerLiveUpdatedAt: passengerLiveUpdatedAt?.toDate ? passengerLiveUpdatedAt.toDate() : null,
     createdAt: created?.toDate ? created.toDate() : new Date(),
   }
 }

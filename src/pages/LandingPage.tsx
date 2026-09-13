@@ -24,6 +24,10 @@ import {
   ArrowLeftRight,
   Star,
   ChevronDown,
+  Bell,
+  Settings,
+  Heart,
+  TicketCheck,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { Button } from '../components/ui/Button'
@@ -118,6 +122,11 @@ export default function LandingPage() {
   const [heroTitle, setHeroTitle] = useState('سافر بسهولة..\nواحجز مكانك في ثواني')
   const [heroSubtitle, setHeroSubtitle] = useState('رحلات آمنة ومريحة بين محافظات مصر')
   const [stats, setStats] = useState({ drivers: '+500', trips: '+50K', users: '+100K', cities: '+27' })
+  const [landingConfig, setLandingConfig] = useState({
+    logoImageUrl: '', googlePlayUrl: '', appStoreUrl: '', emergencyTitle: 'الإنقاذ السريع',
+    emergencySubtitle: 'اطلب سيارة إنقاذ من مكانك', emergencyLogoUrl: '', emergencyActionUrl: '',
+    partners: [] as { name: string; logoUrl: string; url: string }[],
+  })
   const [testimonials, setTestimonials] = useState<{ id: string; stars: number; comment: string }[]>([])
   const [faqItems, setFaqItems] = useState<{ question: string; answer: string }[]>([])
   const [openFaq, setOpenFaq] = useState<number | null>(null)
@@ -144,6 +153,20 @@ export default function LandingPage() {
         if (s.heroTitle) setHeroTitle(s.heroTitle)
         if (s.heroSubtitle) setHeroSubtitle(s.heroSubtitle)
         setStats({ drivers: s.statDrivers, trips: s.statTrips, users: s.statUsers, cities: s.statCities })
+        setLandingConfig({
+          logoImageUrl: s.logoImageUrl,
+          googlePlayUrl: s.googlePlayUrl,
+          appStoreUrl: s.appStoreUrl,
+          emergencyTitle: s.emergencyTitle,
+          emergencySubtitle: s.emergencySubtitle,
+          emergencyLogoUrl: s.emergencyLogoUrl,
+          emergencyActionUrl: s.emergencyActionUrl,
+          partners: [1, 2, 3, 4, 5].map((number) => ({
+            name: s[`partner${number}Name` as keyof typeof s] as string,
+            logoUrl: s[`partner${number}LogoUrl` as keyof typeof s] as string,
+            url: s[`partner${number}Url` as keyof typeof s] as string,
+          })).filter((partner) => partner.name),
+        })
         setSocials({
           whatsapp: s.whatsappNumber,
           facebook: s.facebookUrl,
@@ -166,7 +189,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-40 border-b border-white/10 bg-tertiary/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <img src={`${import.meta.env.BASE_URL}logo.jpeg`} alt="مسافر" className="h-11 w-11 rounded-xl object-cover" />
+            <img src={landingConfig.logoImageUrl || `${import.meta.env.BASE_URL}logo.jpeg`} alt="مسافر" className="h-11 w-11 rounded-xl object-cover" />
             <div className="hidden sm:block">
               <p className="text-lg font-bold leading-tight">MOSAFER</p>
               <p className="-mt-1 text-xs text-white/60">مسافر</p>
@@ -229,6 +252,16 @@ export default function LandingPage() {
 
       {/* ---- Hero ---- */}
       <section id="home" className="relative scroll-mt-20 min-h-[560px] overflow-hidden bg-tertiary sm:min-h-[640px]">
+        <aside className="absolute left-4 top-8 z-20 hidden w-24 overflow-hidden rounded-2xl border border-purple-400/25 bg-[#071038]/80 text-center backdrop-blur lg:block">
+          {[
+            [Search, 'البحث عن رحلة', '/login'], [CarFront, 'رحلاتي', '/login'], [TicketCheck, 'حجوزاتي', '/login'],
+            [Heart, 'المفضلة', '/login'], [Wallet, 'المحفظة', '/login'], [Bell, 'الإشعارات', '/login'], [Settings, 'الإعدادات', '/login'],
+          ].map(([Icon, label, path]) => (
+            <button key={String(label)} onClick={() => navigate(String(path))} className="flex w-full flex-col items-center gap-1 border-b border-white/10 px-2 py-3 text-[11px] text-white/80 transition hover:bg-purple-500/15 hover:text-white last:border-0">
+              <Icon size={22} className="text-purple-400" />{String(label)}
+            </button>
+          ))}
+        </aside>
         {/* الصورة النضيفة - ممتدة كخلفية كاملة بارتفاع كافي عشان تبان كاملة */}
         <img
           src={heroImageUrl}
@@ -258,7 +291,13 @@ export default function LandingPage() {
               </span>
             </div>
 
-            {/* حمل التطبيق - اتشال بناءً على طلب صاحب المشروع */}
+            {(landingConfig.googlePlayUrl || landingConfig.appStoreUrl) && (
+              <div className="mt-5 inline-flex flex-wrap items-center gap-2 rounded-xl border border-white/15 bg-[#050b2c]/70 p-3">
+                <span className="w-full text-center text-xs text-white/75">حمّل التطبيق الآن</span>
+                {landingConfig.googlePlayUrl && <a href={landingConfig.googlePlayUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-black px-4 py-2 text-sm font-bold">Google Play</a>}
+                {landingConfig.appStoreUrl && <a href={landingConfig.appStoreUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-black px-4 py-2 text-sm font-bold">App Store</a>}
+              </div>
+            )}
           </div>
         </div>
 
@@ -378,6 +417,33 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-6">
+            {getFeatures(t).map((feature) => (
+              <div key={feature.title} className="flex min-h-24 items-center gap-3 rounded-xl border border-purple-400/20 bg-[#071038]/90 p-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-purple-500/15 text-purple-400"><feature.icon size={24} /></div>
+                <div><p className="text-sm font-bold text-white">{feature.title}</p><p className="mt-1 text-[10px] leading-4 text-white/60">{feature.desc}</p></div>
+              </div>
+            ))}
+            <a href={landingConfig.emergencyActionUrl || '/#/support'} target={landingConfig.emergencyActionUrl ? '_blank' : undefined} rel="noreferrer" className="flex min-h-24 items-center gap-3 rounded-xl border border-red-400/30 bg-red-950/40 p-3">
+              {landingConfig.emergencyLogoUrl ? <img src={landingConfig.emergencyLogoUrl} alt="" className="h-12 w-12 object-contain" /> : <span className="text-3xl">🚨</span>}
+              <div><p className="text-sm font-bold text-red-300">{landingConfig.emergencyTitle}</p><p className="mt-1 text-[10px] leading-4 text-white/65">{landingConfig.emergencySubtitle}</p></div>
+            </a>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 overflow-hidden rounded-xl border border-purple-400/20 bg-[#071038]/90 sm:grid-cols-4">
+            {getStatIcons(t).map((stat) => <div key={stat.key} className="flex items-center justify-center gap-3 border-white/10 p-3 sm:border-l"><stat.icon className="text-purple-400" /><div><p className="font-extrabold text-purple-400">{stats[stat.key]}</p><p className="text-xs text-white/65">{stat.label}</p></div></div>)}
+          </div>
+
+          {landingConfig.partners.length > 0 && (
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 rounded-xl border border-purple-400/20 bg-[#071038]/90 px-5 py-4">
+              <span className="font-bold text-white">شركاؤنا</span>
+              {landingConfig.partners.map((partner, index) => {
+                const content = partner.logoUrl ? <img src={partner.logoUrl} alt={partner.name} className="h-8 max-w-28 object-contain" /> : <span className="font-bold text-white/80">{partner.name}</span>
+                return partner.url ? <a key={index} href={partner.url} target="_blank" rel="noreferrer">{content}</a> : <span key={index}>{content}</span>
+              })}
+            </div>
+          )}
         </div>
       </section>
 
