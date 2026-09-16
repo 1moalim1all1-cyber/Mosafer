@@ -19,6 +19,51 @@ export default function AdminDashboardPage() {
     fetchDashboardStats().then(setStats)
   }, [])
 
+  const overviewCards = [
+    {
+      value: stats?.activeTrips ?? '-',
+      label: t('admin.activeTrips'),
+      path: '/admin/trips',
+      cardClass: 'border-success/30 bg-success/5 hover:border-success/70 hover:bg-success/10',
+      valueClass: 'text-success',
+    },
+    {
+      value: stats?.pendingDrivers ?? '-',
+      label: t('admin.pendingDrivers'),
+      path: '/admin/drivers',
+      cardClass: 'border-warning/30 bg-warning/5 hover:border-warning/70 hover:bg-warning/10',
+      valueClass: 'text-warning',
+    },
+    {
+      value: stats?.totalUsers ?? '-',
+      label: t('admin.totalUsers'),
+      path: '/admin/users',
+      cardClass: 'border-primary/30 bg-primary-light hover:border-primary/70',
+      valueClass: 'text-primary',
+    },
+    {
+      value: stats?.activeRequests ?? '-',
+      label: 'طلبات ركاب نشطة',
+      path: '/community',
+      cardClass: 'border-primary/30 bg-primary-light hover:border-primary/70',
+      valueClass: 'text-primary',
+    },
+    {
+      value: stats?.confirmedBookings ?? '-',
+      label: 'حجوزات مؤكدة',
+      path: '/admin/trips',
+      cardClass: 'border-success/30 bg-success/5 hover:border-success/70 hover:bg-success/10',
+      valueClass: 'text-success',
+    },
+    {
+      value: stats?.totalReports ?? '-',
+      label: 'بلاغات الدعم',
+      path: '/admin/reports',
+      cardClass: 'border-warning/30 bg-warning/5 hover:border-warning/70 hover:bg-warning/10',
+      valueClass: 'text-warning',
+    },
+  ]
+
   const links = [
     { path: '/admin/users', icon: '👥', label: t('admin.manageUsers') },
     { path: '/admin/trips', icon: '🚗', label: t('admin.manageTrips') },
@@ -42,30 +87,19 @@ export default function AdminDashboardPage() {
       <main className="mx-auto w-full max-w-7xl px-4 py-6">
         <h2 className="mb-3 font-bold text-text-primary">{t('admin.overview')}</h2>
         <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-          <div className="rounded-xl border border-success/30 bg-success/5 p-4 text-center">
-            <p className="text-2xl font-bold text-success">{stats?.activeTrips ?? '-'}</p>
-            <p className="text-xs text-text-secondary">{t('admin.activeTrips')}</p>
-          </div>
-          <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 text-center">
-            <p className="text-2xl font-bold text-warning">{stats?.pendingDrivers ?? '-'}</p>
-            <p className="text-xs text-text-secondary">{t('admin.pendingDrivers')}</p>
-          </div>
-          <div className="rounded-xl border border-primary/30 bg-primary-light p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{stats?.totalUsers ?? '-'}</p>
-            <p className="text-xs text-text-secondary">{t('admin.totalUsers')}</p>
-          </div>
-          <div className="rounded-xl border border-primary/30 bg-primary-light p-4 text-center">
-            <p className="text-2xl font-bold text-primary">{stats?.activeRequests ?? '-'}</p>
-            <p className="text-xs text-text-secondary">طلبات ركاب نشطة</p>
-          </div>
-          <div className="rounded-xl border border-success/30 bg-success/5 p-4 text-center">
-            <p className="text-2xl font-bold text-success">{stats?.confirmedBookings ?? '-'}</p>
-            <p className="text-xs text-text-secondary">حجوزات مؤكدة</p>
-          </div>
-          <div className="rounded-xl border border-warning/30 bg-warning/5 p-4 text-center">
-            <p className="text-2xl font-bold text-warning">{stats?.totalReports ?? '-'}</p>
-            <p className="text-xs text-text-secondary">بلاغات الدعم</p>
-          </div>
+          {overviewCards.map((card) => (
+            <button
+              key={card.label}
+              type="button"
+              onClick={() => navigate(card.path)}
+              className={`group rounded-xl border p-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 ${card.cardClass}`}
+              aria-label={`فتح ${card.label}`}
+            >
+              <p className={`text-2xl font-bold ${card.valueClass}`}>{card.value}</p>
+              <p className="text-xs text-text-secondary transition group-hover:text-text-primary">{card.label}</p>
+              <p className="mt-1 text-[10px] text-text-secondary/70 opacity-0 transition group-hover:opacity-100">اضغط للتفاصيل</p>
+            </button>
+          ))}
         </div>
 
         <h2 className="mb-3 font-bold text-text-primary">{t('admin.management')}</h2>
