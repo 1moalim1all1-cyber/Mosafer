@@ -23,7 +23,7 @@ export default function AdminDashboardPage() {
     {
       value: stats?.activeTrips ?? '-',
       label: t('admin.activeTrips'),
-      path: '/admin/trips',
+      path: '/admin/trips?status=active',
       cardClass: 'border-success/30 bg-success/5 hover:border-success/70 hover:bg-success/10',
       valueClass: 'text-success',
     },
@@ -51,7 +51,7 @@ export default function AdminDashboardPage() {
     {
       value: stats?.confirmedBookings ?? '-',
       label: 'حجوزات مؤكدة',
-      path: '/admin/trips',
+      path: '/admin/bookings?status=confirmed',
       cardClass: 'border-success/30 bg-success/5 hover:border-success/70 hover:bg-success/10',
       valueClass: 'text-success',
     },
@@ -67,6 +67,7 @@ export default function AdminDashboardPage() {
   const links = [
     { path: '/admin/users', icon: '👥', label: t('admin.manageUsers') },
     { path: '/admin/trips', icon: '🚗', label: t('admin.manageTrips') },
+    { path: '/admin/bookings', icon: '🎫', label: 'إدارة الحجوزات' },
     { path: '/admin/drivers', icon: '🪪', label: t('admin.reviewDrivers') },
     { path: '/admin/wallet-requests', icon: '👛', label: t('admin.walletRequests') },
     { path: '/admin/governorates', icon: '🗺️', label: t('admin.manageGovernorates') },
