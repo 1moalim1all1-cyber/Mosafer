@@ -57,6 +57,7 @@ const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'))
 const AdminDriverQueuePage = lazy(() => import('./pages/AdminDriverQueuePage'))
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'))
 const AdminTripsPage = lazy(() => import('./pages/AdminTripsPage'))
+const AdminBookingsPage = lazy(() => import('./pages/AdminBookingsPage'))
 const TripsCommunityPage = lazy(() => import('./pages/TripsCommunityPage'))
 const CreateTripRequestPage = lazy(() => import('./pages/CreateTripRequestPage'))
 const MyTripRequestsPage = lazy(() => import('./pages/MyTripRequestsPage'))
@@ -279,6 +280,16 @@ function AppShell() {
               <ProtectedRoute>
                 <AdminRoute>
                   <AdminTripsPage />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/bookings"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <AdminBookingsPage />
                 </AdminRoute>
               </ProtectedRoute>
             }
