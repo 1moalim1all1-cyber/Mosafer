@@ -4,9 +4,8 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
-  // لما نبني نسخة التطبيق (Capacitor) بنستخدم مسار جذر عادي "/"،
-  // ولما نبني نسخة الموقع (GitHub Pages) بنستخدم اسم الـ Repository.
-  // الأمر بيتحكم فيها عن طريق: npm run build:app بدل npm run build
-  base: mode === 'capacitor' ? '/' : '/Mosafer/',
+  // المسار النسبي يخلي نسخة الويب تشتغل على الدومين الخاص وعلى رابط
+  // GitHub Pages القديم في نفس الوقت. نسخة Capacitor تفضل على الجذر.
+  base: mode === 'capacitor' ? '/' : './',
   plugins: [react(), tailwindcss()],
 }))
