@@ -57,13 +57,13 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="flex items-center justify-between border-b border-border bg-card px-4 py-4 lg:hidden">
+      <header className="sticky top-0 z-30 flex items-center justify-between border-b border-white/8 bg-card/92 px-4 py-3 shadow-lg backdrop-blur-xl lg:hidden">
         <div className="flex items-center gap-2">
           <img src={`${import.meta.env.BASE_URL}logo.jpeg`} alt="مسافر" className="h-11 w-11 rounded-2xl object-cover shadow-md" />
           <h1 className="text-xl font-bold text-primary">مسافر</h1>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/notifications')} className="relative">
+          <button onClick={() => navigate('/notifications')} className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-bg/45 transition active:scale-95">
             <Bell size={22} className="text-text-secondary" />
             {unread > 0 && (
               <span className="absolute -left-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-danger text-[10px] text-white">
@@ -71,8 +71,8 @@ export default function HomePage() {
               </span>
             )}
           </button>
-          <span className="text-sm text-text-secondary">{user?.fullName}</span>
-          <button onClick={() => logout()} className="text-sm font-semibold text-danger">
+          <span className="max-w-24 truncate text-sm font-semibold text-text-primary">{user?.fullName}</span>
+          <button onClick={() => logout()} className="rounded-lg bg-danger/10 px-2 py-1.5 text-xs font-semibold text-danger">
             خروج
           </button>
         </div>
@@ -94,11 +94,11 @@ export default function HomePage() {
       <main className="mx-auto grid w-full max-w-7xl gap-8 px-4 pb-24 pt-6 lg:grid-cols-[minmax(360px,460px)_minmax(0,1fr)] lg:items-start">
         <section className="-mt-16 lg:sticky lg:top-24">
 
-        <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-[0_8px_30px_rgba(15,23,42,0.08)]">
+        <div className="app-surface flex flex-col gap-3 rounded-3xl p-5">
           <div className="relative">
             <div>
               <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-                <MapPin size={14} className="text-primary" /> {t('search.from')}
+                <span className="icon-chip"><MapPin size={15} /></span> {t('search.from')}
               </label>
               <select
                 value={origin}
@@ -130,7 +130,7 @@ export default function HomePage() {
 
           <div>
             <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-              <MapPin size={14} className="text-primary" /> {t('search.to')}
+              <span className="icon-chip"><MapPin size={15} /></span> {t('search.to')}
             </label>
             <select
               value={destination}
@@ -148,7 +148,7 @@ export default function HomePage() {
 
           <div className="flex items-center justify-between rounded-xl border-2 border-border bg-bg px-4 py-3">
             <span className="flex items-center gap-1.5 text-sm font-semibold text-text-primary">
-              <Users size={14} className="text-primary" /> {t('search.passengers')}
+              <span className="icon-chip"><Users size={15} /></span> {t('search.passengers')}
             </span>
             <div className="flex items-center gap-3">
               <button
@@ -173,21 +173,21 @@ export default function HomePage() {
         </div>
 
         {/* ---- قسم "رايح فين؟" - مدخل واضح لمجتمع الرحلات (طلب/عرض) ---- */}
-        <div className="mt-6 rounded-2xl border border-border bg-card p-5">
+        <div className="app-surface mt-6 rounded-3xl p-5">
           <h2 className="mb-4 text-lg font-bold text-text-primary">{t('community.whereTo')}</h2>
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => navigate('/community/new-request')}
-              className="flex flex-col items-center gap-2 rounded-xl border-2 border-border py-5 transition hover:border-primary hover:bg-primary-light"
+              className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-bg/30 py-5 transition-all hover:-translate-y-0.5 hover:border-primary hover:bg-primary/8"
             >
-              <Search size={26} className="text-primary" />
+              <span className="action-icon"><Search size={25} /></span>
               <span className="text-sm font-semibold text-text-primary">{t('community.searchForTrip')}</span>
             </button>
             <button
               onClick={() => navigate('/role-selection')}
-              className="flex flex-col items-center gap-2 rounded-xl border-2 border-border py-5 transition hover:border-primary hover:bg-primary-light"
+              className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-bg/30 py-5 transition-all hover:-translate-y-0.5 hover:border-primary hover:bg-primary/8"
             >
-              <CarFront size={26} className="text-primary" />
+              <span className="action-icon"><CarFront size={25} /></span>
               <span className="text-sm font-semibold text-text-primary">{t('community.iAmGoingHaveSeats')}</span>
             </button>
           </div>

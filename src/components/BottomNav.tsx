@@ -40,8 +40,8 @@ export function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 hidden border-t border-border bg-card shadow-[0_-4px_16px_rgba(15,23,42,0.06)] max-lg:block">
-      <div className="mx-auto flex max-w-lg">
+    <nav className="fixed inset-x-0 bottom-0 z-40 hidden border-t border-white/10 bg-card/94 px-2 pb-[max(.4rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-12px_35px_rgba(0,0,0,.28)] backdrop-blur-xl max-lg:block">
+      <div className="mx-auto flex max-w-lg gap-1">
         {tabs.map((tab) => {
           const active = location.pathname === tab.path
           const isAddTrip = tab.path === '/driver/create-trip'
@@ -51,12 +51,15 @@ export function BottomNav() {
             <button
               key={tab.path}
               onClick={() => navigate(tab.path)}
-              className={`flex flex-1 flex-col items-center gap-1 py-3 font-semibold transition-transform active:scale-95 ${
+              className={`relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-2xl py-2 font-semibold transition-all active:scale-95 ${
                 compact ? 'text-[10px]' : 'text-xs'
-              } ${isAddTrip ? 'text-warning' : active ? 'text-primary' : 'text-text-secondary'}`}
+              } ${isAddTrip ? 'bg-warning/10 text-warning' : active ? 'bg-primary/12 text-primary' : 'text-text-secondary hover:bg-white/5'}`}
             >
-              <Icon size={compact ? 19 : 22} strokeWidth={active || isAddTrip ? 2.4 : 2} className={isAddTrip ? 'scale-110' : ''} />
-              {tab.label}
+              {active && !isAddTrip && <span className="absolute top-0 h-0.5 w-7 rounded-full bg-primary shadow-[0_0_10px_rgba(22,119,255,.9)]" />}
+              <span className={`flex h-8 w-8 items-center justify-center rounded-xl transition ${active ? 'bg-primary text-white shadow-[0_5px_14px_rgba(22,119,255,.3)]' : isAddTrip ? 'bg-warning text-tertiary' : ''}`}>
+                <Icon size={compact ? 18 : 20} strokeWidth={active || isAddTrip ? 2.5 : 2} />
+              </span>
+              <span className="max-w-full truncate px-0.5">{tab.label}</span>
             </button>
           )
         })}
