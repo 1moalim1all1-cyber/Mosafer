@@ -6,7 +6,6 @@ import {
   orderBy,
   onSnapshot,
   where,
-  limit,
   getDocs,
   setDoc,
   getDoc,
@@ -26,11 +25,10 @@ export async function getOrCreateChat(passengerId: string, driverId: string): Pr
   const q = query(
     collection(db, 'chats'),
     where('passengerId', '==', passengerId),
-    where('driverId', '==', driverId),
-    limit(1),
   )
   const existing = await getDocs(q)
-  if (!existing.empty) return existing.docs[0].id
+  const previous = existing.docs.find((chat) => chat.data().driverId === driverId)
+  if (previous) return previous.id
 
   const chatRef = doc(collection(db, 'chats'))
   await setDoc(chatRef, {

@@ -8,6 +8,8 @@ import { subscribeOffersForRequest, respondToTripOffer } from '../lib/tripOffers
 import type { TripRequest } from '../types/tripRequest'
 import type { TripOffer } from '../types/tripOffer'
 import { BottomNav } from '../components/BottomNav'
+import { getOrCreateChat } from '../lib/chat'
+import { MessageCircle } from 'lucide-react'
 
 function getStatusConfig(t: (key: string) => string): Record<TripRequest['status'], { label: string; color: string }> {
   return {
@@ -22,11 +24,30 @@ function OfferRow({ offer }: { offer: TripOffer }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   async function handle(accept: boolean) {
     setLoading(true)
     try {
       await respondToTripOffer(offer, accept)
+      if (accept) {
+        const chatId = await getOrCreateChat(offer.passengerId, offer.driverId)
+        navigate(`/chat/${chatId}`)
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'تعذر إتمام العملية، حاول تاني')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function openChat() {
+    setLoading(true)
+    try {
+      const chatId = await getOrCreateChat(offer.passengerId, offer.driverId)
+      navigate(`/chat/${chatId}`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'تعذر فتح المحادثة')
     } finally {
       setLoading(false)
     }
@@ -46,6 +67,7 @@ function OfferRow({ offer }: { offer: TripOffer }) {
       </p>
       {offer.message && <p className="mb-2 text-xs text-text-secondary">"{offer.message}"</p>}
 
+      {error && <p className="mb-2 text-sm text-danger">{error}</p>}
       {offer.status === 'pending' ? (
         <div className="flex gap-2">
           <button
@@ -68,6 +90,7 @@ function OfferRow({ offer }: { offer: TripOffer }) {
           {offer.status === 'accepted' ? `✅ ${t('community.offerAccepted')}` : `❌ ${t('community.offerRejected')}`}
         </span>
       )}
+      {offer.status === 'accepted' && <button onClick={openChat} disabled={loading} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 font-semibold text-white disabled:opacity-50"><MessageCircle size={18} /> تواصل مع السائق</button>}
     </div>
   )
 }

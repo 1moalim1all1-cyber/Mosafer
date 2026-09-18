@@ -6,6 +6,10 @@ import { subscribeDriverTrips, subscribeDriverStatus } from '../lib/driverAction
 import type { Trip } from '../types/trip'
 import { Button } from '../components/ui/Button'
 import { Armchair, Users, Plus } from 'lucide-react'
+import { subscribeDriverOffers } from '../lib/tripOffers'
+import { getOrCreateChat } from '../lib/chat'
+import type { TripOffer } from '../types/tripOffer'
+import { MessageCircle } from 'lucide-react'
 
 function getStatusLabels(t: (key: string) => string): Record<Trip['status'], { label: string; color: string }> {
   return {
@@ -27,16 +31,30 @@ export default function DriverDashboardPage() {
   const STATUS_LABELS = getStatusLabels(t)
   const [trips, setTrips] = useState<Trip[]>([])
   const [approved, setApproved] = useState<boolean | null>(null)
+  const [offers, setOffers] = useState<TripOffer[]>([])
+  const [chatError, setChatError] = useState('')
 
   useEffect(() => {
     if (!user) return
     const unsub1 = subscribeDriverTrips(user.uid, setTrips)
     const unsub2 = subscribeDriverStatus(user.uid, (s) => setApproved(s === 'approved'))
+    const unsub3 = subscribeDriverOffers(user.uid, setOffers)
     return () => {
       unsub1()
       unsub2()
+      unsub3()
     }
   }, [user])
+
+  async function contactPassenger(offer: TripOffer) {
+    try {
+      setChatError('')
+      const chatId = await getOrCreateChat(offer.passengerId, offer.driverId)
+      navigate(`/chat/${chatId}`)
+    } catch (error) {
+      setChatError(error instanceof Error ? error.message : 'تعذر فتح المحادثة')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-bg pb-24">
@@ -57,6 +75,17 @@ export default function DriverDashboardPage() {
       )}
 
       <main className="mx-auto w-full max-w-6xl px-4 py-6">
+        {offers.length > 0 && <section className="mb-8">
+          <h2 className="mb-3 text-lg font-bold text-text-primary">عروضي لطلبات الركاب</h2>
+          {chatError && <p className="mb-2 text-sm text-danger">{chatError}</p>}
+          <div className="grid gap-3 lg:grid-cols-2">
+            {offers.map((offer) => <div key={offer.id} className="rounded-2xl border border-border bg-card p-4">
+              <div className="flex justify-between gap-2"><span className="font-semibold text-text-primary">عرضك: {offer.seatsOffered} مقعد · {offer.pricePerSeat} ج.م للمقعد</span><span className={`text-sm font-bold ${offer.status === 'accepted' ? 'text-success' : offer.status === 'rejected' ? 'text-danger' : 'text-warning'}`}>{offer.status === 'accepted' ? 'الراكب وافق' : offer.status === 'rejected' ? 'تم الاعتذار' : 'بانتظار رد الراكب'}</span></div>
+              <p className="mt-2 text-sm text-text-secondary">الساعة {offer.departureTime}</p>
+              {offer.status === 'accepted' && <button onClick={() => contactPassenger(offer)} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 font-semibold text-white"><MessageCircle size={18} /> تواصل مع الراكب</button>}
+            </div>)}
+          </div>
+        </section>}
         {trips.length === 0 && <p className="py-12 text-center text-text-secondary">{t('driver.noTripsYet')}</p>}
 
         <div className="grid gap-4 lg:grid-cols-2">
