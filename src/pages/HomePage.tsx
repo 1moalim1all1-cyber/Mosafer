@@ -9,7 +9,8 @@ import { subscribeUnreadCount } from '../lib/notifications'
 import { subscribeAvailableTrips, subscribeCompletedTripsCount } from '../lib/trips'
 import type { Trip } from '../types/trip'
 import { Animated3DCar } from '../components/Animated3DCar'
-import { Users2, Bell, MapPin, ArrowLeftRight, Users, Search, CarFront } from 'lucide-react'
+import { Users2, Bell, MapPin, ArrowLeftRight, Users, Search, CarFront, Siren, ExternalLink, Handshake } from 'lucide-react'
+import { fetchAppSettings } from '../lib/admin'
 
 const GOVERNORATES = [
   'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحر الأحمر', 'البحيرة',
@@ -30,9 +31,32 @@ export default function HomePage() {
   const [availableTrips, setAvailableTrips] = useState<Trip[]>([])
   const [tripsLoading, setTripsLoading] = useState(true)
   const [completedCount, setCompletedCount] = useState(0)
+  const [services, setServices] = useState({
+    emergencyTitle: 'الإنقاذ السريع',
+    emergencySubtitle: 'اطلب سيارة إنقاذ من مكانك',
+    emergencyLogoUrl: '',
+    emergencyActionUrl: '',
+    partners: [] as { name: string; logoUrl: string; url: string }[],
+  })
 
   useEffect(() => {
     return subscribeCompletedTripsCount(setCompletedCount)
+  }, [])
+
+  useEffect(() => {
+    fetchAppSettings().then((settings) => {
+      setServices({
+        emergencyTitle: settings.emergencyTitle,
+        emergencySubtitle: settings.emergencySubtitle,
+        emergencyLogoUrl: settings.emergencyLogoUrl,
+        emergencyActionUrl: settings.emergencyActionUrl,
+        partners: [1, 2, 3, 4, 5].map((number) => ({
+          name: settings[`partner${number}Name` as keyof typeof settings] as string,
+          logoUrl: settings[`partner${number}LogoUrl` as keyof typeof settings] as string,
+          url: settings[`partner${number}Url` as keyof typeof settings] as string,
+        })).filter((partner) => partner.name),
+      })
+    }).catch(() => undefined)
   }, [])
 
   useEffect(() => {
@@ -192,6 +216,17 @@ export default function HomePage() {
             </button>
           </div>
         </div>
+
+        <button
+          onClick={() => services.emergencyActionUrl ? window.open(services.emergencyActionUrl, '_blank', 'noopener,noreferrer') : navigate('/support')}
+          className="group mt-6 flex w-full items-center gap-4 overflow-hidden rounded-3xl border border-danger/35 bg-gradient-to-l from-danger/20 via-card to-card p-4 text-right shadow-[0_14px_35px_rgba(239,68,68,.12)] transition hover:border-danger/70"
+        >
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-danger/30 bg-danger/15 text-danger">
+            {services.emergencyLogoUrl ? <img src={services.emergencyLogoUrl} alt={services.emergencyTitle} className="h-full w-full object-contain p-1" /> : <Siren size={28} />}
+          </span>
+          <span className="min-w-0 flex-1"><strong className="block text-base text-danger">{services.emergencyTitle}</strong><small className="mt-1 block text-text-secondary">{services.emergencySubtitle}</small></span>
+          <ExternalLink size={19} className="shrink-0 text-danger transition group-hover:scale-110" />
+        </button>
         </section>
 
         <section className="min-w-0">
@@ -215,6 +250,20 @@ export default function HomePage() {
         {!tripsLoading && <div className="grid gap-4 xl:grid-cols-2">{availableTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)}</div>}
         </section>
       </main>
+
+      {services.partners.length > 0 && (
+        <section className="mx-auto w-full max-w-7xl px-4 pb-28 lg:pb-10">
+          <div className="app-surface rounded-3xl p-5">
+            <div className="mb-4 flex items-center gap-2"><span className="icon-chip"><Handshake size={16} /></span><h2 className="font-bold text-text-primary">رعاة وشركاء مسافر</h2></div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              {services.partners.map((partner, index) => {
+                const partnerContent = <><span className="flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-white/[0.04] p-2">{partner.logoUrl ? <img src={partner.logoUrl} alt={partner.name} className="h-full max-w-full object-contain" /> : <span className="text-center font-bold text-text-primary">{partner.name}</span>}</span>{partner.logoUrl && <span className="mt-2 block truncate text-xs font-semibold text-text-secondary">{partner.name}</span>}</>
+                return partner.url ? <a key={`${partner.name}-${index}`} href={partner.url} target="_blank" rel="noreferrer" className="rounded-2xl border border-border bg-bg/35 p-2 text-center transition hover:-translate-y-0.5 hover:border-primary">{partnerContent}</a> : <div key={`${partner.name}-${index}`} className="rounded-2xl border border-border bg-bg/35 p-2 text-center">{partnerContent}</div>
+              })}
+            </div>
+          </div>
+        </section>
+      )}
       <BottomNav />
     </div>
   )
