@@ -47,9 +47,15 @@ export async function createTripRequest(input: {
   const uid = auth.currentUser?.uid
   if (!uid) throw new Error('لازم تسجّل دخول الأول')
 
+  // Firestore بيرفض أي خاصية قيمتها undefined. حقول الموقع والوقت
+  // والملاحظات اختيارية، فنبني المستند بالقيم الموجودة فقط.
+  const cleanInput = Object.fromEntries(
+    Object.entries(input).filter(([, value]) => value !== undefined),
+  )
+
   const docRef = await addDoc(collection(db, 'tripRequests'), {
     passengerId: uid,
-    ...input,
+    ...cleanInput,
     status: 'active',
     createdAt: Timestamp.now(),
   })
