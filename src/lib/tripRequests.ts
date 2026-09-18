@@ -1,4 +1,4 @@
-import { collection, doc, addDoc, updateDoc, query, where, orderBy, limit, onSnapshot, Timestamp } from 'firebase/firestore'
+import { collection, doc, addDoc, updateDoc, query, where, onSnapshot, Timestamp } from 'firebase/firestore'
 import { db, auth } from './firebase'
 import type { TripRequest } from '../types/tripRequest'
 
@@ -72,18 +72,26 @@ export async function createTripRequest(input: {
 
 /** فيد طلبات الرحلات النشطة - للسائقين يدوّروا على طلبات في اتجاههم */
 export function subscribeActiveTripRequests(country: string, callback: (requests: TripRequest[]) => void, count = 30) {
+  // الترتيب بـ createdAt مع country + status كان محتاج Composite Index
+  // منشور يدويًا في Firebase. بنجيب البيانات بفلتر بسيط ونرتبها محليًا
+  // عشان الطلب ما يظهرش من الكاش ثم يختفي بعد Refresh لو الفهرس ناقص.
   const q = query(
     collection(db, 'tripRequests'),
-    where('country', '==', country),
     where('status', '==', 'active'),
-    orderBy('createdAt', 'desc'),
-    limit(count),
   )
   let latestRequests: TripRequest[] = []
-  const emitCurrentRequests = () => callback(latestRequests.filter((request) => isTripRequestCurrent(request)))
+  const emitCurrentRequests = () => callback(
+    latestRequests
+      .filter((request) => request.country === country && isTripRequestCurrent(request))
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, count),
+  )
   const unsubscribe = onSnapshot(q, (snap) => {
     latestRequests = snap.docs.map((d) => mapDoc(d.id, d.data()))
     emitCurrentRequests()
+  }, (error) => {
+    console.error('Failed to load active trip requests', error)
+    callback([])
   })
   const expiryTimer = window.setInterval(emitCurrentRequests, 30_000)
 
@@ -95,14 +103,17 @@ export function subscribeActiveTripRequests(country: string, callback: (requests
 
 /** طلبات الرحلات بتاعة راكب معيّن (لشاشة "طلباتي") */
 export function subscribeMyTripRequests(passengerId: string, callback: (requests: TripRequest[]) => void) {
-  const q = query(collection(db, 'tripRequests'), where('passengerId', '==', passengerId), orderBy('createdAt', 'desc'))
+  const q = query(collection(db, 'tripRequests'), where('passengerId', '==', passengerId))
   return onSnapshot(q, (snap) => {
     callback(snap.docs.map((d) => {
       const request = mapDoc(d.id, d.data())
       return request.status === 'active' && !isTripRequestCurrent(request)
         ? { ...request, status: 'expired' as const }
         : request
-    }))
+    }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()))
+  }, (error) => {
+    console.error('Failed to load passenger trip requests', error)
+    callback([])
   })
 }
 
