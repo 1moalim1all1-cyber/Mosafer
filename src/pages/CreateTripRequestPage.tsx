@@ -18,7 +18,8 @@ export default function CreateTripRequestPage() {
   const { user } = useAuth()
   const [country, setCountry] = useCountry()
 
-  const todayStr = new Date().toISOString().split('T')[0]
+  const now = new Date()
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 
   const [origin, setOrigin] = useState('')
   const [destination, setDestination] = useState('')
@@ -47,6 +48,11 @@ export default function CreateTripRequestPage() {
       setError(t('community.errorSameCity'))
       return
     }
+    const requestedTime = new Date(`${travelDate}T${preferredTime || '23:59:59'}`)
+    if (Number.isNaN(requestedTime.getTime()) || requestedTime.getTime() <= Date.now()) {
+      setError('الميعاد اللي اخترته فات بالفعل. اختار وقت لسه مجاش عشان الطلب يفضل ظاهر للسائقين.')
+      return
+    }
 
     setLoading(true)
     setError(null)
@@ -69,7 +75,7 @@ export default function CreateTripRequestPage() {
       console.error('Failed to publish trip request', publishError)
       const firebaseError = publishError as { code?: string; message?: string }
       const errorCode = firebaseError.code || 'unknown'
-      setError(`تعذّر نشر الطلب — كود الخطأ: ${errorCode}`)
+      setError(firebaseError.message || `تعذّر نشر الطلب — كود الخطأ: ${errorCode}`)
       setLoading(false)
       return
     }

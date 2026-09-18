@@ -28,6 +28,9 @@ export function isTripRequestCurrent(request: Pick<TripRequest, 'travelDate' | '
   if (request.status !== 'active') return false
   const endTime = request.preferredTime || '23:59:59'
   const expiresAt = new Date(`${request.travelDate}T${endTime}`)
+  // الوقت هنا "مفضّل" مش موعد إغلاق صارم؛ نخلي الطلب ظاهر ساعتين
+  // بعده عشان السائقين يلحقوا يردوا، بدل ما يختفي مع أول تحديث للصفحة.
+  if (request.preferredTime) expiresAt.setHours(expiresAt.getHours() + 2)
   return !Number.isNaN(expiresAt.getTime()) && expiresAt.getTime() >= now.getTime()
 }
 
@@ -46,6 +49,11 @@ export async function createTripRequest(input: {
 }): Promise<string> {
   const uid = auth.currentUser?.uid
   if (!uid) throw new Error('لازم تسجّل دخول الأول')
+
+  const requestedTime = new Date(`${input.travelDate}T${input.preferredTime || '23:59:59'}`)
+  if (Number.isNaN(requestedTime.getTime()) || requestedTime.getTime() <= Date.now()) {
+    throw new Error('اختار تاريخ ووقت لسه مجاش')
+  }
 
   // Firestore بيرفض أي خاصية قيمتها undefined. حقول الموقع والوقت
   // والملاحظات اختيارية، فنبني المستند بالقيم الموجودة فقط.
