@@ -1,4 +1,4 @@
-import { collection, doc, addDoc, updateDoc, query, where, onSnapshot, Timestamp } from 'firebase/firestore'
+import { collection, doc, addDoc, updateDoc, deleteDoc, query, where, onSnapshot, Timestamp } from 'firebase/firestore'
 import { db, auth } from './firebase'
 import type { TripRequest } from '../types/tripRequest'
 
@@ -105,12 +105,18 @@ export function subscribeActiveTripRequests(country: string, callback: (requests
 export function subscribeMyTripRequests(passengerId: string, callback: (requests: TripRequest[]) => void) {
   const q = query(collection(db, 'tripRequests'), where('passengerId', '==', passengerId))
   return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => {
+    const currentRequests: TripRequest[] = []
+    snap.docs.forEach((d) => {
       const request = mapDoc(d.id, d.data())
-      return request.status === 'active' && !isTripRequestCurrent(request)
-        ? { ...request, status: 'expired' as const }
-        : request
-    }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()))
+      if (request.status === 'active' && !isTripRequestCurrent(request)) {
+        // صاحب الطلب هو اللي فاتح الصفحة، وقواعد Firestore تسمح له
+        // بحذف طلبه. كده الطلب المنتهي بيتشال فعليًا من قاعدة البيانات.
+        deleteDoc(d.ref).catch((error) => console.error('Failed to delete expired trip request', error))
+        return
+      }
+      currentRequests.push(request)
+    })
+    callback(currentRequests.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()))
   }, (error) => {
     console.error('Failed to load passenger trip requests', error)
     callback([])
