@@ -1,5 +1,5 @@
-import { doc, getDoc } from 'firebase/firestore'
-import { db } from './firebase'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { db, auth } from './firebase'
 import type { AppUser } from '../types/user'
 import type { DriverProfile } from '../types/booking'
 
@@ -38,4 +38,15 @@ export async function fetchDriverProfile(uid: string): Promise<DriverProfile | n
     verificationStatus: data.verificationStatus ?? 'notSubmitted',
     vehicle: data.vehicle ?? null,
   }
+}
+
+export async function updateMyProfile(input: { fullName: string; profileImageUrl?: string | null }) {
+  const uid = auth.currentUser?.uid
+  if (!uid) throw new Error('لازم تسجّل دخول الأول')
+  const fullName = input.fullName.trim()
+  if (fullName.length < 2) throw new Error('اكتب اسم صحيح')
+  await updateDoc(doc(db, 'users', uid), {
+    fullName,
+    ...(input.profileImageUrl !== undefined ? { profileImageUrl: input.profileImageUrl } : {}),
+  })
 }

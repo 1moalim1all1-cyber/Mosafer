@@ -28,6 +28,7 @@ export interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>
   register: (input: RegisterInput & { email: string }) => Promise<void>
   logout: () => Promise<void>
+  refreshUser: () => Promise<void>
 }
 
 /** ترجمة أكواد أخطاء Firebase لرسائل عربية مفهومة */
@@ -182,8 +183,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOut(auth)
   }
 
+  async function refreshUser() {
+    const current = auth.currentUser
+    if (!current) return
+    const snap = await getDoc(doc(db, 'users', current.uid))
+    setUser(snap.exists() ? mapUserDoc(current.uid, snap.data()) : null)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

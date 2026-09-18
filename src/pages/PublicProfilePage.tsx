@@ -31,8 +31,6 @@ export default function PublicProfilePage() {
     return <div className="flex min-h-screen items-center justify-center text-text-secondary">{t('track.bookingNotFound')}</div>
   }
 
-  const firstName = user.fullName.split(' ')[0]
-
   return (
     <div className="min-h-screen bg-bg">
       <header className="flex items-center gap-3 border-b border-border bg-card px-4 py-4">
@@ -46,12 +44,12 @@ export default function PublicProfilePage() {
         <div className="mb-6 flex flex-col items-center text-center">
           <div className="mb-3 flex h-24 w-24 items-center justify-center rounded-full bg-primary-light text-4xl">
             {user.profileImageUrl ? (
-              <img src={user.profileImageUrl} className="h-24 w-24 rounded-full object-cover" alt={firstName} />
+              <img src={user.profileImageUrl} className="h-24 w-24 rounded-full object-cover" alt={user.fullName} />
             ) : (
               '🧑'
             )}
           </div>
-          <p className="text-xl font-bold text-text-primary">{firstName}</p>
+          <p className="text-xl font-bold text-text-primary">{user.fullName}</p>
           {user.role === 'driver' && (
             <span className="mt-1 flex items-center gap-1 text-sm font-semibold text-success">
               <ShieldCheck size={14} /> {t('publicProfile.verifiedDriver')}

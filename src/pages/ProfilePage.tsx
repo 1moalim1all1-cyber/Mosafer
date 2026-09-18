@@ -1,14 +1,66 @@
 import { useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/useAuth'
 import { changeLanguage } from '../lib/i18n'
 import { Button } from '../components/ui/Button'
 import { BottomNav } from '../components/BottomNav'
+import { Camera, Pencil, Save, UserRound } from 'lucide-react'
+import { uploadImageToCloudinary } from '../lib/cloudinary'
+import { updateMyProfile } from '../lib/users'
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth()
+  const { user, logout, refreshUser } = useAuth()
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
+  const [editing, setEditing] = useState(false)
+  const [fullName, setFullName] = useState(user?.fullName ?? '')
+  const [previewUrl, setPreviewUrl] = useState(user?.profileImageUrl ?? '')
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [profileError, setProfileError] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setFullName(user?.fullName ?? '')
+    setPreviewUrl(user?.profileImageUrl ?? '')
+  }, [user?.fullName, user?.profileImageUrl])
+
+  function selectPhoto(file?: File) {
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setProfileError('اختار ملف صورة فقط')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setProfileError('حجم الصورة لازم يكون أقل من 5 ميجا')
+      return
+    }
+    setSelectedImage(file)
+    setPreviewUrl(URL.createObjectURL(file))
+    setEditing(true)
+    setProfileError('')
+  }
+
+  async function saveProfile() {
+    if (fullName.trim().length < 2) {
+      setProfileError('اكتب اسم صحيح')
+      return
+    }
+    setSaving(true)
+    setProfileError('')
+    try {
+      const imageUrl = selectedImage ? await uploadImageToCloudinary(selectedImage, 'mosafer/users/profile') : undefined
+      await updateMyProfile({ fullName, profileImageUrl: imageUrl })
+      await refreshUser()
+      setSelectedImage(null)
+      setEditing(false)
+    } catch (error) {
+      setProfileError(error instanceof Error ? error.message : 'تعذر حفظ البيانات')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   async function handleLogout() {
     if (!confirm('متأكد إنك عايز تسجّل خروج من حسابك؟')) return
@@ -50,11 +102,23 @@ export default function ProfilePage() {
       </header>
 
       <main className="mx-auto max-w-lg px-4 py-6">
-        <div className="mb-4 text-center">
-          <div className="mx-auto mb-2 flex h-20 w-20 items-center justify-center rounded-full bg-primary-light text-3xl">
-            🧑
-          </div>
-          <p className="text-lg font-bold text-text-primary">{user?.fullName}</p>
+        <div className="app-surface mb-5 rounded-3xl p-5 text-center">
+          <button onClick={() => fileInputRef.current?.click()} className="group relative mx-auto mb-3 block h-24 w-24" aria-label="تغيير الصورة الشخصية">
+            <span className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-primary/50 bg-primary-light text-primary shadow-lg">
+              {previewUrl ? <img src={previewUrl} alt={fullName || 'الصورة الشخصية'} className="h-full w-full object-cover" /> : <UserRound size={42} />}
+            </span>
+            <span className="absolute bottom-0 left-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-card bg-primary text-white"><Camera size={15} /></span>
+          </button>
+          <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={(event) => selectPhoto(event.target.files?.[0])} />
+          {editing ? (
+            <div className="mx-auto max-w-sm">
+              <input value={fullName} onChange={(event) => setFullName(event.target.value)} className="mb-3 w-full rounded-xl border-2 border-border bg-bg px-4 py-3 text-center font-bold text-text-primary focus:border-primary focus:outline-none" placeholder="الاسم الكامل" />
+              {profileError && <p className="mb-3 text-sm text-danger">{profileError}</p>}
+              <div className="flex gap-2"><Button variant="secondary" onClick={() => { setEditing(false); setFullName(user?.fullName ?? ''); setPreviewUrl(user?.profileImageUrl ?? ''); setSelectedImage(null) }}>إلغاء</Button><Button onClick={saveProfile} loading={saving} icon={<Save size={17} />}>حفظ البيانات</Button></div>
+            </div>
+          ) : (
+            <button onClick={() => setEditing(true)} className="inline-flex items-center gap-2 text-lg font-bold text-text-primary">{user?.fullName}<Pencil size={15} className="text-primary" /></button>
+          )}
           <p className="text-text-secondary">{user?.phone}</p>
         </div>
 

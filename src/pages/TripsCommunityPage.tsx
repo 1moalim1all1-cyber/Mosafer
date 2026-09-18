@@ -14,6 +14,8 @@ import { SendOfferModal } from '../components/SendOfferModal'
 import { subscribeAvailableTrips } from '../lib/trips'
 import type { Trip } from '../types/trip'
 import { TripCard } from '../components/TripCard'
+import { fetchUserProfile } from '../lib/users'
+import type { AppUser } from '../types/user'
 
 function requestMarkerIcon(count: number) {
   return new L.DivIcon({
@@ -30,12 +32,23 @@ function RequestCard({ request }: { request: TripRequest }) {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const [showOfferModal, setShowOfferModal] = useState(false)
+  const [passenger, setPassenger] = useState<AppUser | null>(null)
 
   const isOwnRequest = user?.uid === request.passengerId
   const isDriver = user?.role === 'driver'
 
+  useEffect(() => {
+    fetchUserProfile(request.passengerId).then(setPassenger).catch(() => setPassenger(null))
+  }, [request.passengerId])
+
   return (
     <div className="mb-3 rounded-2xl border border-border bg-card p-4">
+      <div className="mb-3 flex items-center gap-3">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-primary/30 bg-primary-light text-primary">
+          {passenger?.profileImageUrl ? <img src={passenger.profileImageUrl} alt={passenger.fullName} className="h-full w-full object-cover" /> : <Users size={20} />}
+        </span>
+        <div className="min-w-0"><p className="truncate font-bold text-text-primary">{passenger?.fullName || 'راكب'}</p><p className="text-xs text-text-secondary">طالب رحلة</p></div>
+      </div>
       <div className="mb-2 flex items-center justify-between">
         <span className="rounded-full bg-primary-light px-2 py-0.5 text-xs font-semibold text-primary">
           {t('community.lookingForTrip')}
