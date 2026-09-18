@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Search, PlusCircle, List, MapIcon } from 'lucide-react'
+import { Search, PlusCircle, List, MapIcon, CarFront, Users, Route, UserRoundSearch } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import { useAuth } from '../contexts/useAuth'
@@ -11,6 +11,9 @@ import { REGION_COORDINATES } from '../lib/regionCoordinates'
 import type { TripRequest } from '../types/tripRequest'
 import { BottomNav } from '../components/BottomNav'
 import { SendOfferModal } from '../components/SendOfferModal'
+import { subscribeAvailableTrips } from '../lib/trips'
+import type { Trip } from '../types/trip'
+import { TripCard } from '../components/TripCard'
 
 function requestMarkerIcon(count: number) {
   return new L.DivIcon({
@@ -69,10 +72,14 @@ function RequestCard({ request }: { request: TripRequest }) {
 export default function TripsCommunityPage() {
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
+  const { user } = useAuth()
   const [country] = useCountry()
   const [requests, setRequests] = useState<TripRequest[]>([])
   const [loading, setLoading] = useState(true)
+  const [trips, setTrips] = useState<Trip[]>([])
+  const [tripsLoading, setTripsLoading] = useState(true)
   const [view, setView] = useState<'list' | 'map'>('list')
+  const [feedType, setFeedType] = useState<'requests' | 'trips'>('requests')
 
   useEffect(() => {
     setLoading(true)
@@ -82,21 +89,56 @@ export default function TripsCommunityPage() {
     })
   }, [country])
 
+  useEffect(() => {
+    if (!user) return
+    setTripsLoading(true)
+    return subscribeAvailableTrips(user.gender, country, (data) => {
+      setTrips(data)
+      setTripsLoading(false)
+    }, 30)
+  }, [country, user])
+
   return (
     <div className="min-h-screen bg-bg pb-24">
-      <header className="flex items-center justify-between border-b border-border bg-card px-4 py-4">
-        <h1 className="text-lg font-bold text-text-primary">{t('community.title')}</h1>
-        <div className="flex items-center gap-3">
+      <header className="border-b border-border bg-card px-4 py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-bold text-text-primary">سوق الرحلات</h1>
+          <p className="text-xs text-text-secondary">اطلب عربية أو احجز مكان في رحلة رايحة نفس طريقك</p>
+        </div>
+        <div className="flex items-center gap-2">
           <button onClick={() => navigate('/community/my-requests')} className="text-sm font-semibold text-text-secondary">
             {t('community.myRequests')}
           </button>
-          <button onClick={() => navigate('/community/new-request')} className="flex items-center gap-1 text-sm font-semibold text-primary">
-            <PlusCircle size={16} /> {t('community.requestTripTitle')}
-          </button>
+        </div>
         </div>
       </header>
 
-      <div className="mx-auto flex w-full max-w-7xl gap-2 px-4 pt-6">
+      <div className="mx-auto grid w-full max-w-7xl gap-3 px-4 pt-6 sm:grid-cols-2">
+        <button onClick={() => navigate('/community/new-request')} className="group flex items-center gap-3 rounded-2xl border border-primary/35 bg-gradient-to-l from-primary/15 to-card p-4 text-right transition hover:border-primary">
+          <span className="action-icon !h-12 !w-12"><UserRoundSearch size={23} /></span>
+          <span><strong className="block text-text-primary">أنا راكب ومحتاج عربية</strong><small className="text-text-secondary">انشر خط سيرك وعدد الركاب</small></span>
+          <PlusCircle className="mr-auto text-primary" size={20} />
+        </button>
+        <button onClick={() => navigate(user?.role === 'driver' ? '/driver/create-trip' : '/role-selection')} className="group flex items-center gap-3 rounded-2xl border border-secondary/35 bg-gradient-to-l from-secondary/15 to-card p-4 text-right transition hover:border-secondary">
+          <span className="action-icon !h-12 !w-12 !from-secondary"><CarFront size={23} /></span>
+          <span><strong className="block text-text-primary">أنا سائق ومعايا مكان</strong><small className="text-text-secondary">انشر رحلتك والمقاعد المتاحة</small></span>
+          <PlusCircle className="mr-auto text-secondary" size={20} />
+        </button>
+      </div>
+
+      <div className="mx-auto mt-5 w-full max-w-7xl px-4">
+      <div className="flex rounded-2xl border border-border bg-card/70 p-1.5">
+        <button onClick={() => setFeedType('requests')} className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition ${feedType === 'requests' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-text-secondary'}`}>
+          <Users size={18} /> طلبات الركاب <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">{requests.length}</span>
+        </button>
+        <button onClick={() => { setFeedType('trips'); setView('list') }} className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition ${feedType === 'trips' ? 'bg-secondary text-white shadow-lg shadow-secondary/20' : 'text-text-secondary'}`}>
+          <Route size={18} /> عروض السائقين <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs">{trips.length}</span>
+        </button>
+      </div>
+      </div>
+
+      {feedType === 'requests' && <div className="mx-auto flex w-full max-w-7xl gap-2 px-4 pt-4">
         <button
           onClick={() => setView('list')}
           className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl border-2 py-2 text-sm font-semibold ${
@@ -113,10 +155,10 @@ export default function TripsCommunityPage() {
         >
           <MapIcon size={16} /> {t('community.mapView')}
         </button>
-      </div>
+      </div>}
 
       <main className="mx-auto w-full max-w-7xl px-4 py-6">
-        {loading && (
+        {feedType === 'requests' && loading && (
           <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-32 animate-pulse rounded-2xl bg-card" />
@@ -124,7 +166,7 @@ export default function TripsCommunityPage() {
           </div>
         )}
 
-        {!loading && requests.length === 0 && (
+        {feedType === 'requests' && !loading && requests.length === 0 && (
           <div className="flex flex-col items-center py-16 text-center">
             <Search size={40} className="mb-3 text-text-secondary" />
             <p className="mb-1 font-semibold text-text-primary">{t('community.noRequestsYet')}</p>
@@ -132,9 +174,9 @@ export default function TripsCommunityPage() {
           </div>
         )}
 
-        {!loading && requests.length > 0 && view === 'list' && <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">{requests.map((r) => <RequestCard key={r.id} request={r} />)}</div>}
+        {feedType === 'requests' && !loading && requests.length > 0 && view === 'list' && <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">{requests.map((r) => <RequestCard key={r.id} request={r} />)}</div>}
 
-        {!loading && requests.length > 0 && view === 'map' && (
+        {feedType === 'requests' && !loading && requests.length > 0 && view === 'map' && (
           <div className="overflow-hidden rounded-2xl border border-border" style={{ height: 'min(68vh, 680px)' }}>
             <MapContainer center={[26.8, 30.8]} zoom={country === 'saudi' ? 5 : 6} style={{ height: '100%', width: '100%' }}>
               <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
@@ -159,6 +201,12 @@ export default function TripsCommunityPage() {
             </MapContainer>
           </div>
         )}
+
+        {feedType === 'trips' && tripsLoading && <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">{[1, 2, 3].map((i) => <div key={i} className="h-56 animate-pulse rounded-2xl bg-card" />)}</div>}
+        {feedType === 'trips' && !tripsLoading && trips.length === 0 && (
+          <div className="flex flex-col items-center py-16 text-center"><CarFront size={44} className="mb-3 text-text-secondary" /><p className="font-bold text-text-primary">مفيش رحلات متاحة دلوقتي</p><p className="mt-1 text-sm text-text-secondary">أول سائق ينشر رحلة هتظهر هنا فورًا</p></div>
+        )}
+        {feedType === 'trips' && !tripsLoading && trips.length > 0 && <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">{trips.map((trip) => <TripCard key={trip.id} trip={trip} />)}</div>}
       </main>
 
       <BottomNav />

@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/useAuth'
 import { subscribeDriverTrips, subscribeDriverStatus } from '../lib/driverActions'
 import type { Trip } from '../types/trip'
 import { Button } from '../components/ui/Button'
+import { Armchair, Users, Plus } from 'lucide-react'
 
 function getStatusLabels(t: (key: string) => string): Record<Trip['status'], { label: string; color: string }> {
   return {
@@ -75,13 +76,13 @@ export default function DriverDashboardPage() {
                 )}
               </p>
             </div>
-            <div className="text-left">
+            <div className="min-w-36 text-left">
               <p className={`text-sm font-semibold ${STATUS_LABELS[trip.status].color}`}>
                 {STATUS_LABELS[trip.status].label}
               </p>
-              <p className="text-sm text-text-secondary">
-                {trip.availableSeats}/{trip.totalSeats} {t('driver.available')}
-              </p>
+              <p className="mt-1 flex items-center justify-end gap-1.5 text-sm font-semibold text-text-primary"><Armchair size={15} className="text-primary" /> متبقي {trip.availableSeats} من {trip.totalSeats}</p>
+              <p className="flex items-center justify-end gap-1 text-xs text-text-secondary"><Users size={13} /> محجوز {Math.max(0, trip.totalSeats - trip.availableSeats)}</p>
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-border"><div className="h-full rounded-full bg-gradient-to-l from-primary to-secondary" style={{ width: `${trip.totalSeats > 0 ? ((trip.totalSeats - trip.availableSeats) / trip.totalSeats) * 100 : 0}%` }} /></div>
             </div>
           </button>
         ))}
@@ -90,7 +91,7 @@ export default function DriverDashboardPage() {
 
       {approved && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2">
-          <Button onClick={() => navigate('/driver/create-trip')} fullWidth={false} icon="➕">
+          <Button onClick={() => navigate('/driver/create-trip')} fullWidth={false} icon={<Plus size={19} />}>
             {t('driver.newTrip')}
           </Button>
         </div>

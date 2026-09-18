@@ -15,6 +15,7 @@ import { LiveLocationToggle } from '../components/LiveLocationToggle'
 import { LiveMapViewport } from '../components/LiveMapViewport'
 import type { Trip } from '../types/trip'
 import { getOrCreateChat } from '../lib/chat'
+import { Armchair, Users } from 'lucide-react'
 
 const pickupIcon = new L.DivIcon({
   html: '<div style="background:#2563EB;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
@@ -320,6 +321,10 @@ export default function DriverTripBookingsPage() {
       <main className="mx-auto w-full max-w-6xl px-4 py-6">
         {trip && !['completed', 'cancelled', 'expired'].includes(trip.status) && (
           <div className="mb-5 rounded-2xl border border-border bg-card p-4">
+            <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-border bg-bg/45 p-3">
+              <div><p className="flex items-center gap-2 font-bold text-text-primary"><Armchair size={18} className="text-primary" /> متبقي {trip.availableSeats} مقعد</p><p className="mt-1 text-xs text-text-secondary">من إجمالي {trip.totalSeats} مقاعد</p></div>
+              <div className="text-left"><p className="flex items-center gap-1.5 font-bold text-success"><Users size={17} /> {Math.max(0, trip.totalSeats - trip.availableSeats)} محجوز</p><p className="mt-1 text-xs text-text-secondary">يتحدث تلقائيًا</p></div>
+            </div>
             <p className="mb-3 font-bold text-text-primary">حالة الرحلة الحالية</p>
             <div className="grid grid-cols-3 gap-2 text-center text-xs font-semibold">
               <div className={`rounded-xl p-3 ${['active', 'full'].includes(trip.status) ? 'bg-primary text-white' : 'bg-primary-light text-primary'}`}>1. متاحة</div>
