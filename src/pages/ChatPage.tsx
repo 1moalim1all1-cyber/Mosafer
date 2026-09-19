@@ -53,6 +53,9 @@ export default function ChatPage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full border border-primary/30 bg-primary-light text-lg text-primary">
+          {otherUser?.profileImageUrl ? <img src={otherUser.profileImageUrl} alt={otherUser.fullName} className="h-full w-full object-cover" /> : '👤'}
+        </div>
         <div className="min-w-0 flex-1">
           <h1 className="truncate text-lg font-bold text-text-primary">{otherUser?.fullName || t('common.chat')}</h1>
           {otherUser && <p className="text-xs text-text-secondary">تم فتح التواصل بعد الاتفاق على الرحلة</p>}
