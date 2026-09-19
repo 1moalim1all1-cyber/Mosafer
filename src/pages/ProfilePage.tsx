@@ -8,6 +8,7 @@ import { BottomNav } from '../components/BottomNav'
 import { Camera, Pencil, Save, UserRound } from 'lucide-react'
 import { uploadImageToCloudinary } from '../lib/cloudinary'
 import { updateMyProfile } from '../lib/users'
+import { subscribeDriverStatus } from '../lib/driverActions'
 
 export default function ProfilePage() {
   const { user, logout, refreshUser } = useAuth()
@@ -19,12 +20,18 @@ export default function ProfilePage() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
   const [profileError, setProfileError] = useState('')
+  const [driverStatus, setDriverStatus] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     setFullName(user?.fullName ?? '')
     setPreviewUrl(user?.profileImageUrl ?? '')
   }, [user?.fullName, user?.profileImageUrl])
+
+  useEffect(() => {
+    if (!user) return
+    return subscribeDriverStatus(user.uid, setDriverStatus)
+  }, [user])
 
   function selectPhoto(file?: File) {
     if (!file) return
@@ -144,7 +151,7 @@ export default function ProfilePage() {
         )}
 
         <div className="flex flex-col gap-3">
-          {user?.role === 'driver' && (
+          {driverStatus === 'approved' && (
             <Button variant="secondary" onClick={() => navigate('/driver')}>
               {t('profile.driverDashboard')}
             </Button>
