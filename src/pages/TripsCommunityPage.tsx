@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Search, PlusCircle, List, MapIcon, CarFront, Users, Route, UserRoundSearch } from 'lucide-react'
+import { Search, PlusCircle, List, MapIcon, CarFront, Users, Route, UserRoundSearch, Bell, MessageCircle, ClipboardList, Gauge } from 'lucide-react'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import { useAuth } from '../contexts/useAuth'
@@ -17,6 +17,7 @@ import { TripCard } from '../components/TripCard'
 import { fetchUserProfile } from '../lib/users'
 import type { AppUser } from '../types/user'
 import { subscribeDriverStatus } from '../lib/driverActions'
+import { subscribeUnreadCount } from '../lib/notifications'
 
 function requestMarkerIcon(count: number) {
   return new L.DivIcon({
@@ -94,10 +95,16 @@ export default function TripsCommunityPage() {
   const [view, setView] = useState<'list' | 'map'>('list')
   const [feedType, setFeedType] = useState<'requests' | 'trips'>('requests')
   const [driverStatus, setDriverStatus] = useState<string | null>(null)
+  const [unread, setUnread] = useState(0)
 
   useEffect(() => {
     if (!user) return
     return subscribeDriverStatus(user.uid, setDriverStatus)
+  }, [user])
+
+  useEffect(() => {
+    if (!user) return
+    return subscribeUnreadCount(user.uid, setUnread)
   }, [user])
 
   function openDriverFlow() {
@@ -125,16 +132,33 @@ export default function TripsCommunityPage() {
 
   return (
     <div className="min-h-screen bg-bg pb-24">
-      <header className="border-b border-border bg-card px-4 py-4">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3">
+      <header className="border-b border-border bg-card px-4 py-3">
+        <div className="mx-auto max-w-7xl">
+        <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-lg font-bold text-text-primary">سوق الرحلات</h1>
           <p className="text-xs text-text-secondary">اطلب عربية أو احجز مكان في رحلة رايحة نفس طريقك</p>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => navigate('/community/my-requests')} className="text-sm font-semibold text-text-secondary">
-            {t('community.myRequests')}
+        <button onClick={() => navigate('/notifications')} className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-bg/45 text-text-secondary" aria-label="الإشعارات">
+          <Bell size={20} />
+          {unread > 0 && <span className="absolute -left-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white">{unread > 99 ? '99+' : unread}</span>}
+        </button>
+        </div>
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+          <button onClick={() => navigate('/community/my-requests')} className="flex shrink-0 items-center gap-1.5 rounded-xl border border-border bg-bg/45 px-3 py-2 text-xs font-semibold text-text-primary">
+            <ClipboardList size={16} className="text-primary" /> {t('community.myRequests')}
           </button>
+          <button onClick={() => navigate('/my-bookings')} className="flex shrink-0 items-center gap-1.5 rounded-xl border border-border bg-bg/45 px-3 py-2 text-xs font-semibold text-text-primary">
+            <CarFront size={16} className="text-primary" /> حجوزاتي
+          </button>
+          <button onClick={() => navigate('/chats')} className="flex shrink-0 items-center gap-1.5 rounded-xl border border-border bg-bg/45 px-3 py-2 text-xs font-semibold text-text-primary">
+            <MessageCircle size={16} className="text-primary" /> الرسائل
+          </button>
+          {driverStatus === 'approved' && (
+            <button onClick={() => navigate('/driver')} className="flex shrink-0 items-center gap-1.5 rounded-xl border border-secondary/40 bg-secondary/10 px-3 py-2 text-xs font-semibold text-text-primary">
+              <Gauge size={16} className="text-secondary" /> لوحة السائق
+            </button>
+          )}
         </div>
         </div>
       </header>
