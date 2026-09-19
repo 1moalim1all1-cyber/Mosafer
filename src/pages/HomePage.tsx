@@ -24,6 +24,10 @@ const GOVERNORATES = [
   'قنا', 'شمال سيناء', 'سوهاج',
 ]
 
+function externalUrl(url: string) {
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`
+}
+
 export default function HomePage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
@@ -245,7 +249,7 @@ export default function HomePage() {
         </div>
 
         <button
-          onClick={() => services.emergencyActionUrl ? window.open(services.emergencyActionUrl, '_blank', 'noopener,noreferrer') : navigate('/support')}
+          onClick={() => services.emergencyActionUrl ? window.open(externalUrl(services.emergencyActionUrl), '_blank', 'noopener,noreferrer') : navigate('/support')}
           className="group mt-6 flex w-full items-center gap-4 overflow-hidden rounded-3xl border border-danger/35 bg-gradient-to-l from-danger/20 via-card to-card p-4 text-right shadow-[0_14px_35px_rgba(239,68,68,.12)] transition hover:border-danger/70"
         >
           <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-danger/30 bg-danger/15 text-danger">
@@ -320,7 +324,7 @@ export default function HomePage() {
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
               {services.partners.map((partner, index) => {
                 const partnerContent = <><span className="flex h-14 w-full items-center justify-center overflow-hidden rounded-xl bg-white/[0.04] p-2">{partner.logoUrl ? <img src={partner.logoUrl} alt={partner.name} className="h-full max-w-full object-contain" /> : <span className="text-center font-bold text-text-primary">{partner.name}</span>}</span>{partner.logoUrl && <span className="mt-2 block truncate text-xs font-semibold text-text-secondary">{partner.name}</span>}</>
-                return partner.url ? <a key={`${partner.name}-${index}`} href={partner.url} target="_blank" rel="noreferrer" className="rounded-2xl border border-border bg-bg/35 p-2 text-center transition hover:-translate-y-0.5 hover:border-primary">{partnerContent}</a> : <div key={`${partner.name}-${index}`} className="rounded-2xl border border-border bg-bg/35 p-2 text-center">{partnerContent}</div>
+                return partner.url ? <a key={`${partner.name}-${index}`} href={externalUrl(partner.url)} target="_blank" rel="noreferrer" className="rounded-2xl border border-border bg-bg/35 p-2 text-center transition hover:-translate-y-0.5 hover:border-primary">{partnerContent}</a> : <div key={`${partner.name}-${index}`} className="rounded-2xl border border-border bg-bg/35 p-2 text-center">{partnerContent}</div>
               })}
             </div>
           </div>
