@@ -19,6 +19,8 @@ const TYPE_ICONS: Record<string, string> = {
   booking_rejected: '❌',
   trip_status: '🚗',
   chat_message: '💬',
+  tripOfferAccepted: '🤝',
+  tripOfferResponse: '🚘',
 }
 
 export default function NotificationsPage() {
@@ -31,6 +33,8 @@ export default function NotificationsPage() {
     if (user && !notification.isRead) await markNotificationRead(user.uid, notification.id)
     if (!notification.relatedId) return
     if (notification.type === 'chat_message') navigate(`/chat/${notification.relatedId}`)
+    else if (notification.type === 'tripOfferAccepted') navigate(`/chat/${notification.relatedId}`)
+    else if (notification.type === 'tripOfferResponse') navigate('/driver')
     else if (notification.type === 'booking_accepted' || notification.type === 'booking_rejected') navigate('/my-bookings')
     else if (notification.type === 'new_booking') navigate(`/driver/trip/${notification.relatedId}/bookings`)
     else if (notification.type === 'trip_status') navigate(`/trip/${notification.relatedId}`)
