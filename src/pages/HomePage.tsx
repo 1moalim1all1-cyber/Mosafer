@@ -11,6 +11,7 @@ import type { Trip } from '../types/trip'
 import { Animated3DCar } from '../components/Animated3DCar'
 import { Users2, Bell, MapPin, ArrowLeftRight, Users, Search, CarFront, Siren, ExternalLink, Handshake } from 'lucide-react'
 import { fetchAppSettings } from '../lib/admin'
+import { subscribeDriverStatus } from '../lib/driverActions'
 
 const GOVERNORATES = [
   'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحر الأحمر', 'البحيرة',
@@ -31,6 +32,7 @@ export default function HomePage() {
   const [availableTrips, setAvailableTrips] = useState<Trip[]>([])
   const [tripsLoading, setTripsLoading] = useState(true)
   const [completedCount, setCompletedCount] = useState(0)
+  const [driverStatus, setDriverStatus] = useState<string | null>(null)
   const [services, setServices] = useState({
     emergencyTitle: 'الإنقاذ السريع',
     emergencySubtitle: 'اطلب سيارة إنقاذ من مكانك',
@@ -63,6 +65,17 @@ export default function HomePage() {
     if (!user) return
     return subscribeUnreadCount(user.uid, setUnread)
   }, [user])
+
+  useEffect(() => {
+    if (!user) return
+    return subscribeDriverStatus(user.uid, setDriverStatus)
+  }, [user])
+
+  function openDriverFlow() {
+    if (driverStatus === 'approved') navigate('/driver/create-trip')
+    else if (driverStatus === 'pending') navigate('/driver/pending-approval')
+    else navigate('/driver/documents')
+  }
 
   useEffect(() => {
     if (!user) return
@@ -208,7 +221,7 @@ export default function HomePage() {
               <span className="text-sm font-semibold text-text-primary">{t('community.searchForTrip')}</span>
             </button>
             <button
-              onClick={() => navigate('/role-selection')}
+              onClick={openDriverFlow}
               className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-bg/30 py-5 transition-all hover:-translate-y-0.5 hover:border-primary hover:bg-primary/8"
             >
               <span className="action-icon"><CarFront size={25} /></span>
