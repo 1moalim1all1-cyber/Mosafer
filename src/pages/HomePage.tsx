@@ -12,6 +12,7 @@ import { Animated3DCar } from '../components/Animated3DCar'
 import { Users2, Bell, MapPin, ArrowLeftRight, Users, Search, CarFront, Siren, ExternalLink, Handshake } from 'lucide-react'
 import { fetchAppSettings } from '../lib/admin'
 import { subscribeDriverStatus } from '../lib/driverActions'
+import { useCountry } from '../hooks/useCountry'
 
 const GOVERNORATES = [
   'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحر الأحمر', 'البحيرة',
@@ -25,6 +26,7 @@ export default function HomePage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
   const { user, logout } = useAuth()
+  const [country] = useCountry()
   const [origin, setOrigin] = useState('')
   const [destination, setDestination] = useState('')
   const [seats, setSeats] = useState(1)
@@ -80,12 +82,12 @@ export default function HomePage() {
   useEffect(() => {
     if (!user) return
     setTripsLoading(true)
-    const unsubscribe = subscribeAvailableTrips(user.gender, 'egypt', (trips: Trip[]) => {
+    const unsubscribe = subscribeAvailableTrips(user.gender, country, (trips: Trip[]) => {
       setAvailableTrips(trips)
       setTripsLoading(false)
     })
     return unsubscribe
-  }, [user])
+  }, [country, user])
 
   function handleSearch() {
     if (!origin || !destination) return
