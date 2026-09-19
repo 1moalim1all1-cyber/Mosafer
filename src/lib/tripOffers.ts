@@ -1,6 +1,7 @@
 import { collection, doc, addDoc, query, where, onSnapshot, Timestamp, getDoc, runTransaction } from 'firebase/firestore'
 import { db, auth } from './firebase'
 import type { TripOffer } from '../types/tripOffer'
+import { getOrCreateChat } from './chat'
 
 function mapDoc(id: string, data: Record<string, unknown>): TripOffer {
   const created = data.createdAt as { toDate?: () => Date }
@@ -67,7 +68,7 @@ export function subscribeOffersForRequest(requestId: string, callback: (offers: 
   })
 }
 
-export async function respondToTripOffer(offer: TripOffer, accept: boolean) {
+export async function respondToTripOffer(offer: TripOffer, accept: boolean): Promise<string | null> {
   const uid = auth.currentUser?.uid
   if (!uid || uid !== offer.passengerId) throw new Error('الطلب ده مش بتاعك')
   let route = ''
@@ -84,18 +85,27 @@ export async function respondToTripOffer(offer: TripOffer, accept: boolean) {
     if (accept) tx.update(requestRef, { status: 'matched' })
   })
 
+  // بعد موافقة الراكب بننشئ المحادثة فورًا؛ كده الطرفين بيدخلوا نفس
+  // الشات، وإشعار السائق يقدر يفتح المحادثة مباشرة.
+  let chatId: string | null = null
+  if (accept) {
+    chatId = await getOrCreateChat(offer.passengerId, offer.driverId).catch(() => null)
+  }
+
   await addDoc(collection(db, 'users', offer.driverId, 'notifications'), {
     userId: offer.driverId,
     actorId: uid,
-    type: 'tripOfferResponse',
+    type: accept && chatId ? 'tripOfferAccepted' : 'tripOfferResponse',
     title: accept ? 'الراكب وافق على عرضك! 🎉' : 'الراكب اعتذر عن عرضك',
     body: accept
       ? `تقدر تكلّم الراكب دلوقتي وتتفقوا على تفاصيل الرحلة (${route})`
       : `الراكب مش متاح للعرض ده، جرّب رحلات تانية في مجتمع الرحلات`,
-    relatedId: offer.requestId,
+    relatedId: chatId ?? offer.requestId,
     isRead: false,
     createdAt: Timestamp.now(),
   }).catch(() => undefined)
+
+  return chatId
 }
 
 /** عروض السائق ونتيجة رد الراكب بتظهر له فورًا. */
