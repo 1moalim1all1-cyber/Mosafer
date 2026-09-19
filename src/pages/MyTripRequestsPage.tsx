@@ -26,6 +26,13 @@ function OfferRow({ offer }: { offer: TripOffer }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  useEffect(() => {
+    if (offer.status !== 'accepted') return
+    getOrCreateChat(offer.passengerId, offer.driverId).catch(() => {
+      setError('تعذر تجهيز المحادثة. اضغط «تواصل مع السائق» وحاول تاني.')
+    })
+  }, [offer.driverId, offer.passengerId, offer.status])
+
   async function handle(accept: boolean) {
     setLoading(true)
     try {
