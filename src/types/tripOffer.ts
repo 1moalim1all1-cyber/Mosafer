@@ -12,5 +12,7 @@ export interface TripOffer {
   pickupPoint?: string
   message?: string
   status: TripOfferStatus
+  tripId?: string
+  bookingId?: string
   createdAt: Date
 }

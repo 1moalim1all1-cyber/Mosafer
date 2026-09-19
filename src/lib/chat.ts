@@ -11,7 +11,7 @@ import {
   getDoc,
   Timestamp,
 } from 'firebase/firestore'
-import { db } from './firebase'
+import { db, auth } from './firebase'
 
 export interface ChatMessage {
   id: string
@@ -24,10 +24,10 @@ export interface ChatMessage {
 export async function getOrCreateChat(passengerId: string, driverId: string): Promise<string> {
   const q = query(
     collection(db, 'chats'),
-    where('passengerId', '==', passengerId),
+    where(auth.currentUser?.uid === driverId ? 'driverId' : 'passengerId', '==', auth.currentUser?.uid === driverId ? driverId : passengerId),
   )
   const existing = await getDocs(q)
-  const previous = existing.docs.find((chat) => chat.data().driverId === driverId)
+  const previous = existing.docs.find((chat) => chat.data().driverId === driverId && chat.data().passengerId === passengerId)
   if (previous) return previous.id
 
   const chatRef = doc(collection(db, 'chats'))
@@ -60,7 +60,7 @@ export function subscribeChatMessages(chatId: string, callback: (messages: ChatM
 }
 
 export async function sendMessage(chatId: string, senderId: string, text: string) {
-  await addDoc(collection(db, 'chats', chatId, 'messages'), {
+  const message = await addDoc(collection(db, 'chats', chatId, 'messages'), {
     senderId,
     text,
     type: 'text',
@@ -77,7 +77,7 @@ export async function sendMessage(chatId: string, senderId: string, text: string
     const chat = chatSnap.data()
     const receiverId = chat.passengerId === senderId ? chat.driverId : chat.passengerId
     if (receiverId) {
-      await addDoc(collection(db, 'users', receiverId, 'notifications'), {
+      await setDoc(doc(db, 'users', receiverId, 'notifications', message.id), {
         userId: receiverId,
         actorId: senderId,
         type: 'chat_message',

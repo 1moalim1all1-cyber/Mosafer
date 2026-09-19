@@ -145,13 +145,15 @@ function BookingCard({ booking, onRate }: { booking: BookingRow; onRate: () => v
   const { user } = useAuth()
 
   useEffect(() => {
-    fetchUserProfile(booking.passengerId).then(setPassenger)
-  }, [booking.passengerId])
+    fetchUserProfile(booking.passengerId, booking.id).then(setPassenger)
+  }, [booking.passengerId, booking.id, booking.status])
 
   async function respond(accept: boolean) {
     setLoading(true)
     try {
       await respondToBooking(booking.id, accept)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'تعذر الرد على الحجز')
     } finally {
       setLoading(false)
     }
@@ -164,6 +166,8 @@ function BookingCard({ booking, onRate }: { booking: BookingRow; onRate: () => v
     try {
       const ok = await verifyPassengerPin(booking.id, pinInput)
       if (!ok) setPinError(true)
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'تعذر التحقق من الكود')
     } finally {
       setVerifying(false)
     }

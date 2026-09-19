@@ -20,7 +20,7 @@ function getStatusConfig(t: (key: string) => string): Record<TripRequest['status
   }
 }
 
-function OfferRow({ offer }: { offer: TripOffer }) {
+function OfferRow({ offer, requestActive }: { offer: TripOffer; requestActive: boolean }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
@@ -29,11 +29,9 @@ function OfferRow({ offer }: { offer: TripOffer }) {
   async function handle(accept: boolean) {
     setLoading(true)
     try {
-      await respondToTripOffer(offer, accept)
-      if (accept) {
-        const chatId = await getOrCreateChat(offer.passengerId, offer.driverId)
-        navigate(`/chat/${chatId}`)
-      }
+      setError('')
+      const result = await respondToTripOffer(offer, accept)
+      if (accept && result.bookingId) navigate(`/track/${result.bookingId}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'تعذر إتمام العملية، حاول تاني')
     } finally {
@@ -68,7 +66,7 @@ function OfferRow({ offer }: { offer: TripOffer }) {
       {offer.message && <p className="mb-2 text-xs text-text-secondary">"{offer.message}"</p>}
 
       {error && <p className="mb-2 text-sm text-danger">{error}</p>}
-      {offer.status === 'pending' ? (
+      {offer.status === 'pending' && requestActive ? (
         <div className="flex gap-2">
           <button
             onClick={() => handle(false)}
@@ -87,9 +85,10 @@ function OfferRow({ offer }: { offer: TripOffer }) {
         </div>
       ) : (
         <span className={`text-xs font-semibold ${offer.status === 'accepted' ? 'text-success' : 'text-danger'}`}>
-          {offer.status === 'accepted' ? `✅ ${t('community.offerAccepted')}` : `❌ ${t('community.offerRejected')}`}
+          {offer.status === 'accepted' ? `✅ ${t('community.offerAccepted')}` : offer.status === 'pending' ? 'الطلب مغلق' : `❌ ${t('community.offerRejected')}`}
         </span>
       )}
+      {offer.status === 'accepted' && offer.bookingId && <button onClick={() => navigate(`/track/${offer.bookingId}`)} className="mt-3 w-full rounded-xl border border-primary py-2 font-semibold text-primary">عرض الحجز والتتبع</button>}
       {offer.status === 'accepted' && <button onClick={openChat} disabled={loading} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 font-semibold text-white disabled:opacity-50"><MessageCircle size={18} /> تواصل مع السائق</button>}
     </div>
   )
@@ -128,7 +127,7 @@ function RequestWithOffers({ request, statusConfig, onCancel }: { request: TripR
         <div className="mb-2">
           {offers.length === 0 && <p className="py-2 text-center text-xs text-text-secondary">{t('community.noOffersYet')}</p>}
           {offers.map((o) => (
-            <OfferRow key={o.id} offer={o} />
+            <OfferRow key={o.id} offer={o} requestActive={request.status === 'active'} />
           ))}
         </div>
       )}
@@ -156,7 +155,7 @@ export default function MyTripRequestsPage() {
 
   async function handleCancel(id: string) {
     if (!confirm(t('community.confirmCancel'))) return
-    await cancelTripRequest(id)
+    try { await cancelTripRequest(id) } catch (error) { alert(error instanceof Error ? error.message : 'تعذر إلغاء الطلب') }
   }
 
   return (

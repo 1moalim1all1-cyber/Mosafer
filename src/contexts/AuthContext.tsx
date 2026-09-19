@@ -1,3 +1,4 @@
+import { callServer } from '../lib/server'
 import { useEffect, useState, type ReactNode } from 'react'
 import {
   onAuthStateChanged,
@@ -7,7 +8,7 @@ import {
   updateProfile,
   type User as FirebaseUser,
 } from 'firebase/auth'
-import { doc, getDoc, collection, query, where, limit, getDocs, Timestamp, writeBatch } from 'firebase/firestore'
+import { doc, getDoc, Timestamp, writeBatch } from 'firebase/firestore'
 import { auth, db } from '../lib/firebase'
 import type { AppUser, Gender, UserRole } from '../types/user'
 import { AuthContext } from './authContextInstance'
@@ -114,9 +115,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (input.referralCode && input.referralCode.trim().length > 0) {
         const code = input.referralCode.trim().toUpperCase()
         if (code !== myReferralCode) {
-          const q = query(collection(db, 'users'), where('referralCode', '==', code), limit(1))
-          const results = await getDocs(q)
-          if (!results.empty) referredByUid = results.docs[0].id
+          const result = await callServer<{ uid: string | null }>('lookupReferral', { code })
+          referredByUid = result.uid
         }
       }
 

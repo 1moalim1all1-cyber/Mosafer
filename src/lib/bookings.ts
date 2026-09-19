@@ -1,5 +1,5 @@
 import { collection, doc, query, where, orderBy, onSnapshot, updateDoc, Timestamp } from 'firebase/firestore'
-import { db } from './firebase'
+import { db, auth } from './firebase'
 import type { Booking } from '../types/booking'
 
 function mapBookingDoc(id: string, data: Record<string, unknown>): Booking {
@@ -20,7 +20,7 @@ function mapBookingDoc(id: string, data: Record<string, unknown>): Booking {
     passengerLiveLat: (data.passengerLiveLat as number) ?? null,
     passengerLiveLng: (data.passengerLiveLng as number) ?? null,
     passengerLiveUpdatedAt: passengerLiveUpdatedAt?.toDate ? passengerLiveUpdatedAt.toDate() : null,
-    startPin: (data.startPin as string) ?? null,
+    startPin: null,
     pinVerified: Boolean(data.pinVerified),
     createdAt: created?.toDate ? created.toDate() : new Date(),
   }
@@ -43,14 +43,40 @@ export async function stopPassengerLiveLocation(bookingId: string) {
 }
 
 export function subscribeBooking(bookingId: string, callback: (booking: Booking | null) => void) {
-  return onSnapshot(doc(db, 'bookings', bookingId), (snap) => {
-    callback(snap.exists() ? mapBookingDoc(snap.id, snap.data()) : null)
-  })
+  let booking: Booking | null = null
+  let pin: string | null = null
+  let stopPin: (() => void) | undefined
+  const emit = () => callback(booking ? { ...booking, startPin: pin } : null)
+  const stopBooking = onSnapshot(doc(db, 'bookings', bookingId), snap => {
+    booking = snap.exists() ? mapBookingDoc(snap.id, snap.data()) : null
+    if (booking?.passengerId === auth.currentUser?.uid && booking?.status === 'confirmed' && !booking.pinVerified) {
+      if (!stopPin) stopPin = onSnapshot(doc(db, 'bookingPins', bookingId), secret => {
+        pin = secret.data()?.pin ?? null; emit()
+      }, () => { pin = null; emit() })
+    } else { stopPin?.(); stopPin = undefined; pin = null }
+    emit()
+  }, () => { booking = null; stopPin?.(); emit() })
+  return () => { stopBooking(); stopPin?.() }
+
 }
 
 export function subscribePassengerBookings(passengerId: string, callback: (bookings: Booking[]) => void) {
   const q = query(collection(db, 'bookings'), where('passengerId', '==', passengerId), orderBy('createdAt', 'desc'))
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => mapBookingDoc(d.id, d.data())))
+  let rows: Booking[] = []
+  const pins = new Map<string, string>()
+  const listeners = new Map<string, () => void>()
+  const emit = () => callback(rows.map(row => ({ ...row, startPin: pins.get(row.id) ?? null })))
+  const stopBookings = onSnapshot(q, snap => {
+    rows = snap.docs.map(d => mapBookingDoc(d.id, d.data()))
+    const wanted = new Set(rows.filter(b => b.status === 'confirmed' && !b.pinVerified).map(b => b.id))
+    for (const [key, stop] of listeners) if (!wanted.has(key)) { stop(); listeners.delete(key); pins.delete(key) }
+    for (const key of wanted) if (!listeners.has(key)) {
+      listeners.set(key, onSnapshot(doc(db, 'bookingPins', key), secret => {
+        if (secret.exists()) pins.set(key, secret.data().pin); else pins.delete(key)
+        emit()
+      }, () => { pins.delete(key); emit() }))
+    }
+    emit()
   })
+  return () => { stopBookings(); listeners.forEach(stop => stop()) }
 }

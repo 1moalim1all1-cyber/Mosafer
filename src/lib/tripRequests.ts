@@ -1,4 +1,5 @@
-import { collection, doc, addDoc, updateDoc, deleteDoc, query, where, onSnapshot, Timestamp } from 'firebase/firestore'
+import { callServer } from './server'
+import { collection, addDoc, query, where, onSnapshot, Timestamp } from 'firebase/firestore'
 import { db, auth } from './firebase'
 import type { TripRequest } from '../types/tripRequest'
 
@@ -19,13 +20,18 @@ function mapDoc(id: string, data: Record<string, unknown>): TripRequest {
     seatsNeeded: (data.seatsNeeded as number) ?? 1,
     notes: (data.notes as string) ?? undefined,
     status: (data.status as TripRequest['status']) ?? 'active',
+    expiresAt: (data.expiresAt as Timestamp | undefined)?.toDate(),
+    acceptedOfferId: data.acceptedOfferId as string | undefined,
+    tripId: data.tripId as string | undefined,
+    bookingId: data.bookingId as string | undefined,
     createdAt: created?.toDate ? created.toDate() : new Date(),
   }
 }
 
 /** الطلب يختفي من العرض العام بعد وقته، أو بنهاية يوم السفر لو الوقت اختياري. */
-export function isTripRequestCurrent(request: Pick<TripRequest, 'travelDate' | 'preferredTime' | 'status'>, now = new Date()) {
+export function isTripRequestCurrent(request: Pick<TripRequest, 'travelDate' | 'preferredTime' | 'status' | 'expiresAt'>, now = new Date()) {
   if (request.status !== 'active') return false
+  if (request.expiresAt) return request.expiresAt.getTime() >= now.getTime()
   const endTime = request.preferredTime || '23:59:59'
   const expiresAt = new Date(`${request.travelDate}T${endTime}`)
   // الوقت هنا "مفضّل" مش موعد إغلاق صارم؛ نخلي الطلب ظاهر ساعتين
@@ -65,6 +71,7 @@ export async function createTripRequest(input: {
     passengerId: uid,
     ...cleanInput,
     status: 'active',
+    expiresAt: Timestamp.fromMillis(requestedTime.getTime() + (input.preferredTime ? 2 * 3600000 : 0)),
     createdAt: Timestamp.now(),
   })
   return docRef.id
@@ -109,9 +116,9 @@ export function subscribeMyTripRequests(passengerId: string, callback: (requests
     snap.docs.forEach((d) => {
       const request = mapDoc(d.id, d.data())
       if (request.status === 'active' && !isTripRequestCurrent(request)) {
-        // صاحب الطلب هو اللي فاتح الصفحة، وقواعد Firestore تسمح له
-        // بحذف طلبه. كده الطلب المنتهي بيتشال فعليًا من قاعدة البيانات.
-        deleteDoc(d.ref).catch((error) => console.error('Failed to delete expired trip request', error))
+        // احفظ سجل الطلب والعروض، وغيّر الحالة فقط بعد انتهاء الموعد.
+        callServer('cancelTripRequest', { requestId: d.id, expired: true }).catch((error) => console.error('Failed to expire trip request', error))
+        currentRequests.push({ ...request, status: 'expired' })
         return
       }
       currentRequests.push(request)
@@ -124,5 +131,5 @@ export function subscribeMyTripRequests(passengerId: string, callback: (requests
 }
 
 export async function cancelTripRequest(requestId: string) {
-  await updateDoc(doc(db, 'tripRequests', requestId), { status: 'cancelled' })
+  await callServer('cancelTripRequest', { requestId })
 }

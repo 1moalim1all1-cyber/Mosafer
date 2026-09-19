@@ -510,7 +510,7 @@
     "errorSameCity": "Origin and destination should be different",
     "errorPublish": "An error occurred publishing the request, try again",
     "lookingForTrip": "Looking for a Trip",
-    "iHaveTrip": "I Have a Matching Trip",
+    "iHaveTrip": "Accept request and send offer",
     "offerSent": "✅ Notification sent to the passenger",
     "errorOffer": "An error occurred sending the offer",
     "noRequestsYet": "No trip requests yet",

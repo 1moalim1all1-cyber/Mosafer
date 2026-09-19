@@ -33,6 +33,9 @@ export default function NotificationsPage() {
     if (notification.type === 'chat_message') navigate(`/chat/${notification.relatedId}`)
     else if (notification.type === 'booking_accepted' || notification.type === 'booking_rejected') navigate('/my-bookings')
     else if (notification.type === 'new_booking') navigate(`/driver/trip/${notification.relatedId}/bookings`)
+    else if (notification.type === 'tripOffer') navigate('/community/my-requests')
+    else if (notification.type === 'tripOfferResponse') navigate('/driver')
+    else if (notification.type === 'tripAlertMatch') navigate(`/trip/${notification.relatedId}`)
     else if (notification.type === 'trip_status') navigate(`/trip/${notification.relatedId}`)
   }
 

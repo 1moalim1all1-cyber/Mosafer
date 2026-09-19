@@ -15,5 +15,9 @@ export interface TripRequest {
   seatsNeeded: number
   notes?: string
   status: TripRequestStatus
+  expiresAt?: Date
+  acceptedOfferId?: string
+  tripId?: string
+  bookingId?: string
   createdAt: Date
 }
