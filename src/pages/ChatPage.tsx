@@ -2,7 +2,9 @@ import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/useAuth'
-import { subscribeChatMessages, sendMessage, type ChatMessage } from '../lib/chat'
+import { subscribeChat, subscribeChatMessages, sendMessage, type ChatMessage, type ChatThread } from '../lib/chat'
+import { fetchUserProfile } from '../lib/users'
+import type { AppUser } from '../types/user'
 
 export default function ChatPage() {
   const { t } = useTranslation()
@@ -11,12 +13,27 @@ export default function ChatPage() {
   const { user } = useAuth()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [text, setText] = useState('')
+  const [chat, setChat] = useState<ChatThread | null>(null)
+  const [otherUser, setOtherUser] = useState<AppUser | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!chatId) return
     return subscribeChatMessages(chatId, setMessages)
   }, [chatId])
+
+  useEffect(() => {
+    if (!chatId) return
+    return subscribeChat(chatId, setChat)
+  }, [chatId])
+
+  useEffect(() => {
+    if (!chat || !user) return
+    const otherId = chat.passengerId === user.uid ? chat.driverId : chat.passengerId
+    fetchUserProfile(otherId).then(setOtherUser).catch(() => setOtherUser(null))
+  }, [chat, user])
+
+  const phone = otherUser?.phone.replace(/[^0-9]/g, '') ?? ''
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -36,7 +53,16 @@ export default function ChatPage() {
         <button onClick={() => navigate(-1)} className="text-xl">
           ←
         </button>
-        <h1 className="text-lg font-bold text-text-primary">{t('common.chat')}</h1>
+        <div className="min-w-0 flex-1">
+          <h1 className="truncate text-lg font-bold text-text-primary">{otherUser?.fullName || t('common.chat')}</h1>
+          {otherUser && <p className="text-xs text-text-secondary">تم فتح التواصل بعد الاتفاق على الرحلة</p>}
+        </div>
+        {phone && (
+          <div className="flex gap-2">
+            <a href={`tel:${otherUser?.phone}`} className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-bg" aria-label="اتصال">📞</a>
+            <a href={`https://wa.me/${phone}`} target="_blank" rel="noreferrer" className="flex h-10 w-10 items-center justify-center rounded-full bg-success/15" aria-label="واتساب">🟢</a>
+          </div>
+        )}
       </header>
 
       <main className="mx-auto w-full max-w-4xl flex-1 overflow-y-auto px-4 py-4">
