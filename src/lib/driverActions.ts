@@ -2,18 +2,15 @@ import {
   doc,
   setDoc,
   addDoc,
-  updateDoc,
   collection,
   query,
   where,
   orderBy,
   onSnapshot,
   getDoc,
-  getDocs,
-  runTransaction,
-  serverTimestamp,
 } from 'firebase/firestore'
-import { db, auth } from './firebase'
+import { db } from './firebase'
+import { callServer } from './server'
 import { uploadImageToCloudinary } from './cloudinary'
 import type { Trip } from '../types/trip'
 import type { DriverVehicle } from '../types/booking'
@@ -39,6 +36,7 @@ export async function submitDriverDocuments(params: {
     doc(db, 'drivers', params.uid),
     {
       verificationStatus: 'pending',
+      rejectionReason: null,
       nationalIdImageUrl: nationalIdUrl,
       licenseImageUrl: licenseUrl,
       vehicleLicenseImageUrl: vehicleLicenseUrl,
@@ -117,100 +115,12 @@ export async function createTrip(trip: Omit<Trip, 'id'>): Promise<string> {
   return docRef.id
 }
 
-/**
- * إنهاء الرحلة بالكامل من المتصفح (Firestore Transaction) - بيحوّل
- * أرباح الحجوزات المدفوعة بالمحفظة للسائق بعد خصم العمولة، ويزوّد عدد
- * الرحلات لكل من السائق والركاب المؤكدين.
- */
 export async function markTripCompleted(tripId: string) {
-  const uid = auth.currentUser?.uid
-  if (!uid) throw new Error('لازم تسجّل دخول الأول')
-
-  const tripRef = doc(db, 'trips', tripId)
-
-  try {
-    const bookingsSnap = await getDocs(
-      query(collection(db, 'bookings'), where('tripId', '==', tripId), where('status', '==', 'confirmed')),
-    )
-    await runTransaction(db, async (tx) => {
-      const tripSnap = await tx.get(tripRef)
-      if (!tripSnap.exists()) throw new Error('الرحلة دي مش موجودة')
-      const trip = tripSnap.data()
-      if (trip.driverId !== uid) throw new Error('الرحلة دي مش بتاعتك')
-
-      tx.update(tripRef, { status: 'completed' })
-
-      for (const bookingDoc of bookingsSnap.docs) {
-        tx.update(bookingDoc.ref, { status: 'completed' })
-      }
-    })
-    await notifyPassengerIds(
-      [...new Set(bookingsSnap.docs.map((bookingDoc) => bookingDoc.data().passengerId as string))],
-      tripId,
-      'تم إنهاء الرحلة',
-      'وصلت الرحلة بنجاح. تقدر دلوقتي تقيّم السائق.',
-    ).catch(() => undefined)
-  } catch (err) {
-    if (err instanceof Error) throw err
-    throw new Error('حصل خطأ، حاول تاني')
-  }
+  await callServer('changeTripStatus', { tripId, status: 'completed' })
 }
 
-/** قبول أو رفض حجز - لو رفض، بيرجّع المقاعد لتاني وبيسترد الفلوس لو كانت مدفوعة */
 export async function respondToBooking(bookingId: string, accept: boolean) {
-  const bookingRef = doc(db, 'bookings', bookingId)
-
-  try {
-    await runTransaction(db, async (tx) => {
-      const bookingSnap = await tx.get(bookingRef)
-      if (!bookingSnap.exists()) throw new Error('الحجز ده مش موجود')
-      const booking = bookingSnap.data()
-      if (booking.status !== 'pending') throw new Error('الحجز ده اترد عليه بالفعل')
-
-      const tripRef = doc(db, 'trips', booking.tripId)
-      const tripSnap = await tx.get(tripRef)
-
-      if (accept) {
-        tx.update(bookingRef, { status: 'confirmed' })
-        return
-      }
-
-      if (tripSnap.exists()) {
-        const trip = tripSnap.data()
-        tx.update(tripRef, {
-          availableSeats: (trip.availableSeats as number) + (booking.seatsBooked as number),
-          status: 'active',
-          lastBookingId: bookingId,
-        })
-      }
-
-      const bookingUpdate: Record<string, string> = { status: 'rejected' }
-      if (booking.paymentStatus === 'paid' && booking.paymentMethod === 'wallet') {
-        bookingUpdate.paymentStatus = 'refund_pending'
-      }
-      tx.update(bookingRef, bookingUpdate)
-    })
-    const updatedBooking = await getDoc(bookingRef)
-    if (updatedBooking.exists()) {
-      const booking = updatedBooking.data()
-      const actorId = auth.currentUser?.uid
-      if (actorId) {
-        await addDoc(collection(db, 'users', booking.passengerId, 'notifications'), {
-          userId: booking.passengerId,
-          actorId,
-          type: accept ? 'booking_accepted' : 'booking_rejected',
-          title: accept ? 'تم قبول حجزك' : 'تم رفض الحجز',
-          body: accept ? 'السائق وافق على حجزك. تقدر تتواصل معاه وتتابع الرحلة.' : 'السائق لم يتمكن من قبول الحجز هذه المرة.',
-          relatedId: bookingId,
-          isRead: false,
-          createdAt: serverTimestamp(),
-        }).catch(() => undefined)
-      }
-    }
-  } catch (err) {
-    if (err instanceof Error) throw err
-    throw new Error('حصل خطأ، حاول تاني')
-  }
+  await callServer('respondToBooking', { bookingId, accept })
 }
 
 export async function fetchDriverDocStatus(uid: string) {
@@ -219,33 +129,7 @@ export async function fetchDriverDocStatus(uid: string) {
 }
 
 export async function updateTripStatus(tripId: string, status: Trip['status']) {
-  await updateDoc(doc(db, 'trips', tripId), { status })
-  if (status === 'driver_arriving') {
-    await notifyTripPassengers(tripId, 'السائق تحرك', 'السائق في طريقه لمكان الركوب. افتح التتبع لمشاهدة موقعه.').catch(() => undefined)
-  } else if (status === 'in_progress') {
-    await notifyTripPassengers(tripId, 'بدأت الرحلة', 'تم بدء الرحلة، وميزة التتبع المباشر متاحة الآن.').catch(() => undefined)
-  }
-}
-
-async function notifyTripPassengers(tripId: string, title: string, body: string) {
-  const bookingsSnap = await getDocs(query(collection(db, 'bookings'), where('tripId', '==', tripId), where('status', '==', 'confirmed')))
-  const passengerIds = [...new Set(bookingsSnap.docs.map((bookingDoc) => bookingDoc.data().passengerId as string))]
-  await notifyPassengerIds(passengerIds, tripId, title, body)
-}
-
-async function notifyPassengerIds(passengerIds: string[], tripId: string, title: string, body: string) {
-  const actorId = auth.currentUser?.uid
-  if (!actorId) return
-  await Promise.all(passengerIds.map((userId) => addDoc(collection(db, 'users', userId, 'notifications'), {
-    userId,
-    actorId,
-    type: 'trip_status',
-    title,
-    body,
-    relatedId: tripId,
-    isRead: false,
-    createdAt: serverTimestamp(),
-  })))
+  await callServer('changeTripStatus', { tripId, status })
 }
 
 function mapBookingDoc(id: string, data: Record<string, unknown>) {
@@ -273,13 +157,8 @@ function mapBookingDoc(id: string, data: Record<string, unknown>) {
 
 /** السائق بيدخل الكود اللي الراكب قاله عشان يتأكد من هويته وقت الاستلام */
 export async function verifyPassengerPin(bookingId: string, enteredPin: string): Promise<boolean> {
-  const bookingSnap = await getDoc(doc(db, 'bookings', bookingId))
-  if (!bookingSnap.exists()) return false
-  const correct = bookingSnap.data().startPin === enteredPin
-  if (correct) {
-    await updateDoc(doc(db, 'bookings', bookingId), { pinVerified: true })
-  }
-  return correct
+  const result = await callServer<{ verified: boolean }>('verifyPassengerPin', { bookingId, pin: enteredPin })
+  return result.verified
 }
 
 export function subscribeTripBookings(tripId: string, callback: (bookings: ReturnType<typeof mapBookingDoc>[]) => void) {

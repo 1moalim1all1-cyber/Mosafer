@@ -57,8 +57,8 @@ export default function TrackTripPage() {
 
   useEffect(() => {
     if (!booking?.driverId) return
-    fetchUserProfile(booking.driverId).then(setDriver)
-  }, [booking?.driverId])
+    fetchUserProfile(booking.driverId, booking.id).then(setDriver)
+  }, [booking?.driverId, booking?.id, booking?.status])
 
   const hasPickup = booking?.pickupLat != null && booking?.pickupLng != null
   const hasLiveDriver = trip ? isLiveLocationFresh(trip.driverLiveUpdatedAt) && trip.driverLiveLat && trip.driverLiveLng : false
@@ -157,6 +157,12 @@ export default function TrackTripPage() {
         </button>
       </header>
 
+      {booking.status === 'confirmed' && booking.startPin && !booking.pinVerified && (
+        <div className="bg-primary-light p-3 text-center">
+          <p className="text-sm text-text-secondary">كود الركوب — قوله للسائق عند وصوله فقط</p>
+          <p dir="ltr" className="text-2xl font-bold tracking-widest text-primary">{booking.startPin}</p>
+        </div>
+      )}
       <div className="relative flex-1" style={{ minHeight: 320 }}>
         <MapContainer center={center} zoom={hasLiveDriver ? 14 : 11} style={{ height: '100%', width: '100%' }}>
           <LiveMapViewport points={[driverPoint, passengerPoint].filter((point): point is [number, number] => point !== null)} />

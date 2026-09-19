@@ -49,7 +49,7 @@ export function SendOfferModal({ request, onClose }: { request: TripRequest; onC
       const code = typeof cause === 'object' && cause !== null && 'code' in cause ? String(cause.code) : ''
       const message = cause instanceof Error ? cause.message : ''
       setError(code === 'permission-denied'
-        ? 'رفض Firebase إرسال العرض. تأكد إن حسابك سائق معتمد من الإدارة وإن قواعد Firestore منشورة.'
+        ? 'لا يمكنك إرسال العرض حاليًا. تأكد من اعتماد حسابك أو تواصل مع الدعم.'
         : message || `${t('community.errorOffer')}${code ? ` (${code})` : ''}`)
     } finally {
       setLoading(false)
@@ -74,7 +74,8 @@ export function SendOfferModal({ request, onClose }: { request: TripRequest; onC
               <Input
                 label={t('driver.availableSeatsCount')}
                 type="number"
-                min={1}
+                min={request.seatsNeeded}
+                max={8}
                 value={seats}
                 onChange={(e) => setSeats(e.target.value)}
               />
@@ -112,7 +113,7 @@ export function SendOfferModal({ request, onClose }: { request: TripRequest; onC
               <Button variant="secondary" onClick={onClose}>
                 {t('wallet.cancel')}
               </Button>
-              <Button onClick={handleSend} loading={loading} disabled={driverStatus !== 'approved' || !departureTime || !price || !Number.isFinite(Number(price)) || Number(price) <= 0 || !Number.isInteger(Number(seats)) || Number(seats) < 1}>
+              <Button onClick={handleSend} loading={loading} disabled={driverStatus !== 'approved' || !departureTime || !price || !Number.isFinite(Number(price)) || Number(price) <= 0 || !Number.isInteger(Number(seats)) || Number(seats) < request.seatsNeeded || Number(seats) > 8}>
                 {t('community.sendOffer')}
               </Button>
             </div>

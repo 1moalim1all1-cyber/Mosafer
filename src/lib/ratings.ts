@@ -1,4 +1,5 @@
-import { collection, addDoc, query, where, limit, getDocs, Timestamp } from 'firebase/firestore'
+import { callServer } from './server'
+import { collection, query, where, limit, getDocs } from 'firebase/firestore'
 import { db } from './firebase'
 
 export type RatingDirection = 'passengerToDriver' | 'driverToPassenger'
@@ -23,11 +24,7 @@ export async function submitRating(params: {
   stars: number
   comment?: string
 }) {
-  await addDoc(collection(db, 'ratings'), {
-    ...params,
-    isReported: false,
-    createdAt: Timestamp.now(),
-  })
+  await callServer('submitRating', { bookingId: params.bookingId, stars: params.stars, comment: params.comment ?? '' })
 }
 
 /**

@@ -82,6 +82,7 @@ export default function DriverDashboardPage() {
             {offers.map((offer) => <div key={offer.id} className="rounded-2xl border border-border bg-card p-4">
               <div className="flex justify-between gap-2"><span className="font-semibold text-text-primary">عرضك: {offer.seatsOffered} مقعد · {offer.pricePerSeat} ج.م للمقعد</span><span className={`text-sm font-bold ${offer.status === 'accepted' ? 'text-success' : offer.status === 'rejected' ? 'text-danger' : 'text-warning'}`}>{offer.status === 'accepted' ? 'الراكب وافق' : offer.status === 'rejected' ? 'تم الاعتذار' : 'بانتظار رد الراكب'}</span></div>
               <p className="mt-2 text-sm text-text-secondary">الساعة {offer.departureTime}</p>
+              {offer.status === 'accepted' && offer.tripId && <button onClick={() => navigate(`/driver/trip/${offer.tripId}/bookings`)} className="mt-3 w-full rounded-xl border border-primary py-2 font-semibold text-primary">إدارة الرحلة والحجز</button>}
               {offer.status === 'accepted' && <button onClick={() => contactPassenger(offer)} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 font-semibold text-white"><MessageCircle size={18} /> تواصل مع الراكب</button>}
             </div>)}
           </div>

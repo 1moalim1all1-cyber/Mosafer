@@ -8,11 +8,11 @@ import {
   addDoc,
   doc,
   onSnapshot,
-  updateDoc,
+  setDoc,
   Timestamp,
   type DocumentData,
 } from 'firebase/firestore'
-import { db } from './firebase'
+import { db, auth } from './firebase'
 import type { Trip, TripSearchParams } from '../types/trip'
 
 function mapTripDoc(id: string, data: DocumentData): Trip {
@@ -85,9 +85,41 @@ export async function searchTrips(params: TripSearchParams, requesterGender: 'ma
 
 /** متابعة رحلة معيّنة لحظيًا - بيتحدّث تلقائيًا مع أي تغيير (عدد المقاعد، موقع السائق الحي) */
 export function subscribeToTrip(tripId: string, callback: (trip: Trip | null) => void) {
-  return onSnapshot(doc(db, 'trips', tripId), (snap) => {
-    callback(snap.exists() ? mapTripDoc(snap.id, snap.data()) : null)
-  })
+  let current: Trip | null = null
+  let location: Partial<Trip> = {}
+  let stopLocation: (() => void) | undefined
+  let stopMembership: (() => void) | undefined
+  let listening = false
+  const emit = () => callback(current ? { ...current, ...location } : null)
+  const listenLocation = () => {
+    if (listening) return
+    listening = true
+    stopLocation = onSnapshot(doc(db, 'tripLocations', tripId), snap => {
+      const data = snap.data()
+      location = { driverLiveLat: data?.driverLiveLat ?? null, driverLiveLng: data?.driverLiveLng ?? null,
+        driverLiveUpdatedAt: data?.driverLiveUpdatedAt?.toDate?.() ?? null }
+      emit()
+    }, () => { location = { driverLiveLat: null, driverLiveLng: null, driverLiveUpdatedAt: null }; emit() })
+  }
+  const clearLocation = () => {
+    stopLocation?.(); stopLocation = undefined; listening = false
+    location = { driverLiveLat: null, driverLiveLng: null, driverLiveUpdatedAt: null }; emit()
+  }
+  const stopTrip = onSnapshot(doc(db, 'trips', tripId), snap => {
+    current = snap.exists() ? mapTripDoc(snap.id, snap.data()) : null
+    // Never fall back to legacy positions stored on a public trip document.
+    if (current) { current.driverLiveLat = null; current.driverLiveLng = null; current.driverLiveUpdatedAt = null }
+    const uid = auth.currentUser?.uid
+    if (current && uid === current.driverId) listenLocation()
+    else if (current && uid && !stopMembership) {
+      stopMembership = onSnapshot(doc(db, 'trips', tripId, 'members', uid), member => {
+        if (member.exists()) listenLocation(); else clearLocation()
+      }, clearLocation)
+    }
+    emit()
+  }, () => { current = null; clearLocation() })
+  return () => { stopTrip(); stopLocation?.(); stopMembership?.() }
+
 }
 
 /**
@@ -141,7 +173,7 @@ export function subscribePublicTrips(country: string, callback: (trips: Trip[]) 
 }
 
 export async function updateTripLiveLocation(tripId: string, lat: number, lng: number) {
-  await updateDoc(doc(db, 'trips', tripId), {
+  await setDoc(doc(db, 'tripLocations', tripId), {
     driverLiveLat: lat,
     driverLiveLng: lng,
     driverLiveUpdatedAt: Timestamp.now(),
@@ -170,7 +202,7 @@ export async function fetchLocationHistory(tripId: string): Promise<{ lat: numbe
 }
 
 export async function stopTripLiveLocation(tripId: string) {
-  await updateDoc(doc(db, 'trips', tripId), {
+  await setDoc(doc(db, 'tripLocations', tripId), {
     driverLiveLat: null,
     driverLiveLng: null,
     driverLiveUpdatedAt: null,

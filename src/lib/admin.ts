@@ -1,3 +1,4 @@
+import { callServer } from './server'
 import {
   collection,
   collectionGroup,
@@ -383,7 +384,7 @@ export function subscribeAllTrips(callback: (trips: ManagedTrip[]) => void, coun
 
 /** حذف رحلة نهائيًا - الأدمن بس اللي يقدر يعمل كده لأي رحلة (السائق بيقدر يحذف بس رحلته هو) */
 export async function deleteTrip(tripId: string) {
-  await deleteDoc(doc(db, 'trips', tripId))
+  await callServer('deleteTrip', { tripId })
 }
 
 export interface SupportReport {
