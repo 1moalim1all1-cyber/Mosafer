@@ -19,6 +19,7 @@ import { db } from './firebase'
 
 export interface PendingDriver {
   uid: string
+  verificationStatus?: 'pending' | 'approved' | 'rejected'
   vehicleMake?: string
   vehicleModel?: string
   nationalIdImageUrl?: string
@@ -28,25 +29,31 @@ export interface PendingDriver {
   selfieVerificationUrl?: string
 }
 
+function mapDriverRecord(id: string, data: Record<string, unknown>): PendingDriver {
+  const vehicle = data.vehicle as { make?: string; model?: string } | undefined
+  return {
+    uid: id,
+    verificationStatus: (data.verificationStatus as PendingDriver['verificationStatus']) ?? 'pending',
+    vehicleMake: vehicle?.make,
+    vehicleModel: vehicle?.model,
+    nationalIdImageUrl: data.nationalIdImageUrl as string | undefined,
+    licenseImageUrl: data.licenseImageUrl as string | undefined,
+    vehicleLicenseImageUrl: data.vehicleLicenseImageUrl as string | undefined,
+    vehicleImageUrl: data.vehicleImageUrl as string | undefined,
+    selfieVerificationUrl: data.selfieVerificationUrl as string | undefined,
+  }
+}
+
 export function subscribePendingDrivers(callback: (drivers: PendingDriver[]) => void) {
   const q = query(collection(db, 'drivers'), where('verificationStatus', '==', 'pending'))
   return onSnapshot(q, (snap) => {
-    callback(
-      snap.docs.map((d) => {
-        const data = d.data()
-        return {
-          uid: d.id,
-          vehicleMake: data.vehicle?.make,
-          vehicleModel: data.vehicle?.model,
-          nationalIdImageUrl: data.nationalIdImageUrl,
-          licenseImageUrl: data.licenseImageUrl,
-          vehicleLicenseImageUrl: data.vehicleLicenseImageUrl,
-          vehicleImageUrl: data.vehicleImageUrl,
-          selfieVerificationUrl: data.selfieVerificationUrl,
-        }
-      }),
-    )
+    callback(snap.docs.map((d) => mapDriverRecord(d.id, d.data())))
   })
+}
+
+export function subscribeApprovedDrivers(callback: (drivers: PendingDriver[]) => void) {
+  const q = query(collection(db, 'drivers'), where('verificationStatus', '==', 'approved'))
+  return onSnapshot(q, (snap) => callback(snap.docs.map((d) => mapDriverRecord(d.id, d.data()))))
 }
 
 export async function approveDriver(driverId: string) {
@@ -55,6 +62,10 @@ export async function approveDriver(driverId: string) {
 
 export async function rejectDriver(driverId: string, reason: string) {
   await updateDoc(doc(db, 'drivers', driverId), { verificationStatus: 'rejected', rejectionReason: reason })
+}
+
+export async function returnDriverToReview(driverId: string) {
+  await updateDoc(doc(db, 'drivers', driverId), { verificationStatus: 'pending', rejectionReason: '' })
 }
 
 export async function fetchDashboardStats() {
