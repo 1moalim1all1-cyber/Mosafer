@@ -101,21 +101,26 @@ export function subscribeAvailableTrips(
   callback: (trips: Trip[]) => void,
   count = 15,
 ) {
-  // لازم نفلتر الرحلات اللي فاتت من داخل الاستعلام نفسه، مش بعد ما
-  // نجيب البيانات - عشان لو فيه رحلات قديمة السائق نسي يقفلها، مكنش
-  // هيبقى موجود مكان للرحلات الجديدة الفعلية جوه حد الـ 15 نتيجة
-  const constraints = [
-    where('status', '==', 'active'),
-    where('country', '==', country),
-    where('departureTime', '>=', Timestamp.now()),
-    orderBy('departureTime'),
-  ]
+  // بنسيب التاريخ والترتيب للفلترة المحلية عشان القسم يشتغل من غير
+  // Composite Index يدوي. شرط السيدات يفضل في الاستعلام لأن قواعد
+  // Firestore تمنع حساب الرجل من قراءة رحلات السيدات أصلًا.
+  const constraints = [where('status', '==', 'active')]
   if (requesterGender === 'male') {
-    constraints.splice(2, 0, where('isWomenOnly', '==', false))
+    constraints.push(where('isWomenOnly', '==', false))
   }
-  const q = query(collection(db, 'trips'), ...constraints, limit(count))
+  const q = query(collection(db, 'trips'), ...constraints)
   return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => mapTripDoc(d.id, d.data())))
+    const now = Date.now()
+    callback(
+      snap.docs
+        .map((d) => mapTripDoc(d.id, d.data()))
+        .filter((trip) => trip.country === country && trip.departureTime.getTime() >= now && trip.availableSeats > 0)
+        .sort((a, b) => a.departureTime.getTime() - b.departureTime.getTime())
+        .slice(0, count),
+    )
+  }, (error) => {
+    console.error('Failed to load available trips', error)
+    callback([])
   })
 }
 
