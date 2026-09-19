@@ -31,8 +31,7 @@ service cloud.firestore {
     }
 
     function isApprovedDriver() {
-      return isSignedIn() &&
-        userDoc().data.role == 'driver' &&
+      return isActiveAccount() &&
         get(/databases/$(database)/documents/drivers/$(request.auth.uid)).data.verificationStatus == 'approved';
     }
 
@@ -75,7 +74,7 @@ service cloud.firestore {
     match /drivers/{driverId} {
       allow read: if isOwner(driverId) || isAdmin();
       allow create: if isOwner(driverId) &&
-        userDoc().data.role == 'driver' &&
+        isActiveAccount() &&
         request.resource.data.verificationStatus == 'pending';
       allow update: if isAdmin() || (
         isOwner(driverId) &&
