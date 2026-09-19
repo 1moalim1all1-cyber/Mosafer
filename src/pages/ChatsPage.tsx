@@ -10,20 +10,27 @@ function ChatRow({ chat, uid }: { chat: ChatThread; uid: string }) {
   const navigate = useNavigate()
   const otherId = chat.passengerId === uid ? chat.driverId : chat.passengerId
   const [name, setName] = useState(otherId)
+  const [photo, setPhoto] = useState<string | null>(null)
 
   useEffect(() => {
     fetchUserProfile(otherId).then((u) => {
       if (u?.fullName) setName(u.fullName)
+      setPhoto(u?.profileImageUrl ?? null)
     })
   }, [otherId])
 
   return (
     <button
       onClick={() => navigate(`/chat/${chat.id}`)}
-      className="flex w-full flex-col rounded-2xl border border-border bg-card p-4 text-right transition hover:border-primary"
+      className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-4 text-right transition hover:border-primary"
     >
-      <span className="font-semibold text-text-primary">{name}</span>
-      <span className="truncate text-sm text-text-secondary">{chat.lastMessage || '—'}</span>
+      <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full border border-primary/30 bg-primary-light text-lg">
+        {photo ? <img src={photo} alt={name} className="h-full w-full object-cover" /> : '👤'}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate font-semibold text-text-primary">{name}</span>
+        <span className="block truncate text-sm text-text-secondary">{chat.lastMessage || 'ابدأ المحادثة'}</span>
+      </span>
     </button>
   )
 }
