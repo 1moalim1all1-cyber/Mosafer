@@ -16,6 +16,7 @@ import type { Trip } from '../types/trip'
 import { TripCard } from '../components/TripCard'
 import { fetchUserProfile } from '../lib/users'
 import type { AppUser } from '../types/user'
+import { subscribeDriverStatus } from '../lib/driverActions'
 
 function requestMarkerIcon(count: number) {
   return new L.DivIcon({
@@ -28,14 +29,13 @@ function requestMarkerIcon(count: number) {
   })
 }
 
-function RequestCard({ request }: { request: TripRequest }) {
+function RequestCard({ request, canSendOffer }: { request: TripRequest; canSendOffer: boolean }) {
   const { t, i18n } = useTranslation()
   const { user } = useAuth()
   const [showOfferModal, setShowOfferModal] = useState(false)
   const [passenger, setPassenger] = useState<AppUser | null>(null)
 
   const isOwnRequest = user?.uid === request.passengerId
-  const isDriver = user?.role === 'driver'
 
   useEffect(() => {
     fetchUserProfile(request.passengerId).then(setPassenger).catch(() => setPassenger(null))
@@ -68,7 +68,7 @@ function RequestCard({ request }: { request: TripRequest }) {
       </div>
       {request.notes && <p className="mb-3 text-sm text-text-secondary">"{request.notes}"</p>}
 
-      {!isOwnRequest && isDriver && (
+      {!isOwnRequest && canSendOffer && (
         <button
           onClick={() => setShowOfferModal(true)}
           className="w-full rounded-xl bg-gradient-to-l from-primary to-secondary py-2.5 text-sm font-semibold text-white"
@@ -93,6 +93,18 @@ export default function TripsCommunityPage() {
   const [tripsLoading, setTripsLoading] = useState(true)
   const [view, setView] = useState<'list' | 'map'>('list')
   const [feedType, setFeedType] = useState<'requests' | 'trips'>('requests')
+  const [driverStatus, setDriverStatus] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!user) return
+    return subscribeDriverStatus(user.uid, setDriverStatus)
+  }, [user])
+
+  function openDriverFlow() {
+    if (driverStatus === 'approved') navigate('/driver/create-trip')
+    else if (driverStatus === 'pending') navigate('/driver/pending-approval')
+    else navigate('/driver/documents')
+  }
 
   useEffect(() => {
     setLoading(true)
@@ -133,7 +145,7 @@ export default function TripsCommunityPage() {
           <span><strong className="block text-text-primary">أنا راكب ومحتاج عربية</strong><small className="text-text-secondary">انشر خط سيرك وعدد الركاب</small></span>
           <PlusCircle className="mr-auto text-primary" size={20} />
         </button>
-        <button onClick={() => navigate(user?.role === 'driver' ? '/driver/create-trip' : '/role-selection')} className="group flex items-center gap-3 rounded-2xl border border-secondary/35 bg-gradient-to-l from-secondary/15 to-card p-4 text-right transition hover:border-secondary">
+        <button onClick={openDriverFlow} className="group flex items-center gap-3 rounded-2xl border border-secondary/35 bg-gradient-to-l from-secondary/15 to-card p-4 text-right transition hover:border-secondary">
           <span className="action-icon !h-12 !w-12 !from-secondary"><CarFront size={23} /></span>
           <span><strong className="block text-text-primary">أنا سائق ومعايا مكان</strong><small className="text-text-secondary">انشر رحلتك والمقاعد المتاحة</small></span>
           <PlusCircle className="mr-auto text-secondary" size={20} />
@@ -187,7 +199,7 @@ export default function TripsCommunityPage() {
           </div>
         )}
 
-        {feedType === 'requests' && !loading && requests.length > 0 && view === 'list' && <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">{requests.map((r) => <RequestCard key={r.id} request={r} />)}</div>}
+        {feedType === 'requests' && !loading && requests.length > 0 && view === 'list' && <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">{requests.map((r) => <RequestCard key={r.id} request={r} canSendOffer={driverStatus === 'approved'} />)}</div>}
 
         {feedType === 'requests' && !loading && requests.length > 0 && view === 'map' && (
           <div className="overflow-hidden rounded-2xl border border-border" style={{ height: 'min(68vh, 680px)' }}>
