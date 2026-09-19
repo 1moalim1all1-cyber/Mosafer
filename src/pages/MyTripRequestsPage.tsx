@@ -29,10 +29,10 @@ function OfferRow({ offer }: { offer: TripOffer }) {
   async function handle(accept: boolean) {
     setLoading(true)
     try {
-      await respondToTripOffer(offer, accept)
+      const acceptedChatId = await respondToTripOffer(offer, accept)
       if (accept) {
-        const chatId = await getOrCreateChat(offer.passengerId, offer.driverId)
-        navigate(`/chat/${chatId}`)
+        if (acceptedChatId) navigate(`/chat/${acceptedChatId}`)
+        else setError('تم قبول العرض، لكن تعذر فتح المحادثة تلقائيًا. اضغط «تواصل مع السائق» وحاول تاني.')
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'تعذر إتمام العملية، حاول تاني')
