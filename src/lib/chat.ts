@@ -99,6 +99,12 @@ export interface ChatThread {
   lastMessageAt: Date
 }
 
+export function subscribeChat(chatId: string, callback: (chat: ChatThread | null) => void) {
+  return onSnapshot(doc(db, 'chats', chatId), (snap) => {
+    callback(snap.exists() ? mapChatDoc(snap.id, snap.data()) : null)
+  })
+}
+
 function mapChatDoc(id: string, data: Record<string, unknown>): ChatThread {
   const last = data.lastMessageAt as { toDate?: () => Date }
   return {
