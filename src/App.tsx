@@ -31,7 +31,7 @@ import { ProtectedRoute, GuestOnlyRoute } from './routes/guards'
 
 
 
-import { AdminRoute, DriverRoute } from './routes/roleGuards'
+import { AdminRoute } from './routes/roleGuards'
 import { RootRoute } from './routes/guards'
 import { useAuth } from './contexts/useAuth'
 import { SplashScreen } from './components/SplashScreen'
@@ -57,7 +57,6 @@ const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage'))
 const AdminDriverQueuePage = lazy(() => import('./pages/AdminDriverQueuePage'))
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'))
 const AdminTripsPage = lazy(() => import('./pages/AdminTripsPage'))
-const AdminBookingsPage = lazy(() => import('./pages/AdminBookingsPage'))
 const TripsCommunityPage = lazy(() => import('./pages/TripsCommunityPage'))
 const CreateTripRequestPage = lazy(() => import('./pages/CreateTripRequestPage'))
 const MyTripRequestsPage = lazy(() => import('./pages/MyTripRequestsPage'))
@@ -184,9 +183,7 @@ function AppShell() {
             path="/driver/documents"
             element={
               <ProtectedRoute>
-                <DriverRoute>
-                  <DriverDocumentsPage />
-                </DriverRoute>
+                <DriverDocumentsPage />
               </ProtectedRoute>
             }
           />
@@ -194,9 +191,7 @@ function AppShell() {
             path="/driver/pending-approval"
             element={
               <ProtectedRoute>
-                <DriverRoute>
-                  <DriverPendingApprovalPage />
-                </DriverRoute>
+                <DriverPendingApprovalPage />
               </ProtectedRoute>
             }
           />
@@ -204,9 +199,7 @@ function AppShell() {
             path="/driver"
             element={
               <ProtectedRoute>
-                <DriverRoute>
-                  <DriverDashboardPage />
-                </DriverRoute>
+                <DriverDashboardPage />
               </ProtectedRoute>
             }
           />
@@ -214,9 +207,7 @@ function AppShell() {
             path="/driver/create-trip"
             element={
               <ProtectedRoute>
-                <DriverRoute>
-                  <CreateTripPage />
-                </DriverRoute>
+                <CreateTripPage />
               </ProtectedRoute>
             }
           />
@@ -224,9 +215,7 @@ function AppShell() {
             path="/driver/trip/:tripId/bookings"
             element={
               <ProtectedRoute>
-                <DriverRoute>
-                  <DriverTripBookingsPage />
-                </DriverRoute>
+                <DriverTripBookingsPage />
               </ProtectedRoute>
             }
           />
@@ -280,16 +269,6 @@ function AppShell() {
               <ProtectedRoute>
                 <AdminRoute>
                   <AdminTripsPage />
-                </AdminRoute>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/bookings"
-            element={
-              <ProtectedRoute>
-                <AdminRoute>
-                  <AdminBookingsPage />
                 </AdminRoute>
               </ProtectedRoute>
             }
