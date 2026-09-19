@@ -46,6 +46,14 @@ export default function DriverDashboardPage() {
     }
   }, [user])
 
+  useEffect(() => {
+    const acceptedOffers = offers.filter((offer) => offer.status === 'accepted')
+    if (acceptedOffers.length === 0) return
+    Promise.all(
+      acceptedOffers.map((offer) => getOrCreateChat(offer.passengerId, offer.driverId)),
+    ).catch(() => setChatError('في عرض مقبول لكن تعذر تجهيز المحادثة. اضغط «تواصل مع الراكب» وحاول تاني.'))
+  }, [offers])
+
   async function contactPassenger(offer: TripOffer) {
     try {
       setChatError('')
