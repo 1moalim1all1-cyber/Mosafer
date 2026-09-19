@@ -2,12 +2,20 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Search, CarFront, PlusCircle, Wallet, UserCircle, LayoutDashboard, Users2 } from 'lucide-react'
 import { useAuth } from '../contexts/useAuth'
+import { useEffect, useState } from 'react'
+import { subscribeDriverStatus } from '../lib/driverActions'
 
 export function BottomNav() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
   const { t } = useTranslation()
+  const [driverStatus, setDriverStatus] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!user) return
+    return subscribeDriverStatus(user.uid, setDriverStatus)
+  }, [user])
 
   const passengerTabs = [
     { path: '/', icon: Search, label: t('bottomNav.home') },
@@ -19,7 +27,7 @@ export function BottomNav() {
 
   let tabs = passengerTabs
 
-  if (user?.role === 'driver') {
+  if (driverStatus === 'approved') {
     tabs = [
       passengerTabs[0],
       passengerTabs[1],
