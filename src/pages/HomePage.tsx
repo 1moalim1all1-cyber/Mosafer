@@ -9,10 +9,12 @@ import { subscribeUnreadCount } from '../lib/notifications'
 import { subscribeAvailableTrips, subscribeCompletedTripsCount } from '../lib/trips'
 import type { Trip } from '../types/trip'
 import { Animated3DCar } from '../components/Animated3DCar'
-import { Users2, Bell, MapPin, ArrowLeftRight, Users, Search, CarFront, Siren, ExternalLink, Handshake } from 'lucide-react'
+import { Users2, Bell, MapPin, ArrowLeftRight, Users, Search, CarFront, Siren, ExternalLink, Handshake, CalendarDays, Clock3, ArrowLeft } from 'lucide-react'
 import { fetchAppSettings } from '../lib/admin'
 import { subscribeDriverStatus } from '../lib/driverActions'
 import { useCountry } from '../hooks/useCountry'
+import { subscribeActiveTripRequests } from '../lib/tripRequests'
+import type { TripRequest } from '../types/tripRequest'
 
 const GOVERNORATES = [
   'القاهرة', 'الجيزة', 'الإسكندرية', 'الدقهلية', 'البحر الأحمر', 'البحيرة',
@@ -33,6 +35,8 @@ export default function HomePage() {
   const [unread, setUnread] = useState(0)
   const [availableTrips, setAvailableTrips] = useState<Trip[]>([])
   const [tripsLoading, setTripsLoading] = useState(true)
+  const [tripRequests, setTripRequests] = useState<TripRequest[]>([])
+  const [requestsLoading, setRequestsLoading] = useState(true)
   const [completedCount, setCompletedCount] = useState(0)
   const [driverStatus, setDriverStatus] = useState<string | null>(null)
   const [services, setServices] = useState({
@@ -88,6 +92,14 @@ export default function HomePage() {
     })
     return unsubscribe
   }, [country, user])
+
+  useEffect(() => {
+    setRequestsLoading(true)
+    return subscribeActiveTripRequests(country, (requests) => {
+      setTripRequests(requests.slice(0, 6))
+      setRequestsLoading(false)
+    }, 6)
+  }, [country])
 
   function handleSearch() {
     if (!origin || !destination) return
@@ -247,7 +259,7 @@ export default function HomePage() {
         <section className="min-w-0">
         <h2 className="mb-4 text-xl font-bold text-text-primary">{t('home.availableTripsNow')}</h2>
 
-        {tripsLoading && (
+        {(tripsLoading || requestsLoading) && (
           <div className="grid gap-4 xl:grid-cols-2">
             {[1, 2, 3].map((i) => (
               <div key={i} className="h-40 animate-pulse rounded-2xl bg-card" />
@@ -255,14 +267,49 @@ export default function HomePage() {
           </div>
         )}
 
-        {!tripsLoading && availableTrips.length === 0 && (
+        {!tripsLoading && !requestsLoading && availableTrips.length === 0 && tripRequests.length === 0 && (
           <div className="flex flex-col items-center py-6">
             <Animated3DCar size={110} />
             <p className="mt-2 text-text-secondary">{t('home.noTripsNow')}</p>
           </div>
         )}
 
-        {!tripsLoading && <div className="grid gap-4 xl:grid-cols-2">{availableTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)}</div>}
+        {!tripsLoading && availableTrips.length > 0 && (
+          <div className="grid gap-4 xl:grid-cols-2">{availableTrips.map((trip) => <TripCard key={trip.id} trip={trip} />)}</div>
+        )}
+
+        {!requestsLoading && tripRequests.length > 0 && (
+          <div className={availableTrips.length > 0 ? 'mt-7' : ''}>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h3 className="font-bold text-text-primary">طلبات ركاب متاحة</h3>
+                <p className="text-xs text-text-secondary">ركاب محتاجين عربية على نفس الطريق</p>
+              </div>
+              <button onClick={() => navigate('/community')} className="flex items-center gap-1 text-sm font-semibold text-primary">
+                عرض الكل <ArrowLeft size={16} />
+              </button>
+            </div>
+            <div className="grid gap-4 xl:grid-cols-2">
+              {tripRequests.map((request) => (
+                <button
+                  key={request.id}
+                  onClick={() => navigate('/community')}
+                  className="app-surface w-full rounded-2xl p-4 text-right transition hover:-translate-y-0.5 hover:border-primary"
+                >
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">طلب راكب</span>
+                    <span className="flex items-center gap-1 text-xs text-text-secondary"><Users size={14} /> {request.seatsNeeded} مقعد</span>
+                  </div>
+                  <p className="text-lg font-bold text-text-primary">{request.originCity} ← {request.destinationCity}</p>
+                  <div className="mt-3 flex flex-wrap gap-3 text-sm text-text-secondary">
+                    <span className="flex items-center gap-1"><CalendarDays size={15} /> {request.travelDate}</span>
+                    {request.preferredTime && <span className="flex items-center gap-1"><Clock3 size={15} /> {request.preferredTime}</span>}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         </section>
       </main>
 
