@@ -1,8 +1,10 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useEffect, useState } from 'react'
 import { Search, CarFront, Wallet, UserCircle, LayoutDashboard, Bell, Globe, Users2, MessageCircle } from 'lucide-react'
 import { useAuth } from '../contexts/useAuth'
 import { changeLanguage } from '../lib/i18n'
+import { subscribeDriverStatus } from '../lib/driverActions'
 
 /**
  * شريط تنقّل علوي بيظهر بس على شاشات الكمبيوتر (lg فأكبر)، عشان
@@ -15,6 +17,12 @@ export function DesktopNav() {
   const location = useLocation()
   const { user, logout } = useAuth()
   const { t, i18n } = useTranslation()
+  const [driverStatus, setDriverStatus] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!user) return
+    return subscribeDriverStatus(user.uid, setDriverStatus)
+  }, [user])
 
   const links = [
     { path: '/', icon: Search, label: t('bottomNav.home') },
@@ -25,7 +33,7 @@ export function DesktopNav() {
     { path: '/chats', icon: MessageCircle, label: t('common.chats') },
   ]
 
-  if (user?.role === 'driver') {
+  if (driverStatus === 'approved') {
     links.splice(1, 0, { path: '/driver', icon: CarFront, label: t('bottomNav.driverTrips') })
   }
   if (user?.role === 'admin') {
