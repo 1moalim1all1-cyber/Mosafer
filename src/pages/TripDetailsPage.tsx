@@ -5,7 +5,6 @@ import confetti from 'canvas-confetti'
 import { subscribeToTrip } from '../lib/trips'
 import { fetchUserProfile } from '../lib/users'
 import { createBooking } from '../lib/booking'
-import { getOrCreateChat } from '../lib/chat'
 import { subscribeFavorites, toggleFavorite } from '../lib/favorites'
 import { TripRouteMap } from '../components/TripRouteMap'
 import { LocationPicker } from '../components/LocationPicker'
@@ -28,7 +27,6 @@ export default function TripDetailsPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [openingChat, setOpeningChat] = useState(false)
   const [favorites, setFavorites] = useState<string[]>([])
   const [pickupPoint, setPickupPoint] = useState<{ lat: number; lng: number } | null>(null)
   const [pickingLocation, setPickingLocation] = useState(false)
@@ -40,17 +38,6 @@ export default function TripDetailsPage() {
   }, [user])
 
   const isFavorite = trip ? favorites.includes(trip.id) : false
-
-  async function openChat() {
-    if (!trip || !user) return
-    setOpeningChat(true)
-    try {
-      const chatId = await getOrCreateChat(user.uid, trip.driverId)
-      navigate(`/chat/${chatId}`)
-    } finally {
-      setOpeningChat(false)
-    }
-  }
 
   useEffect(() => {
     if (!tripId) return
@@ -141,14 +128,6 @@ export default function TripDetailsPage() {
               {isFavorite ? '❤️' : '🤍'}
             </button>
           )}
-          {driver?.phone && (
-            <a href={`tel:${driver.phone}`} className="text-xl">
-              📞
-            </a>
-          )}
-          <button onClick={openChat} disabled={openingChat} className="text-xl">
-            💬
-          </button>
         </div>
       </header>
 
