@@ -15,7 +15,6 @@ import {
   Wallet,
   Headphones,
   MessageCircle,
-  ExternalLink,
   Phone,
   Mail,
   MapPinned,
@@ -42,6 +41,23 @@ import { useCountry } from '../hooks/useCountry'
 import { CountrySelector } from '../components/CountrySelector'
 import { COUNTRIES } from '../lib/countries'
 import { Globe } from 'lucide-react'
+
+function FacebookIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-current"><path d="M14 8.8V6.5c0-.7.5-.9.9-.9h2.3V2.1L14.1 2C10.8 2 10 4.5 10 6.1v2.7H8v3.9h2V22h4v-9.3h2.9l.5-3.9H14Z" /></svg>
+}
+function InstagramIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-none stroke-current" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" className="fill-current stroke-none"/></svg>
+}
+function TikTokIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-current"><path d="M15.3 2h-3.5v13.5a2.9 2.9 0 1 1-2-2.8V9.1A6.4 6.4 0 1 0 15.3 15V8.2a8 8 0 0 0 4.7 1.5V6.2A4.7 4.7 0 0 1 15.3 2Z"/></svg>
+}
+function YoutubeIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5 fill-current"><path d="M22 12s0-3.3-.4-4.9a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.3a2.5 2.5 0 0 0-1.8 1.8C2 8.7 2 12 2 12s0 3.3.4 4.9a2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.3a2.5 2.5 0 0 0 1.8-1.8C22 15.3 22 12 22 12Zm-12 3V9l5.2 3-5.2 3Z"/></svg>
+}
+
+function externalUrl(url: string) {
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`
+}
 
 function getFeatures(t: (key: string) => string) {
   return [
@@ -294,8 +310,8 @@ export default function LandingPage() {
             {(landingConfig.googlePlayUrl || landingConfig.appStoreUrl) && (
               <div className="mt-5 inline-flex flex-wrap items-center gap-2 rounded-xl border border-white/15 bg-[#050b2c]/70 p-3">
                 <span className="w-full text-center text-xs text-white/75">حمّل التطبيق الآن</span>
-                {landingConfig.googlePlayUrl && <a href={landingConfig.googlePlayUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-black px-4 py-2 text-sm font-bold">Google Play</a>}
-                {landingConfig.appStoreUrl && <a href={landingConfig.appStoreUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-black px-4 py-2 text-sm font-bold">App Store</a>}
+                {landingConfig.googlePlayUrl && <a href={externalUrl(landingConfig.googlePlayUrl)} target="_blank" rel="noreferrer" className="rounded-lg bg-black px-4 py-2 text-sm font-bold">Google Play</a>}
+                {landingConfig.appStoreUrl && <a href={externalUrl(landingConfig.appStoreUrl)} target="_blank" rel="noreferrer" className="rounded-lg bg-black px-4 py-2 text-sm font-bold">App Store</a>}
               </div>
             )}
           </div>
@@ -425,7 +441,7 @@ export default function LandingPage() {
                 <div><p className="text-sm font-bold text-white">{feature.title}</p><p className="mt-1 text-[10px] leading-4 text-white/60">{feature.desc}</p></div>
               </div>
             ))}
-            <a href={landingConfig.emergencyActionUrl || '/#/support'} target={landingConfig.emergencyActionUrl ? '_blank' : undefined} rel="noreferrer" className="flex min-h-24 items-center gap-3 rounded-xl border border-red-400/30 bg-red-950/40 p-3">
+            <a href={landingConfig.emergencyActionUrl ? externalUrl(landingConfig.emergencyActionUrl) : '/#/support'} target={landingConfig.emergencyActionUrl ? '_blank' : undefined} rel="noreferrer" className="flex min-h-24 items-center gap-3 rounded-xl border border-red-400/30 bg-red-950/40 p-3">
               {landingConfig.emergencyLogoUrl ? <img src={landingConfig.emergencyLogoUrl} alt="" className="h-12 w-12 object-contain" /> : <span className="text-3xl">🚨</span>}
               <div><p className="text-sm font-bold text-red-300">{landingConfig.emergencyTitle}</p><p className="mt-1 text-[10px] leading-4 text-white/65">{landingConfig.emergencySubtitle}</p></div>
             </a>
@@ -440,7 +456,7 @@ export default function LandingPage() {
               <span className="font-bold text-white">شركاؤنا</span>
               {landingConfig.partners.map((partner, index) => {
                 const content = partner.logoUrl ? <img src={partner.logoUrl} alt={partner.name} className="h-8 max-w-28 object-contain" /> : <span className="font-bold text-white/80">{partner.name}</span>
-                return partner.url ? <a key={index} href={partner.url} target="_blank" rel="noreferrer">{content}</a> : <span key={index}>{content}</span>
+                return partner.url ? <a key={index} href={externalUrl(partner.url)} target="_blank" rel="noreferrer">{content}</a> : <span key={index}>{content}</span>
               })}
             </div>
           )}
@@ -661,22 +677,22 @@ export default function LandingPage() {
                 </a>
               )}
               {[
-                { url: socials.facebook, label: 'فيسبوك' },
-                { url: socials.instagram, label: 'إنستجرام' },
-                { url: socials.tiktok, label: 'تيك توك' },
-                { url: socials.youtube, label: 'يوتيوب' },
+                { url: socials.facebook, label: 'فيسبوك', icon: FacebookIcon, color: 'hover:bg-[#1877F2] hover:text-white' },
+                { url: socials.instagram, label: 'إنستجرام', icon: InstagramIcon, color: 'hover:bg-[#E4405F] hover:text-white' },
+                { url: socials.tiktok, label: 'تيك توك', icon: TikTokIcon, color: 'hover:bg-black hover:text-white' },
+                { url: socials.youtube, label: 'يوتيوب', icon: YoutubeIcon, color: 'hover:bg-[#FF0000] hover:text-white' },
               ]
                 .filter((s) => s.url)
                 .map((s) => (
                   <a
                     key={s.label}
-                    href={s.url}
+                    href={externalUrl(s.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={s.label}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 transition hover:border-primary"
+                    className={`flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 transition hover:scale-110 ${s.color}`}
                   >
-                    <ExternalLink size={16} />
+                    <s.icon />
                   </a>
                 ))}
             </div>
@@ -685,9 +701,9 @@ export default function LandingPage() {
           <div>
             <p className="mb-3 font-semibold text-white">{t('landing.quickLinks')}</p>
             <ul className="space-y-2 text-sm">
-              <li>{t('landing.home')}</li>
-              <li>{t('landing.aboutUs')}</li>
-              <li>{t('landing.services')}</li>
+              <li><button onClick={() => document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' })} className="transition hover:text-white">{t('landing.home')}</button></li>
+              <li><button onClick={() => navigate('/about-help')} className="transition hover:text-white">{t('landing.aboutUs')}</button></li>
+              <li><button onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })} className="transition hover:text-white">{t('landing.services')}</button></li>
             </ul>
           </div>
 
