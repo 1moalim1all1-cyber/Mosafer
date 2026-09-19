@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { PlusCircle, ChevronDown } from 'lucide-react'
 import { useAuth } from '../contexts/useAuth'
@@ -102,14 +102,18 @@ function OfferRow({ offer }: { offer: TripOffer }) {
   )
 }
 
-function RequestWithOffers({ request, statusConfig, onCancel }: { request: TripRequest; statusConfig: ReturnType<typeof getStatusConfig>; onCancel: (id: string) => void }) {
+function RequestWithOffers({ request, statusConfig, onCancel, initiallyExpanded = false }: { request: TripRequest; statusConfig: ReturnType<typeof getStatusConfig>; onCancel: (id: string) => void; initiallyExpanded?: boolean }) {
   const { t, i18n } = useTranslation()
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(initiallyExpanded)
   const [offers, setOffers] = useState<TripOffer[]>([])
 
   useEffect(() => {
     return subscribeOffersForRequest(request.id, setOffers)
   }, [request.id])
+
+  useEffect(() => {
+    if (initiallyExpanded || offers.some((offer) => offer.status === 'pending')) setExpanded(true)
+  }, [initiallyExpanded, offers])
 
   return (
     <div className="mb-3 rounded-2xl border border-border bg-card p-4">
@@ -151,10 +155,12 @@ function RequestWithOffers({ request, statusConfig, onCancel }: { request: TripR
 
 export default function MyTripRequestsPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { t } = useTranslation()
   const { user } = useAuth()
   const [requests, setRequests] = useState<TripRequest[]>([])
   const STATUS_CONFIG = getStatusConfig(t)
+  const requestedId = searchParams.get('request')
 
   useEffect(() => {
     if (!user) return
@@ -190,7 +196,7 @@ export default function MyTripRequestsPage() {
 
         <div className="grid gap-4 lg:grid-cols-2">
           {requests.map((r) => (
-            <RequestWithOffers key={r.id} request={r} statusConfig={STATUS_CONFIG} onCancel={handleCancel} />
+            <RequestWithOffers key={r.id} request={r} statusConfig={STATUS_CONFIG} onCancel={handleCancel} initiallyExpanded={requestedId === r.id} />
           ))}
         </div>
       </main>
