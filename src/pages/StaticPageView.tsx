@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { fetchStaticPage } from '../lib/pages'
+import { DEFAULT_PAGES, fetchStaticPage } from '../lib/pages'
 
 export default function StaticPageView() {
   const { pageId } = useParams<{ pageId: string }>()
@@ -9,7 +9,7 @@ export default function StaticPageView() {
 
   useEffect(() => {
     if (!pageId) return
-    fetchStaticPage(pageId).then(setPage)
+    fetchStaticPage(pageId).then(setPage).catch(() => setPage(DEFAULT_PAGES[pageId] ?? { title: 'الصفحة', content: 'تعذر تحميل المحتوى حاليًا.' }))
   }, [pageId])
 
   return (
