@@ -53,7 +53,7 @@ export default function LoginPage() {
           <p className="mt-1 text-text-secondary">{t('auth.loginSubtitle')}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} autoComplete="off" className="flex flex-col gap-4">
           <Input
             label={t('auth.phone')}
             type="tel"
@@ -61,14 +61,14 @@ export default function LoginPage() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             dir="ltr"
-            autoComplete="tel"
+            autoComplete="off"
           />
           <Input
             label={t('auth.password')}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
+            autoComplete="off"
           />
 
           <Link to="/forgot-password" className="text-sm font-semibold text-primary hover:text-primary-hover">
@@ -81,12 +81,6 @@ export default function LoginPage() {
             {t('auth.loginButton')}
           </Button>
 
-          <Link
-            to="/role-selection"
-            className="text-center text-sm font-semibold text-primary hover:text-primary-hover"
-          >
-            {t('auth.noAccount')}
-          </Link>
         </form>
       </div>
     </div>
