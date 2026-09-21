@@ -403,29 +403,45 @@ export interface SupportReport {
   id: string
   reporterId: string
   message: string
-  status: 'pending' | 'resolved' | 'closed'
+  status: 'pending' | 'in_progress' | 'resolved' | 'closed'
+  adminReply?: string
+  repliedAt?: Date
   createdAt: Date
+}
+
+function mapSupportReport(id: string, data: Record<string, unknown>): SupportReport {
+  const created = data.createdAt as { toDate?: () => Date }
+  const replied = data.repliedAt as { toDate?: () => Date } | undefined
+  return {
+    id,
+    reporterId: (data.reporterId as string) ?? '',
+    message: (data.message as string) ?? '',
+    status: (data.status as SupportReport['status']) ?? 'pending',
+    adminReply: (data.adminReply as string) ?? '',
+    repliedAt: replied?.toDate ? replied.toDate() : undefined,
+    createdAt: created?.toDate ? created.toDate() : new Date(),
+  }
 }
 
 export function subscribeSupportReports(callback: (items: SupportReport[]) => void) {
   const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(200))
   return onSnapshot(q, (snap) => {
     callback(
-      snap.docs.map((d) => {
-        const data = d.data()
-        const created = data.createdAt as { toDate?: () => Date }
-        return {
-          id: d.id,
-          reporterId: data.reporterId ?? '',
-          message: data.message ?? '',
-          status: data.status ?? 'pending',
-          createdAt: created?.toDate ? created.toDate() : new Date(),
-        }
-      }),
+      snap.docs.map((d) => mapSupportReport(d.id, d.data())),
     )
   })
 }
 
 export async function setReportStatus(reportId: string, status: SupportReport['status']) {
   await updateDoc(doc(db, 'reports', reportId), { status })
+}
+
+export async function replyToSupportReport(report: SupportReport, adminReply: string, status: SupportReport['status']) {
+  const reply = adminReply.trim()
+  if (!reply) throw new Error('اكتب رد الإدارة الأول')
+  await updateDoc(doc(db, 'reports', report.id), {
+    adminReply: reply,
+    status,
+    repliedAt: new Date(),
+  })
 }
