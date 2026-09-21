@@ -23,6 +23,7 @@ export interface PendingDriver {
   vehicleMake?: string
   vehicleModel?: string
   nationalIdImageUrl?: string
+  nationalIdBackImageUrl?: string
   licenseImageUrl?: string
   vehicleLicenseImageUrl?: string
   vehicleImageUrl?: string
@@ -37,6 +38,7 @@ function mapDriverRecord(id: string, data: Record<string, unknown>): PendingDriv
     vehicleMake: vehicle?.make,
     vehicleModel: vehicle?.model,
     nationalIdImageUrl: data.nationalIdImageUrl as string | undefined,
+    nationalIdBackImageUrl: data.nationalIdBackImageUrl as string | undefined,
     licenseImageUrl: data.licenseImageUrl as string | undefined,
     vehicleLicenseImageUrl: data.vehicleLicenseImageUrl as string | undefined,
     vehicleImageUrl: data.vehicleImageUrl as string | undefined,
