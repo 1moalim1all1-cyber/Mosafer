@@ -29,6 +29,7 @@ export interface AuthContextValue {
   register: (input: RegisterInput & { email: string }) => Promise<void>
   logout: () => Promise<void>
   refreshUser: () => Promise<void>
+  recoverMissingProfile: (input: { fullName: string; gender: Gender }) => Promise<void>
 }
 
 /** ترجمة أكواد أخطاء Firebase لرسائل عربية مفهومة */
@@ -190,8 +191,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(snap.exists() ? mapUserDoc(current.uid, snap.data()) : null)
   }
 
+  async function recoverMissingProfile(input: { fullName: string; gender: Gender }) {
+    const current = auth.currentUser
+    if (!current) throw new Error('لازم تسجّل دخول الأول')
+    const fullName = input.fullName.trim()
+    if (fullName.length < 2) throw new Error('اكتب الاسم بالكامل')
+    const phone = (current.email?.split('@')[0] ?? '').replace(/[^0-9]/g, '')
+    if (phone.length < 8) throw new Error('تعذر استرجاع رقم الهاتف، تواصل مع الدعم')
+
+    const existing = await getDoc(doc(db, 'users', current.uid))
+    if (existing.exists()) {
+      setUser(mapUserDoc(current.uid, existing.data()))
+      return
+    }
+
+    const now = Timestamp.now()
+    const referralCode = current.uid.substring(0, 8).toUpperCase()
+    const recoveredUser: AppUser = {
+      uid: current.uid, role: 'passenger', fullName, phone, email: current.email ?? '', gender: input.gender,
+      profileImageUrl: null, isPhoneVerified: false, isEmailVerified: false, trustScore: 0,
+      totalTrips: 0, avgRating: 0, status: 'active', language: 'ar', favoriteTrips: [],
+      referralCode, referredByUid: null, createdAt: now.toDate(),
+    }
+    const batch = writeBatch(db)
+    batch.set(doc(db, 'users', current.uid), {
+      role: recoveredUser.role, fullName, phone, email: recoveredUser.email, gender: input.gender,
+      isPhoneVerified: false, isEmailVerified: false, trustScore: 0, totalTrips: 0, avgRating: 0,
+      status: 'active', language: 'ar', favoriteTrips: [], referralCode, referredByUid: null, createdAt: now,
+    })
+    batch.set(doc(db, 'wallets', current.uid), { balance: 0, currency: 'EGP', createdAt: now }, { merge: true })
+    await batch.commit()
+    await updateProfile(current, { displayName: fullName })
+    setUser(recoveredUser)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, loading, login, register, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, firebaseUser, loading, login, register, logout, refreshUser, recoverMissingProfile }}>
       {children}
     </AuthContext.Provider>
   )
