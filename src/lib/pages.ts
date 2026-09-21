@@ -46,15 +46,22 @@ export async function fetchStaticPage(pageId: string) {
   const snap = await getDoc(doc(db, 'pages', pageId))
   if (snap.exists()) {
     const data = snap.data()
-    return { title: data.title ?? DEFAULT_PAGES[pageId]?.title, content: data.content ?? DEFAULT_PAGES[pageId]?.content }
+    const fallback = DEFAULT_PAGES[pageId] ?? { title: '', content: '' }
+    const title = typeof data.title === 'string' && data.title.trim() ? data.title : fallback.title
+    const content = typeof data.content === 'string' && data.content.trim() ? data.content : fallback.content
+    return { title, content }
   }
   return DEFAULT_PAGES[pageId] ?? { title: '', content: '' }
 }
 
 export async function fetchFaqItems() {
-  const snap = await getDoc(doc(db, 'pages', 'faq'))
-  if (snap.exists() && snap.data().items?.length > 0) {
-    return snap.data().items as { question: string; answer: string }[]
+  try {
+    const snap = await getDoc(doc(db, 'pages', 'faq'))
+    if (snap.exists() && Array.isArray(snap.data().items) && snap.data().items.length > 0) {
+      return snap.data().items as { question: string; answer: string }[]
+    }
+  } catch {
+    // المحتوى الافتراضي يضمن إن الصفحة متبقاش فاضية عند انقطاع Firebase.
   }
   return DEFAULT_FAQ_ITEMS
 }
