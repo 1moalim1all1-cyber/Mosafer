@@ -25,9 +25,10 @@ export async function getOrCreateChat(passengerId: string, driverId: string): Pr
   const q = query(
     collection(db, 'chats'),
     where('passengerId', '==', passengerId),
+    where('driverId', '==', driverId),
   )
   const existing = await getDocs(q)
-  const previous = existing.docs.find((chat) => chat.data().driverId === driverId)
+  const previous = existing.docs[0]
   if (previous) return previous.id
 
   const chatRef = doc(collection(db, 'chats'))
