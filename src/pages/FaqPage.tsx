@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { fetchFaqItems } from '../lib/pages'
+import { DEFAULT_FAQ_ITEMS, fetchFaqItems } from '../lib/pages'
 
 export default function FaqPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [items, setItems] = useState<{ question: string; answer: string }[]>([])
+  const [items, setItems] = useState<{ question: string; answer: string }[]>(DEFAULT_FAQ_ITEMS)
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   useEffect(() => {
-    fetchFaqItems().then(setItems)
+    fetchFaqItems().then(setItems).catch(() => setItems(DEFAULT_FAQ_ITEMS))
   }, [])
 
   return (
