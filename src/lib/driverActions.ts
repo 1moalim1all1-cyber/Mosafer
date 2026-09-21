@@ -21,14 +21,16 @@ import type { DriverVehicle } from '../types/booking'
 export async function submitDriverDocuments(params: {
   uid: string
   nationalId: File
+  nationalIdBack: File
   license: File
   vehicleLicense: File
   vehicleImage: File
   selfie: File
   vehicle: DriverVehicle
 }) {
-  const [nationalIdUrl, licenseUrl, vehicleLicenseUrl, vehicleImageUrl, selfieUrl] = await Promise.all([
+  const [nationalIdUrl, nationalIdBackUrl, licenseUrl, vehicleLicenseUrl, vehicleImageUrl, selfieUrl] = await Promise.all([
     uploadImageToCloudinary(params.nationalId, 'mosafer/drivers/national_id'),
+    uploadImageToCloudinary(params.nationalIdBack, 'mosafer/drivers/national_id'),
     uploadImageToCloudinary(params.license, 'mosafer/drivers/license'),
     uploadImageToCloudinary(params.vehicleLicense, 'mosafer/drivers/license'),
     uploadImageToCloudinary(params.vehicleImage, 'mosafer/drivers/vehicle'),
@@ -40,6 +42,7 @@ export async function submitDriverDocuments(params: {
     {
       verificationStatus: 'pending',
       nationalIdImageUrl: nationalIdUrl,
+      nationalIdBackImageUrl: nationalIdBackUrl,
       licenseImageUrl: licenseUrl,
       vehicleLicenseImageUrl: vehicleLicenseUrl,
       vehicleImageUrl: vehicleImageUrl,
