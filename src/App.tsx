@@ -31,7 +31,7 @@ import { ProtectedRoute, GuestOnlyRoute } from './routes/guards'
 
 
 
-import { AdminRoute } from './routes/roleGuards'
+import { AdminRoute, DriverRoute } from './routes/roleGuards'
 import { RootRoute } from './routes/guards'
 import { useAuth } from './contexts/useAuth'
 import { SplashScreen } from './components/SplashScreen'
@@ -199,7 +199,7 @@ function AppShell() {
             path="/driver"
             element={
               <ProtectedRoute>
-                <DriverDashboardPage />
+                <DriverRoute><DriverDashboardPage /></DriverRoute>
               </ProtectedRoute>
             }
           />
@@ -207,7 +207,7 @@ function AppShell() {
             path="/driver/create-trip"
             element={
               <ProtectedRoute>
-                <CreateTripPage />
+                <DriverRoute><CreateTripPage /></DriverRoute>
               </ProtectedRoute>
             }
           />
@@ -215,7 +215,7 @@ function AppShell() {
             path="/driver/trip/:tripId/bookings"
             element={
               <ProtectedRoute>
-                <DriverTripBookingsPage />
+                <DriverRoute><DriverTripBookingsPage /></DriverRoute>
               </ProtectedRoute>
             }
           />
