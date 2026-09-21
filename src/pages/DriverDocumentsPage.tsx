@@ -42,6 +42,7 @@ export default function DriverDocumentsPage() {
   const { t } = useTranslation()
 
   const [nationalId, setNationalId] = useState<File | null>(null)
+  const [nationalIdBack, setNationalIdBack] = useState<File | null>(null)
   const [license, setLicense] = useState<File | null>(null)
   const [vehicleLicense, setVehicleLicense] = useState<File | null>(null)
   const [vehicleImage, setVehicleImage] = useState<File | null>(null)
@@ -59,8 +60,8 @@ export default function DriverDocumentsPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!nationalId || !license || !vehicleLicense || !vehicleImage || !selfie) {
-      setError(t('driver.errorAllDocs'))
+    if (!nationalId || !nationalIdBack || !license || !vehicleLicense || !vehicleImage || !selfie) {
+      setError('ارفع كل المستندات المطلوبة، ومنها صورة البطاقة وش وظهر')
       return
     }
     if (!make || !model || !plateNumber || !year) {
@@ -75,6 +76,7 @@ export default function DriverDocumentsPage() {
       await submitDriverDocuments({
         uid: user.uid,
         nationalId,
+        nationalIdBack,
         license,
         vehicleLicense,
         vehicleImage,
@@ -103,7 +105,8 @@ export default function DriverDocumentsPage() {
       <p className="mb-6 text-text-secondary">{t('driver.documentsSubtitle')}</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <FileField label={t('driver.docNationalId')} file={nationalId} onChange={setNationalId} chooseLabel={t('driver.tapToChoosePhoto')} />
+        <FileField label="صورة البطاقة — الوجه الأمامي" file={nationalId} onChange={setNationalId} chooseLabel={t('driver.tapToChoosePhoto')} />
+        <FileField label="صورة البطاقة — الوجه الخلفي" file={nationalIdBack} onChange={setNationalIdBack} chooseLabel={t('driver.tapToChoosePhoto')} />
         <FileField label={t('driver.docLicense')} file={license} onChange={setLicense} chooseLabel={t('driver.tapToChoosePhoto')} />
         <FileField label={t('driver.docVehicleLicense')} file={vehicleLicense} onChange={setVehicleLicense} chooseLabel={t('driver.tapToChoosePhoto')} />
         <FileField label={t('driver.docVehicleImage')} file={vehicleImage} onChange={setVehicleImage} chooseLabel={t('driver.tapToChoosePhoto')} />
