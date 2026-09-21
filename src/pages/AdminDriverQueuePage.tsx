@@ -53,7 +53,8 @@ function DriverRow({ driver, approved = false }: { driver: PendingDriver; approv
   }
 
   const docs = [
-    { label: t('admin.docNationalId'), url: driver.nationalIdImageUrl },
+    { label: 'البطاقة — الوجه الأمامي', url: driver.nationalIdImageUrl },
+    { label: 'البطاقة — الوجه الخلفي', url: driver.nationalIdBackImageUrl },
     { label: t('admin.docLicense'), url: driver.licenseImageUrl },
     { label: t('admin.docVehicleLicense'), url: driver.vehicleLicenseImageUrl },
     { label: t('admin.docVehicleImage'), url: driver.vehicleImageUrl },
