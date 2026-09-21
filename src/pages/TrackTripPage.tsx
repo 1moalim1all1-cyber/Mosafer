@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Polyline, Popup } from 'react-leaflet'
 import L from 'leaflet'
 import { subscribeBooking } from '../lib/bookings'
 import { subscribeToTrip, fetchLocationHistory } from '../lib/trips'
@@ -30,6 +30,11 @@ const driverIcon = new L.DivIcon({
 const passengerIcon = new L.DivIcon({
   html: '<div style="background:#9333EA;width:38px;height:38px;border-radius:50%;border:3px solid white;box-shadow:0 2px 12px rgba(147,51,234,.55);display:flex;align-items:center;justify-content:center;font-size:18px">👤</div>',
   className: '', iconSize: [38, 38], iconAnchor: [19, 19],
+})
+
+const destinationIcon = new L.DivIcon({
+  html: '<div style="background:#EF4444;width:38px;height:38px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 12px rgba(239,68,68,.5);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);font-size:17px">🏁</span></div>',
+  className: '', iconSize: [38, 38], iconAnchor: [19, 38],
 })
 
 function isLiveLocationFresh(updatedAt?: Date | null): boolean {
@@ -61,12 +66,14 @@ export default function TrackTripPage() {
   }, [booking?.driverId])
 
   const hasPickup = booking?.pickupLat != null && booking?.pickupLng != null
-  const hasLiveDriver = trip ? isLiveLocationFresh(trip.driverLiveUpdatedAt) && trip.driverLiveLat && trip.driverLiveLng : false
+  const hasLiveDriver = trip ? isLiveLocationFresh(trip.driverLiveUpdatedAt) && trip.driverLiveLat != null && trip.driverLiveLng != null : false
 
   const pickupPoint: [number, number] | null = hasPickup ? [booking!.pickupLat!, booking!.pickupLng!] : null
   const driverPoint: [number, number] | null = hasLiveDriver ? [trip!.driverLiveLat!, trip!.driverLiveLng!] : null
   const hasLivePassenger = isLiveLocationFresh(booking?.passengerLiveUpdatedAt) && booking?.passengerLiveLat != null && booking?.passengerLiveLng != null
   const passengerPoint: [number, number] | null = hasLivePassenger ? [booking!.passengerLiveLat!, booking!.passengerLiveLng!] : pickupPoint
+  const originPoint: [number, number] | null = trip?.originLat != null && trip?.originLng != null ? [trip.originLat, trip.originLng] : null
+  const destinationPoint: [number, number] | null = trip?.destinationLat != null && trip?.destinationLng != null ? [trip.destinationLat, trip.destinationLng] : null
 
   const distanceKm =
     passengerPoint && driverPoint ? calculateDistanceKm(driverPoint[0], driverPoint[1], passengerPoint[0], passengerPoint[1]) : null
@@ -159,7 +166,7 @@ export default function TrackTripPage() {
 
       <div className="relative flex-1" style={{ minHeight: 320 }}>
         <MapContainer center={center} zoom={hasLiveDriver ? 14 : 11} style={{ height: '100%', width: '100%' }}>
-          <LiveMapViewport points={[driverPoint, passengerPoint].filter((point): point is [number, number] => point !== null)} />
+          <LiveMapViewport points={[driverPoint, passengerPoint, originPoint, destinationPoint].filter((point): point is [number, number] => point !== null)} />
           <TileLayer
             url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -170,9 +177,11 @@ export default function TrackTripPage() {
           {pathHistory && pathHistory.length > 1 && (
             <Polyline positions={pathHistory} color="#9333EA" weight={4} opacity={0.7} />
           )}
-          {pickupPoint && <Marker position={pickupPoint} icon={pickupIcon} />}
-          {hasLivePassenger && passengerPoint && <Marker position={passengerPoint} icon={passengerIcon} />}
-          {driverPoint && <Marker position={driverPoint} icon={driverIcon} />}
+          {originPoint && destinationPoint && <Polyline positions={[originPoint, destinationPoint]} color="#2563EB" weight={4} opacity={0.45} />}
+          {pickupPoint && <Marker position={pickupPoint} icon={pickupIcon}><Popup>📍 نقطة ركوب الراكب</Popup></Marker>}
+          {hasLivePassenger && passengerPoint && <Marker position={passengerPoint} icon={passengerIcon}><Popup>👤 موقع الراكب مباشر</Popup></Marker>}
+          {driverPoint && <Marker position={driverPoint} icon={driverIcon}><Popup>🚗 موقع السائق مباشر</Popup></Marker>}
+          {destinationPoint && <Marker position={destinationPoint} icon={destinationIcon}><Popup>🏁 وجهة الرحلة: {trip.destinationCity}</Popup></Marker>}
         </MapContainer>
 
         <button
@@ -185,6 +194,11 @@ export default function TrackTripPage() {
       </div>
 
       <div className="border-t border-border bg-card p-4">
+        <div className="mx-auto mb-3 flex max-w-3xl flex-wrap justify-center gap-2 text-xs font-semibold">
+          <span className="rounded-full bg-blue-600/10 px-3 py-1.5 text-blue-500">🚗 السائق مباشر</span>
+          <span className="rounded-full bg-purple-600/10 px-3 py-1.5 text-purple-500">👤 الراكب مباشر</span>
+          <span className="rounded-full bg-red-600/10 px-3 py-1.5 text-red-500">🏁 وجهة الرحلة</span>
+        </div>
         <div className="mx-auto mb-4 grid max-w-3xl grid-cols-3 gap-2 text-center text-xs font-semibold">
           <div className={`rounded-xl p-2 ${trip.status === 'driver_arriving' ? 'bg-primary text-white' : 'bg-primary-light text-primary'}`}>السائق في الطريق</div>
           <div className={`rounded-xl p-2 ${trip.status === 'in_progress' ? 'bg-primary text-white' : 'bg-primary-light text-primary'}`}>الرحلة بدأت</div>
