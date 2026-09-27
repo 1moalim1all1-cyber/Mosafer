@@ -64,9 +64,11 @@ function RequestRow({ request }: { request: WalletRequestRow }) {
       )}
 
       {request.type === 'deposit' && request.senderNumber && (
-        <p className="mb-3 text-sm text-text-secondary">
-          {t('admin.transferredFrom')} <span dir="ltr">{request.senderNumber}</span>
-        </p>
+        <div className="mb-3 rounded-lg bg-success/5 p-3 text-sm text-text-secondary">
+          <p className="font-semibold text-text-primary">{request.method}</p>
+          <p>{t('admin.transferredFrom')} <span dir="ltr">{request.senderNumber}</span></p>
+          {request.transactionReference && <p>رقم العملية: <span dir="ltr" className="font-semibold text-text-primary">{request.transactionReference}</span></p>}
+        </div>
       )}
 
       <div className="flex gap-3">
