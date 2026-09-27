@@ -109,19 +109,28 @@ export function subscribeAvailableTrips(
     constraints.push(where('isWomenOnly', '==', false))
   }
   const q = query(collection(db, 'trips'), ...constraints)
-  return onSnapshot(q, (snap) => {
+  let latestTrips: Trip[] = []
+  const emitCurrentTrips = () => {
     const now = Date.now()
     callback(
-      snap.docs
-        .map((d) => mapTripDoc(d.id, d.data()))
+      latestTrips
         .filter((trip) => trip.country === country && trip.departureTime.getTime() >= now && trip.availableSeats > 0)
         .sort((a, b) => a.departureTime.getTime() - b.departureTime.getTime())
         .slice(0, count),
     )
+  }
+  const unsubscribe = onSnapshot(q, (snap) => {
+    latestTrips = snap.docs.map((d) => mapTripDoc(d.id, d.data()))
+    emitCurrentTrips()
   }, (error) => {
     console.error('Failed to load available trips', error)
     callback([])
   })
+  const expiryTimer = window.setInterval(emitCurrentTrips, 30_000)
+  return () => {
+    window.clearInterval(expiryTimer)
+    unsubscribe()
+  }
 }
 
 /** السائق بيحدّث موقعه الحي أثناء الرحلة - زي كريم بالظبط */
@@ -140,9 +149,20 @@ export function subscribePublicTrips(country: string, callback: (trips: Trip[]) 
     orderBy('departureTime'),
     limit(count),
   )
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => mapTripDoc(d.id, d.data())))
+  let latestTrips: Trip[] = []
+  const emitCurrentTrips = () => {
+    const now = Date.now()
+    callback(latestTrips.filter((trip) => trip.departureTime.getTime() >= now).slice(0, count))
+  }
+  const unsubscribe = onSnapshot(q, (snap) => {
+    latestTrips = snap.docs.map((d) => mapTripDoc(d.id, d.data()))
+    emitCurrentTrips()
   })
+  const expiryTimer = window.setInterval(emitCurrentTrips, 30_000)
+  return () => {
+    window.clearInterval(expiryTimer)
+    unsubscribe()
+  }
 }
 
 export async function updateTripLiveLocation(tripId: string, lat: number, lng: number) {
