@@ -213,6 +213,7 @@ export default function CreateTripRequestPage() {
       {pickingLocation && (
         <LocationPicker
           title={pickingLocation === 'origin' ? 'حدد نقطة الركوب' : 'حدد نقطة الوصول'}
+          autoLocate={pickingLocation === 'origin'}
           initialLat={pickingLocation === 'origin' ? originPoint?.lat : destinationPoint?.lat}
           initialLng={pickingLocation === 'origin' ? originPoint?.lng : destinationPoint?.lng}
           onClose={() => setPickingLocation(null)}
