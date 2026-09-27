@@ -153,12 +153,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         referredByUid,
         createdAt: now,
       })
-      batch.set(doc(db, 'publicProfiles', uid), {
+      batch.set(doc(db, 'wallets', uid), { balance: welcomeBonus, currency: 'EGP', createdAt: now })
+      await batch.commit()
+
+      const publicBatch = writeBatch(db)
+      publicBatch.set(doc(db, 'publicProfiles', uid), {
         uid, fullName: input.fullName.trim(), profileImageUrl: null, role: input.role,
         trustScore: 0, totalTrips: 0, avgRating: 0,
       })
-      batch.set(doc(db, 'wallets', uid), { balance: welcomeBonus, currency: 'EGP', createdAt: now })
-      await batch.commit()
+      await publicBatch.commit().catch(() => undefined)
 
       await updateProfile(credential.user, { displayName: input.fullName.trim() })
 
@@ -232,12 +235,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isPhoneVerified: false, isEmailVerified: false, trustScore: 0, totalTrips: 0, avgRating: 0,
       status: 'active', language: 'ar', favoriteTrips: [], referralCode, referredByUid: null, createdAt: now,
     })
-    batch.set(doc(db, 'publicProfiles', current.uid), {
+    batch.set(doc(db, 'wallets', current.uid), { balance: 0, currency: 'EGP', createdAt: now }, { merge: true })
+    await batch.commit()
+    const publicBatch = writeBatch(db)
+    publicBatch.set(doc(db, 'publicProfiles', current.uid), {
       uid: current.uid, fullName, profileImageUrl: null, role: recoveredUser.role,
       trustScore: 0, totalTrips: 0, avgRating: 0,
     }, { merge: true })
-    batch.set(doc(db, 'wallets', current.uid), { balance: 0, currency: 'EGP', createdAt: now }, { merge: true })
-    await batch.commit()
+    await publicBatch.commit().catch(() => undefined)
     await updateProfile(current, { displayName: fullName })
     setUser(recoveredUser)
   }
