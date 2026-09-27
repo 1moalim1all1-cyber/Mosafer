@@ -28,10 +28,10 @@ function OfferRow({ offer }: { offer: TripOffer }) {
 
   useEffect(() => {
     if (offer.status !== 'accepted') return
-    getOrCreateChat(offer.passengerId, offer.driverId).catch(() => {
+    getOrCreateChat(offer.passengerId, offer.driverId, { offerId: offer.id }).catch(() => {
       setError('تعذر تجهيز المحادثة. اضغط «تواصل مع السائق» وحاول تاني.')
     })
-  }, [offer.driverId, offer.passengerId, offer.status])
+  }, [offer.driverId, offer.id, offer.passengerId, offer.status])
 
   async function handle(accept: boolean) {
     setLoading(true)
@@ -51,7 +51,7 @@ function OfferRow({ offer }: { offer: TripOffer }) {
   async function openChat() {
     setLoading(true)
     try {
-      const chatId = await getOrCreateChat(offer.passengerId, offer.driverId)
+      const chatId = await getOrCreateChat(offer.passengerId, offer.driverId, { offerId: offer.id })
       navigate(`/chat/${chatId}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'تعذر فتح المحادثة')
