@@ -279,13 +279,15 @@ function mapBookingDoc(id: string, data: Record<string, unknown>) {
 
 /** السائق بيدخل الكود اللي الراكب قاله عشان يتأكد من هويته وقت الاستلام */
 export async function verifyPassengerPin(bookingId: string, enteredPin: string): Promise<boolean> {
-  const bookingSnap = await getDoc(doc(db, 'bookings', bookingId))
-  if (!bookingSnap.exists()) return false
-  const correct = bookingSnap.data().startPin === enteredPin
-  if (correct) {
+  try {
+    await updateDoc(doc(db, 'bookings', bookingId), { pinVerified: true, pinAttempt: enteredPin.trim() })
+    return true
+  } catch {
+    const bookingSnap = await getDoc(doc(db, 'bookings', bookingId))
+    if (!bookingSnap.exists() || bookingSnap.data().startPin !== enteredPin.trim()) return false
     await updateDoc(doc(db, 'bookings', bookingId), { pinVerified: true })
+    return true
   }
-  return correct
 }
 
 export function subscribeTripBookings(tripId: string, callback: (bookings: ReturnType<typeof mapBookingDoc>[]) => void) {
