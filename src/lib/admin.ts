@@ -14,6 +14,9 @@ import {
   setDoc,
   runTransaction,
   limit,
+  getDocs,
+  writeBatch,
+  serverTimestamp,
 } from 'firebase/firestore'
 import { db } from './firebase'
 
@@ -25,6 +28,7 @@ export interface PendingDriver {
   nationalIdImageUrl?: string
   nationalIdBackImageUrl?: string
   licenseImageUrl?: string
+  licenseBackImageUrl?: string
   vehicleLicenseImageUrl?: string
   vehicleImageUrl?: string
   selfieVerificationUrl?: string
@@ -40,6 +44,7 @@ function mapDriverRecord(id: string, data: Record<string, unknown>): PendingDriv
     nationalIdImageUrl: data.nationalIdImageUrl as string | undefined,
     nationalIdBackImageUrl: data.nationalIdBackImageUrl as string | undefined,
     licenseImageUrl: data.licenseImageUrl as string | undefined,
+    licenseBackImageUrl: data.licenseBackImageUrl as string | undefined,
     vehicleLicenseImageUrl: data.vehicleLicenseImageUrl as string | undefined,
     vehicleImageUrl: data.vehicleImageUrl as string | undefined,
     selfieVerificationUrl: data.selfieVerificationUrl as string | undefined,
@@ -444,4 +449,31 @@ export async function replyToSupportReport(report: SupportReport, adminReply: st
     status,
     repliedAt: new Date(),
   })
+}
+
+export async function sendNotificationToAllUsers(title: string, body: string): Promise<number> {
+  const cleanTitle = title.trim()
+  const cleanBody = body.trim()
+  if (!cleanTitle || !cleanBody) throw new Error('اكتب عنوان الرسالة ومحتواها')
+
+  const usersSnapshot = await getDocs(query(collection(db, 'users'), where('status', '==', 'active')))
+  const recipients = usersSnapshot.docs
+  for (let start = 0; start < recipients.length; start += 450) {
+    const batch = writeBatch(db)
+    recipients.slice(start, start + 450).forEach((userDocument) => {
+      const notificationRef = doc(collection(db, 'users', userDocument.id, 'notifications'))
+      batch.set(notificationRef, {
+        userId: userDocument.id,
+        actorId: 'admin',
+        type: 'admin_broadcast',
+        title: cleanTitle,
+        body: cleanBody,
+        relatedId: null,
+        isRead: false,
+        createdAt: serverTimestamp(),
+      })
+    })
+    await batch.commit()
+  }
+  return recipients.length
 }
