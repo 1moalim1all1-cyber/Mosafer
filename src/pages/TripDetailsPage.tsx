@@ -247,6 +247,7 @@ export default function TripDetailsPage() {
       {pickingLocation && (
         <LocationPicker
           title={t('tripDetails.pickupPickerTitle')}
+          autoLocate
           initialLat={pickupPoint?.lat}
           initialLng={pickupPoint?.lng}
           onClose={() => setPickingLocation(false)}
