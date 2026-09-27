@@ -23,15 +23,17 @@ export async function submitDriverDocuments(params: {
   nationalId: File
   nationalIdBack: File
   license: File
+  licenseBack: File
   vehicleLicense: File
   vehicleImage: File
   selfie: File
   vehicle: DriverVehicle
 }) {
-  const [nationalIdUrl, nationalIdBackUrl, licenseUrl, vehicleLicenseUrl, vehicleImageUrl, selfieUrl] = await Promise.all([
+  const [nationalIdUrl, nationalIdBackUrl, licenseUrl, licenseBackUrl, vehicleLicenseUrl, vehicleImageUrl, selfieUrl] = await Promise.all([
     uploadImageToCloudinary(params.nationalId, 'mosafer/drivers/national_id'),
     uploadImageToCloudinary(params.nationalIdBack, 'mosafer/drivers/national_id'),
     uploadImageToCloudinary(params.license, 'mosafer/drivers/license'),
+    uploadImageToCloudinary(params.licenseBack, 'mosafer/drivers/license'),
     uploadImageToCloudinary(params.vehicleLicense, 'mosafer/drivers/license'),
     uploadImageToCloudinary(params.vehicleImage, 'mosafer/drivers/vehicle'),
     uploadImageToCloudinary(params.selfie, 'mosafer/users/profile'),
@@ -44,6 +46,7 @@ export async function submitDriverDocuments(params: {
       nationalIdImageUrl: nationalIdUrl,
       nationalIdBackImageUrl: nationalIdBackUrl,
       licenseImageUrl: licenseUrl,
+      licenseBackImageUrl: licenseBackUrl,
       vehicleLicenseImageUrl: vehicleLicenseUrl,
       vehicleImageUrl: vehicleImageUrl,
       selfieVerificationUrl: selfieUrl,
