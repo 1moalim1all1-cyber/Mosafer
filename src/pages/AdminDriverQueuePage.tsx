@@ -55,7 +55,8 @@ function DriverRow({ driver, approved = false }: { driver: PendingDriver; approv
   const docs = [
     { label: 'البطاقة — الوجه الأمامي', url: driver.nationalIdImageUrl },
     { label: 'البطاقة — الوجه الخلفي', url: driver.nationalIdBackImageUrl },
-    { label: t('admin.docLicense'), url: driver.licenseImageUrl },
+    { label: 'رخصة القيادة — الوجه الأمامي', url: driver.licenseImageUrl },
+    { label: 'رخصة القيادة — الوجه الخلفي', url: driver.licenseBackImageUrl },
     { label: t('admin.docVehicleLicense'), url: driver.vehicleLicenseImageUrl },
     { label: t('admin.docVehicleImage'), url: driver.vehicleImageUrl },
     { label: t('admin.docSelfie'), url: driver.selfieVerificationUrl },
