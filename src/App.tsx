@@ -78,6 +78,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'))
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
 const ChatsPage = lazy(() => import('./pages/ChatsPage'))
 const AdminReportsPage = lazy(() => import('./pages/AdminReportsPage'))
+const AdminBroadcastPage = lazy(() => import('./pages/AdminBroadcastPage'))
 
 export default function App() {
   return (
@@ -319,6 +320,16 @@ function AppShell() {
               <ProtectedRoute>
                 <AdminRoute>
                   <AdminReportsPage />
+                </AdminRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/broadcast"
+            element={
+              <ProtectedRoute>
+                <AdminRoute>
+                  <AdminBroadcastPage />
                 </AdminRoute>
               </ProtectedRoute>
             }
