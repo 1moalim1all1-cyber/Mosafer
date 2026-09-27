@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { replyToSupportReport, subscribeSupportReports, setReportStatus, type SupportReport } from '../lib/admin'
-import { fetchUserProfile } from '../lib/users'
+import { fetchPrivateUserProfile } from '../lib/users'
 import { Button } from '../components/ui/Button'
 
 function ReportRow({ report }: { report: SupportReport }) {
@@ -13,7 +13,7 @@ function ReportRow({ report }: { report: SupportReport }) {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    fetchUserProfile(report.reporterId).then((u) => {
+    fetchPrivateUserProfile(report.reporterId).then((u) => {
       if (u?.fullName) setName(u.fullName)
     })
   }, [report.reporterId])
