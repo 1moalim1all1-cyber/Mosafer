@@ -229,13 +229,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       totalTrips: 0, avgRating: 0, status: 'active', language: 'ar', favoriteTrips: [],
       referralCode, referredByUid: null, createdAt: now.toDate(),
     }
+    // بعض الحسابات القديمة عندها محفظة بالفعل لكن مستند المستخدم ناقص.
+    // تحديث محفظة موجودة مرفوض للمستخدم لأسباب أمان، لذلك ننشئها فقط
+    // لو مش موجودة بدل ما نفشل عملية استكمال الحساب كلها.
+    const walletRef = doc(db, 'wallets', current.uid)
+    const walletSnap = await getDoc(walletRef)
     const batch = writeBatch(db)
     batch.set(doc(db, 'users', current.uid), {
       role: recoveredUser.role, fullName, phone, email: recoveredUser.email, gender: input.gender,
       isPhoneVerified: false, isEmailVerified: false, trustScore: 0, totalTrips: 0, avgRating: 0,
       status: 'active', language: 'ar', favoriteTrips: [], referralCode, referredByUid: null, createdAt: now,
     })
-    batch.set(doc(db, 'wallets', current.uid), { balance: 0, currency: 'EGP', createdAt: now }, { merge: true })
+    if (!walletSnap.exists()) {
+      batch.set(walletRef, { balance: 0, currency: 'EGP', createdAt: now })
+    }
     await batch.commit()
     const publicBatch = writeBatch(db)
     publicBatch.set(doc(db, 'publicProfiles', current.uid), {
