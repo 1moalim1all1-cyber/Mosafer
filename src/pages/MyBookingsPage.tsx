@@ -79,7 +79,7 @@ export default function MyBookingsPage() {
     if (!user) return
     setOpeningChatId(booking.id)
     try {
-      const chatId = await getOrCreateChat(user.uid, booking.driverId)
+      const chatId = await getOrCreateChat(user.uid, booking.driverId, { bookingId: booking.id })
       navigate(`/chat/${chatId}`)
     } catch {
       alert('تعذر فتح المحادثة، حاول تاني')
