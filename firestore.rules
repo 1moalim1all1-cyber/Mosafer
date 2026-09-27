@@ -81,7 +81,7 @@ service cloud.firestore {
         resource.data.verificationStatus != 'approved' &&
         request.resource.data.verificationStatus == resource.data.verificationStatus &&
         changedKeys().hasOnly([
-          'nationalIdImageUrl', 'nationalIdBackImageUrl', 'licenseImageUrl', 'vehicleLicenseImageUrl',
+          'nationalIdImageUrl', 'nationalIdBackImageUrl', 'licenseImageUrl', 'licenseBackImageUrl', 'vehicleLicenseImageUrl',
           'vehicleImageUrl', 'selfieVerificationUrl', 'vehicle'
         ])
       );
