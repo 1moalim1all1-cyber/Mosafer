@@ -477,3 +477,24 @@ export async function sendNotificationToAllUsers(title: string, body: string): P
   }
   return recipients.length
 }
+
+export async function migratePublicProfiles(): Promise<number> {
+  const usersSnapshot = await getDocs(collection(db, 'users'))
+  for (let start = 0; start < usersSnapshot.docs.length; start += 450) {
+    const batch = writeBatch(db)
+    usersSnapshot.docs.slice(start, start + 450).forEach((userDocument) => {
+      const data = userDocument.data()
+      batch.set(doc(db, 'publicProfiles', userDocument.id), {
+        uid: userDocument.id,
+        fullName: data.fullName ?? '',
+        profileImageUrl: data.profileImageUrl ?? null,
+        role: data.role ?? 'passenger',
+        trustScore: data.trustScore ?? 0,
+        totalTrips: data.totalTrips ?? 0,
+        avgRating: data.avgRating ?? 0,
+      }, { merge: true })
+    })
+    await batch.commit()
+  }
+  return usersSnapshot.size
+}
