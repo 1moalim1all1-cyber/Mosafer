@@ -19,7 +19,9 @@ service cloud.firestore {
     }
 
     function isActiveAccount() {
-      return isSignedIn() && userDoc().data.status == 'active';
+      // توافق آمن مع الحسابات القديمة التي أُنشئت قبل إضافة حقل status.
+      // الحساب الموقوف أو المحظور عنده قيمة صريحة، لذلك يظل ممنوعًا.
+      return isSignedIn() && userDoc().data.get('status', 'active') == 'active';
     }
 
     function userGender() {
