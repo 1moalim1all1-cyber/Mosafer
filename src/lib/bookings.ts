@@ -1,4 +1,4 @@
-import { collection, doc, query, where, orderBy, onSnapshot, updateDoc, Timestamp } from 'firebase/firestore'
+import { collection, doc, query, where, orderBy, onSnapshot, updateDoc, Timestamp, getDoc } from 'firebase/firestore'
 import { db } from './firebase'
 import type { Booking } from '../types/booking'
 
@@ -53,4 +53,9 @@ export function subscribePassengerBookings(passengerId: string, callback: (booki
   return onSnapshot(q, (snap) => {
     callback(snap.docs.map((d) => mapBookingDoc(d.id, d.data())))
   })
+}
+
+export async function fetchBookingStartPin(bookingId: string): Promise<string | null> {
+  const secret = await getDoc(doc(db, 'bookingSecrets', bookingId))
+  return secret.exists() ? (secret.data().pin as string) : null
 }
