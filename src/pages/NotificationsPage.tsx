@@ -14,6 +14,7 @@ const TYPE_ICONS: Record<string, string> = {
   promotion: '🏷️',
   walletUpdate: '👛',
   adminAlert: '📢',
+  admin_broadcast: '📢',
   new_booking: '💺',
   booking_accepted: '✅',
   booking_rejected: '❌',
