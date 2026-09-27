@@ -39,11 +39,13 @@ service cloud.firestore {
       return getAfter(/databases/$(database)/documents/bookings/$(bookingId));
     }
 
+    function bookingDoc(bookingId) {
+      return get(/databases/$(database)/documents/bookings/$(bookingId));
+    }
+
     // ---- Users ----
     match /users/{userId} {
-      // Temporary compatibility: authenticated users can view driver/passenger
-      // profiles. Move public fields to /publicProfiles before tightening reads.
-      allow read: if isSignedIn();
+      allow read: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) &&
         request.resource.data.role in ['passenger', 'driver'] &&
         request.resource.data.status == 'active' &&
@@ -68,6 +70,16 @@ service cloud.firestore {
           request.resource.data.actorId == request.auth.uid
         );
       }
+    }
+
+    match /publicProfiles/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if (isOwner(userId) || isAdmin()) &&
+        request.resource.data.uid == userId &&
+        request.resource.data.keys().hasOnly([
+          'uid', 'fullName', 'profileImageUrl', 'role', 'trustScore', 'totalTrips', 'avgRating'
+        ]);
+      allow delete: if isAdmin();
     }
 
     // ---- Drivers ----
@@ -119,7 +131,7 @@ service cloud.firestore {
         ) ||
         (
           isActiveAccount() &&
-          changedKeys().hasOnly(['availableSeats', 'status', 'lastBookingId']) &&
+          changedKeys().hasOnly(['availableSeats', 'status', 'lastBookingId', 'participantIds']) &&
           request.resource.data.lastBookingId is string &&
           linkedBooking(request.resource.data.lastBookingId).data.tripId == tripId &&
           (
@@ -143,14 +155,25 @@ service cloud.firestore {
             )
           ) &&
           request.resource.data.availableSeats >= 0 &&
-          request.resource.data.availableSeats <= resource.data.totalSeats
+          request.resource.data.availableSeats <= resource.data.totalSeats &&
+          (
+            linkedBooking(request.resource.data.lastBookingId).data.status != 'pending' ||
+            (
+              request.auth.uid in request.resource.data.participantIds &&
+              request.resource.data.participantIds.size() <= resource.data.get('participantIds', []).size() + 1
+            )
+          )
         );
 
       allow delete: if isAdmin() ||
         (isApprovedDriver() && resource.data.driverId == request.auth.uid);
 
       match /locationHistory/{pointId} {
-        allow read: if isSignedIn();
+        allow read: if isSignedIn() && (
+          get(/databases/$(database)/documents/trips/$(tripId)).data.driverId == request.auth.uid ||
+          request.auth.uid in get(/databases/$(database)/documents/trips/$(tripId)).data.get('participantIds', []) ||
+          isAdmin()
+        );
         allow create: if isApprovedDriver() &&
           get(/databases/$(database)/documents/trips/$(tripId)).data.driverId == request.auth.uid;
         allow update, delete: if false;
@@ -213,8 +236,19 @@ service cloud.firestore {
             (
               resource.data.status == 'confirmed' &&
               request.resource.data.status == 'confirmed' &&
-              changedKeys().hasOnly(['pinVerified']) &&
-              request.resource.data.pinVerified == true
+              (
+                (
+                  changedKeys().hasOnly(['pinVerified', 'pinAttempt']) &&
+                  request.resource.data.pinVerified == true &&
+                  request.resource.data.pinAttempt ==
+                    get(/databases/$(database)/documents/bookingSecrets/$(bookingId)).data.pin
+                ) ||
+                (
+                  resource.data.startPin is string &&
+                  changedKeys().hasOnly(['pinVerified']) &&
+                  request.resource.data.pinVerified == true
+                )
+              )
             ) ||
             (
               resource.data.status == 'confirmed' &&
@@ -224,6 +258,17 @@ service cloud.firestore {
           )
         );
       allow delete: if isAdmin();
+    }
+
+    match /bookingSecrets/{bookingId} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.passengerId == request.auth.uid);
+      allow create: if isSignedIn() &&
+        request.resource.data.bookingId == bookingId &&
+        request.resource.data.passengerId == request.auth.uid &&
+        request.resource.data.pin is string &&
+        request.resource.data.pin.size() == 4 &&
+        getAfter(/databases/$(database)/documents/bookings/$(bookingId)).data.passengerId == request.auth.uid;
+      allow update, delete: if false;
     }
 
     // ---- Wallets (server/admin controlled during phase 1) ----
@@ -346,10 +391,28 @@ service cloud.firestore {
     match /ratings/{ratingId} {
       allow read: if true;
       allow create: if isSignedIn() &&
+        ratingId == request.resource.data.bookingId + '_' + request.auth.uid &&
         request.resource.data.fromUserId == request.auth.uid &&
+        request.resource.data.keys().hasOnly([
+          'tripId', 'bookingId', 'fromUserId', 'toUserId', 'direction', 'stars', 'comment', 'isReported', 'createdAt'
+        ]) &&
         request.resource.data.stars is int &&
         request.resource.data.stars >= 1 &&
-        request.resource.data.stars <= 5;
+        request.resource.data.stars <= 5 &&
+        bookingDoc(request.resource.data.bookingId).data.status == 'completed' &&
+        bookingDoc(request.resource.data.bookingId).data.tripId == request.resource.data.tripId &&
+        (
+          (
+            request.resource.data.direction == 'passengerToDriver' &&
+            bookingDoc(request.resource.data.bookingId).data.passengerId == request.auth.uid &&
+            bookingDoc(request.resource.data.bookingId).data.driverId == request.resource.data.toUserId
+          ) ||
+          (
+            request.resource.data.direction == 'driverToPassenger' &&
+            bookingDoc(request.resource.data.bookingId).data.driverId == request.auth.uid &&
+            bookingDoc(request.resource.data.bookingId).data.passengerId == request.resource.data.toUserId
+          )
+        );
       allow update, delete: if isAdmin();
     }
 
