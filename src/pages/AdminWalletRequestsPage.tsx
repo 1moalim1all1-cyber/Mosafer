@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { subscribePendingWalletRequests, resolveWalletRequest, type WalletRequestRow } from '../lib/admin'
-import { fetchUserProfile } from '../lib/users'
+import { fetchPrivateUserProfile } from '../lib/users'
 import type { AppUser } from '../types/user'
 import { Button } from '../components/ui/Button'
 
@@ -12,7 +12,7 @@ function RequestRow({ request }: { request: WalletRequestRow }) {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    fetchUserProfile(request.userId).then(setUser)
+    fetchPrivateUserProfile(request.userId).then(setUser)
   }, [request.userId])
 
   async function handle(approve: boolean) {
