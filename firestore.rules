@@ -43,6 +43,10 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/bookings/$(bookingId));
     }
 
+    function offerDoc(offerId) {
+      return get(/databases/$(database)/documents/tripOffers/$(offerId));
+    }
+
     // ---- Users ----
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
@@ -333,11 +337,39 @@ service cloud.firestore {
       allow create: if (
         isActiveAccount() &&
         request.resource.data.passengerId == request.auth.uid &&
-        request.resource.data.driverId != request.auth.uid
+        request.resource.data.driverId != request.auth.uid &&
+        (
+          (
+            request.resource.data.relatedBookingId is string &&
+            bookingDoc(request.resource.data.relatedBookingId).data.passengerId == request.resource.data.passengerId &&
+            bookingDoc(request.resource.data.relatedBookingId).data.driverId == request.resource.data.driverId &&
+            bookingDoc(request.resource.data.relatedBookingId).data.status in ['confirmed', 'completed']
+          ) ||
+          (
+            request.resource.data.relatedOfferId is string &&
+            offerDoc(request.resource.data.relatedOfferId).data.passengerId == request.resource.data.passengerId &&
+            offerDoc(request.resource.data.relatedOfferId).data.driverId == request.resource.data.driverId &&
+            offerDoc(request.resource.data.relatedOfferId).data.status == 'accepted'
+          )
+        )
       ) || (
         isApprovedDriver() &&
         request.resource.data.driverId == request.auth.uid &&
-        request.resource.data.passengerId != request.auth.uid
+        request.resource.data.passengerId != request.auth.uid &&
+        (
+          (
+            request.resource.data.relatedBookingId is string &&
+            bookingDoc(request.resource.data.relatedBookingId).data.passengerId == request.resource.data.passengerId &&
+            bookingDoc(request.resource.data.relatedBookingId).data.driverId == request.resource.data.driverId &&
+            bookingDoc(request.resource.data.relatedBookingId).data.status in ['confirmed', 'completed']
+          ) ||
+          (
+            request.resource.data.relatedOfferId is string &&
+            offerDoc(request.resource.data.relatedOfferId).data.passengerId == request.resource.data.passengerId &&
+            offerDoc(request.resource.data.relatedOfferId).data.driverId == request.resource.data.driverId &&
+            offerDoc(request.resource.data.relatedOfferId).data.status == 'accepted'
+          )
+        )
       );
       allow update: if isSignedIn() &&
         (resource.data.passengerId == request.auth.uid ||
