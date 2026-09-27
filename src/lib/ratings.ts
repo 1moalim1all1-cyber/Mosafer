@@ -1,9 +1,11 @@
-import { collection, addDoc, query, where, limit, getDocs, Timestamp } from 'firebase/firestore'
+import { collection, doc, getDoc, setDoc, query, where, limit, getDocs, Timestamp } from 'firebase/firestore'
 import { db } from './firebase'
 
 export type RatingDirection = 'passengerToDriver' | 'driverToPassenger'
 
 export async function hasRated(bookingId: string, fromUserId: string): Promise<boolean> {
+  const secured = await getDoc(doc(db, 'ratings', `${bookingId}_${fromUserId}`))
+  if (secured.exists()) return true
   const q = query(
     collection(db, 'ratings'),
     where('bookingId', '==', bookingId),
@@ -23,8 +25,9 @@ export async function submitRating(params: {
   stars: number
   comment?: string
 }) {
-  await addDoc(collection(db, 'ratings'), {
-    ...params,
+  const cleanParams = Object.fromEntries(Object.entries(params).filter(([, value]) => value !== undefined))
+  await setDoc(doc(db, 'ratings', `${params.bookingId}_${params.fromUserId}`), {
+    ...cleanParams,
     isReported: false,
     createdAt: Timestamp.now(),
   })
