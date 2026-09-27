@@ -258,6 +258,7 @@ export default function CreateTripPage() {
       {pickingLocation && (
         <LocationPicker
           title={pickingLocation === 'origin' ? t('driver.originPointTitle') : t('driver.destinationPointTitle')}
+          autoLocate={pickingLocation === 'origin'}
           initialLat={pickingLocation === 'origin' ? originPoint?.lat : destinationPoint?.lat}
           initialLng={pickingLocation === 'origin' ? originPoint?.lng : destinationPoint?.lng}
           onClose={() => setPickingLocation(null)}
