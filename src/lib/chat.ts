@@ -20,8 +20,16 @@ export interface ChatMessage {
   createdAt: Date
 }
 
-/** إيجاد أو إنشاء محادثة بين راكب وسائق - نفس منطق نسخة Flutter */
-export async function getOrCreateChat(passengerId: string, driverId: string): Promise<string> {
+export type ChatRelation =
+  | { bookingId: string; offerId?: never }
+  | { offerId: string; bookingId?: never }
+
+/** إيجاد أو إنشاء محادثة مرتبطة بحجز فعلي أو عرض وافق عليه الراكب. */
+export async function getOrCreateChat(
+  passengerId: string,
+  driverId: string,
+  relation?: ChatRelation,
+): Promise<string> {
   const q = query(
     collection(db, 'chats'),
     where('passengerId', '==', passengerId),
@@ -35,6 +43,8 @@ export async function getOrCreateChat(passengerId: string, driverId: string): Pr
   await setDoc(chatRef, {
     passengerId,
     driverId,
+    ...(relation?.bookingId ? { relatedBookingId: relation.bookingId } : {}),
+    ...(relation?.offerId ? { relatedOfferId: relation.offerId } : {}),
     createdAt: Timestamp.now(),
     lastMessage: '',
     lastMessageAt: Timestamp.now(),
