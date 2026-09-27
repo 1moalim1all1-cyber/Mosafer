@@ -44,6 +44,7 @@ export default function DriverDocumentsPage() {
   const [nationalId, setNationalId] = useState<File | null>(null)
   const [nationalIdBack, setNationalIdBack] = useState<File | null>(null)
   const [license, setLicense] = useState<File | null>(null)
+  const [licenseBack, setLicenseBack] = useState<File | null>(null)
   const [vehicleLicense, setVehicleLicense] = useState<File | null>(null)
   const [vehicleImage, setVehicleImage] = useState<File | null>(null)
   const [selfie, setSelfie] = useState<File | null>(null)
@@ -60,8 +61,8 @@ export default function DriverDocumentsPage() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!nationalId || !nationalIdBack || !license || !vehicleLicense || !vehicleImage || !selfie) {
-      setError('ارفع كل المستندات المطلوبة، ومنها صورة البطاقة وش وظهر')
+    if (!nationalId || !nationalIdBack || !license || !licenseBack || !vehicleLicense || !vehicleImage || !selfie) {
+      setError('ارفع كل المستندات المطلوبة، ومنها البطاقة ورخصة القيادة وش وظهر')
       return
     }
     if (!make || !model || !plateNumber || !year) {
@@ -78,6 +79,7 @@ export default function DriverDocumentsPage() {
         nationalId,
         nationalIdBack,
         license,
+        licenseBack,
         vehicleLicense,
         vehicleImage,
         selfie,
@@ -107,7 +109,8 @@ export default function DriverDocumentsPage() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <FileField label="صورة البطاقة — الوجه الأمامي" file={nationalId} onChange={setNationalId} chooseLabel={t('driver.tapToChoosePhoto')} />
         <FileField label="صورة البطاقة — الوجه الخلفي" file={nationalIdBack} onChange={setNationalIdBack} chooseLabel={t('driver.tapToChoosePhoto')} />
-        <FileField label={t('driver.docLicense')} file={license} onChange={setLicense} chooseLabel={t('driver.tapToChoosePhoto')} />
+        <FileField label="رخصة القيادة — الوجه الأمامي" file={license} onChange={setLicense} chooseLabel={t('driver.tapToChoosePhoto')} />
+        <FileField label="رخصة القيادة — الوجه الخلفي" file={licenseBack} onChange={setLicenseBack} chooseLabel={t('driver.tapToChoosePhoto')} />
         <FileField label={t('driver.docVehicleLicense')} file={vehicleLicense} onChange={setVehicleLicense} chooseLabel={t('driver.tapToChoosePhoto')} />
         <FileField label={t('driver.docVehicleImage')} file={vehicleImage} onChange={setVehicleImage} chooseLabel={t('driver.tapToChoosePhoto')} />
         <FileField label={t('driver.docSelfie')} file={selfie} onChange={setSelfie} chooseLabel={t('driver.tapToChoosePhoto')} />
