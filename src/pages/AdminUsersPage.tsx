@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Search, ShieldCheck, ShieldX, ShieldAlert } from 'lucide-react'
-import { subscribeAllUsers, setUserStatus, type ManagedUser } from '../lib/admin'
+import { migratePublicProfiles, subscribeAllUsers, setUserStatus, type ManagedUser } from '../lib/admin'
 
 function getRoleLabels(t: (key: string) => string): Record<ManagedUser['role'], string> {
   return {
@@ -29,6 +29,8 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState<'all' | ManagedUser['role']>('all')
   const [busyUid, setBusyUid] = useState<string | null>(null)
+  const [migrating, setMigrating] = useState(false)
+  const [migrationResult, setMigrationResult] = useState('')
 
   useEffect(() => subscribeAllUsers(setUsers), [])
 
@@ -85,6 +87,10 @@ export default function AdminUsersPage() {
       </div>
 
       <main className="mx-auto max-w-lg px-4 py-6">
+        <button onClick={async () => { setMigrating(true); setMigrationResult(''); try { const count = await migratePublicProfiles(); setMigrationResult(`تم تأمين وتجهيز ${count} ملف عام`) } finally { setMigrating(false) } }} disabled={migrating} className="mb-3 w-full rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm font-bold text-primary disabled:opacity-50">
+          {migrating ? 'جاري تأمين ملفات المستخدمين...' : '🔐 تأمين ونقل الملفات العامة'}
+        </button>
+        {migrationResult && <p className="mb-3 rounded-xl bg-success/10 p-3 text-center text-sm font-semibold text-success">✅ {migrationResult}</p>}
         <p className="mb-3 text-sm text-text-secondary">{filtered.length} {t('admin.usersCount')}</p>
 
         {filtered.map((u) => (
