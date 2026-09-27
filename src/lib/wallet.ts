@@ -10,6 +10,7 @@ export interface WalletTransaction {
   method?: string | null
   accountNumber?: string | null
   senderNumber?: string | null
+  transactionReference?: string | null
   createdAt: Date
 }
 
@@ -35,6 +36,7 @@ export function subscribeWalletTransactions(uid: string, callback: (txs: WalletT
           method: data.method ?? null,
           accountNumber: data.accountNumber ?? null,
           senderNumber: data.senderNumber ?? null,
+          transactionReference: data.transactionReference ?? null,
           createdAt: created?.toDate ? created.toDate() : new Date(),
         }
       }),
@@ -47,11 +49,13 @@ export function subscribeWalletTransactions(uid: string, callback: (txs: WalletT
  * كاش/إنستاباي) على رقم الإدارة، وبيسجّل هنا المبلغ ورقمه هو (اللي
  * حوّل منه) عشان الإدارة تتأكد وتقفل الطلب.
  */
-export async function requestDeposit(uid: string, amount: number, senderNumber: string) {
+export async function requestDeposit(uid: string, amount: number, senderNumber: string, method: string, transactionReference: string) {
   await addDoc(collection(db, 'wallets', uid, 'walletTransactions'), {
     type: 'deposit',
     amount,
     senderNumber,
+    method,
+    transactionReference,
     status: 'pending',
     createdAt: Timestamp.now(),
   })
