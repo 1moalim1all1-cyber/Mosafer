@@ -35,6 +35,8 @@ export default function WalletPage() {
 
   const [depositAmount, setDepositAmount] = useState('')
   const [senderNumber, setSenderNumber] = useState('')
+  const [depositMethod, setDepositMethod] = useState('')
+  const [transactionReference, setTransactionReference] = useState('')
 
   const [withdrawAmount, setWithdrawAmount] = useState('')
   const [withdrawMethod, setWithdrawMethod] = useState(WITHDRAW_METHODS[0])
@@ -54,11 +56,18 @@ export default function WalletPage() {
     }
   }, [user])
 
+  const depositMethods = settings ? [
+    { name: 'فودافون كاش', number: settings.depositVodafoneNumber },
+    { name: 'أورنج كاش', number: settings.depositOrangeNumber },
+    { name: 'اتصالات كاش', number: settings.depositEtisalatNumber },
+  ].filter((method) => method.number.trim()) : []
+  const selectedDepositMethod = depositMethods.find((method) => method.name === depositMethod) ?? depositMethods[0]
+
   async function handleDeposit() {
-    if (!user || !depositAmount || Number(depositAmount) <= 0 || !senderNumber.trim()) return
+    if (!user || !depositAmount || Number(depositAmount) <= 0 || !senderNumber.trim() || !selectedDepositMethod || !transactionReference.trim()) return
     setLoading(true)
     try {
-      await requestDeposit(user.uid, Number(depositAmount), senderNumber.trim())
+      await requestDeposit(user.uid, Number(depositAmount), senderNumber.trim(), selectedDepositMethod.name, transactionReference.trim())
       setSubmitted(true)
     } finally {
       setLoading(false)
@@ -84,6 +93,8 @@ export default function WalletPage() {
     setSubmitted(false)
     setDepositAmount('')
     setSenderNumber('')
+    setDepositMethod('')
+    setTransactionReference('')
     setWithdrawAmount('')
     setAccountNumber('')
   }
@@ -172,18 +183,30 @@ export default function WalletPage() {
             ) : (
               <>
                 <h3 className="mb-4 text-lg font-bold text-text-primary">{t('wallet.depositTitle')}</h3>
-                {settings?.depositPhoneNumber ? (
+                {selectedDepositMethod ? (
                   <div className="mb-4 rounded-xl bg-primary-light p-4 text-center">
                     <p className="mb-1 text-sm text-text-secondary">{t('wallet.transferFirstTo')}</p>
-                    <p className="text-lg font-bold text-primary">{settings.depositMethodName}</p>
+                    <p className="text-lg font-bold text-primary">{selectedDepositMethod.name}</p>
                     <p dir="ltr" className="text-xl font-bold text-primary">
-                      {settings.depositPhoneNumber}
+                      {selectedDepositMethod.number}
                     </p>
                   </div>
                 ) : (
                   <p className="mb-4 text-sm text-danger">{t('wallet.depositNotConfigured')}</p>
                 )}
                 <div className="flex flex-col gap-3">
+                  {depositMethods.length > 1 && (
+                    <div>
+                      <label className="mb-1.5 block text-sm font-semibold text-text-primary">اختر المحفظة</label>
+                      <select
+                        value={selectedDepositMethod?.name ?? ''}
+                        onChange={(e) => setDepositMethod(e.target.value)}
+                        className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 focus:border-primary focus:outline-none"
+                      >
+                        {depositMethods.map((method) => <option key={method.name} value={method.name}>{method.name}</option>)}
+                      </select>
+                    </div>
+                  )}
                   <Input
                     label={`${t('wallet.transferredAmount')} (${t('common.currency')})`}
                     type="number"
@@ -197,6 +220,13 @@ export default function WalletPage() {
                     dir="ltr"
                     hint={t('wallet.senderNumberHint')}
                   />
+                  <Input
+                    label="رقم العملية أو المرجع"
+                    value={transactionReference}
+                    onChange={(e) => setTransactionReference(e.target.value)}
+                    dir="ltr"
+                    hint="موجود في رسالة تأكيد التحويل"
+                  />
                 </div>
                 <div className="mt-4 flex gap-3">
                   <Button variant="secondary" onClick={closeModal} fullWidth>
@@ -205,7 +235,7 @@ export default function WalletPage() {
                   <Button
                     onClick={handleDeposit}
                     loading={loading}
-                    disabled={!depositAmount || !senderNumber.trim()}
+                    disabled={!depositAmount || !senderNumber.trim() || !transactionReference.trim() || !selectedDepositMethod}
                     fullWidth
                   >
                     {t('wallet.confirmTransferred')}
