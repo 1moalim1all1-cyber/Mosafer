@@ -53,6 +53,7 @@ export async function sendTripOffer(input: {
     title: 'وصلك عرض رحلة جديد!',
     body: `${input.driverName} بعتلك عرض بسعر ${input.pricePerSeat} ج.م للمقعد. شوف التفاصيل.`,
     relatedId: input.requestId,
+    sourceId: docRef.id,
     isRead: false,
     createdAt: Timestamp.now(),
   }).catch(() => undefined)
@@ -101,6 +102,7 @@ export async function respondToTripOffer(offer: TripOffer, accept: boolean): Pro
       ? `تقدر تكلّم الراكب دلوقتي وتتفقوا على تفاصيل الرحلة (${route})`
       : `الراكب مش متاح للعرض ده، جرّب رحلات تانية في مجتمع الرحلات`,
     relatedId: chatId ?? offer.requestId,
+    sourceId: offer.id,
     isRead: false,
     createdAt: Timestamp.now(),
   }).catch(() => undefined)
