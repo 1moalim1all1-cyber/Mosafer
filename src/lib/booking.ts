@@ -6,6 +6,7 @@ import {
   where,
   limit,
   getDocs,
+  getDoc,
   increment,
   runTransaction,
   Timestamp,
@@ -42,6 +43,13 @@ export async function createBooking(params: {
   const tripRef = doc(db, 'trips', tripId)
   const bookingRef = doc(collection(db, 'bookings'))
   const userRef = doc(db, 'users', uid)
+  let securePinStorage = false
+  try {
+    await getDoc(doc(db, 'publicProfiles', uid))
+    securePinStorage = true
+  } catch {
+    // توافق مؤقت لحد نشر قواعد Firebase الجديدة.
+  }
 
   // لازم نلاقي مرجع الكوبون *قبل* الدخول في الـ Transaction، لأن
   // Firestore على الويب مبيسمحش بعمل Query جوه Transaction - بس قراءة
@@ -106,7 +114,7 @@ export async function createBooking(params: {
         availableSeats: newAvailable,
         status: newAvailable === 0 ? 'full' : 'active',
         lastBookingId: bookingRef.id,
-        participantIds: arrayUnion(uid),
+        ...(securePinStorage ? { participantIds: arrayUnion(uid) } : {}),
       })
 
       if (appliedCouponRef) {
@@ -126,16 +134,19 @@ export async function createBooking(params: {
         paymentStatus,
         pickupLat: pickupLat ?? null,
         pickupLng: pickupLng ?? null,
+        ...(!securePinStorage ? { startPin: String(Math.floor(1000 + Math.random() * 9000)) } : {}),
         pinVerified: false,
         createdAt: serverTimestamp(),
       })
-      tx.set(doc(db, 'bookingSecrets', bookingRef.id), {
-        bookingId: bookingRef.id,
-        passengerId: uid,
-        driverId: trip.driverId,
-        pin: String(Math.floor(1000 + Math.random() * 9000)),
-        createdAt: serverTimestamp(),
-      })
+      if (securePinStorage) {
+        tx.set(doc(db, 'bookingSecrets', bookingRef.id), {
+          bookingId: bookingRef.id,
+          passengerId: uid,
+          driverId: trip.driverId,
+          pin: String(Math.floor(1000 + Math.random() * 9000)),
+          createdAt: serverTimestamp(),
+        })
+      }
     })
     if (bookedDriverId) {
       await addDoc(collection(db, 'users', bookedDriverId, 'notifications'), {
