@@ -50,14 +50,14 @@ export default function DriverDashboardPage() {
     const acceptedOffers = offers.filter((offer) => offer.status === 'accepted')
     if (acceptedOffers.length === 0) return
     Promise.all(
-      acceptedOffers.map((offer) => getOrCreateChat(offer.passengerId, offer.driverId)),
+      acceptedOffers.map((offer) => getOrCreateChat(offer.passengerId, offer.driverId, { offerId: offer.id })),
     ).catch(() => setChatError('في عرض مقبول لكن تعذر تجهيز المحادثة. اضغط «تواصل مع الراكب» وحاول تاني.'))
   }, [offers])
 
   async function contactPassenger(offer: TripOffer) {
     try {
       setChatError('')
-      const chatId = await getOrCreateChat(offer.passengerId, offer.driverId)
+      const chatId = await getOrCreateChat(offer.passengerId, offer.driverId, { offerId: offer.id })
       navigate(`/chat/${chatId}`)
     } catch (error) {
       setChatError(error instanceof Error ? error.message : 'تعذر فتح المحادثة')
