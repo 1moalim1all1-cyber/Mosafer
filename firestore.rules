@@ -362,7 +362,29 @@ service cloud.firestore {
           request.resource.data.amount is number &&
           request.resource.data.amount > 0 &&
           request.resource.data.amount <= 50000 &&
-          !request.resource.data.keys().hasAny(['balanceAfter']);
+          !request.resource.data.keys().hasAny(['balanceAfter']) &&
+          request.resource.data.keys().hasOnly([
+            'type', 'amount', 'status', 'method', 'senderNumber', 'transactionReference', 'accountNumber', 'createdAt'
+          ]) &&
+          (
+            (
+              request.resource.data.type == 'deposit' &&
+              request.resource.data.method in ['فودافون كاش', 'أورنج كاش', 'اتصالات كاش'] &&
+              request.resource.data.senderNumber is string &&
+              request.resource.data.senderNumber.size() >= 10 &&
+              request.resource.data.senderNumber.size() <= 20 &&
+              request.resource.data.transactionReference is string &&
+              request.resource.data.transactionReference.size() >= 3 &&
+              request.resource.data.transactionReference.size() <= 100
+            ) ||
+            (
+              request.resource.data.type == 'withdraw' &&
+              request.resource.data.method is string &&
+              request.resource.data.accountNumber is string &&
+              request.resource.data.accountNumber.size() >= 8 &&
+              request.resource.data.accountNumber.size() <= 100
+            )
+          );
         allow update: if isAdmin();
         allow delete: if isAdmin();
       }
