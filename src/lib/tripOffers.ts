@@ -89,7 +89,7 @@ export async function respondToTripOffer(offer: TripOffer, accept: boolean): Pro
   // الشات، وإشعار السائق يقدر يفتح المحادثة مباشرة.
   let chatId: string | null = null
   if (accept) {
-    chatId = await getOrCreateChat(offer.passengerId, offer.driverId).catch(() => null)
+    chatId = await getOrCreateChat(offer.passengerId, offer.driverId, { offerId: offer.id }).catch(() => null)
   }
 
   await addDoc(collection(db, 'users', offer.driverId, 'notifications'), {
