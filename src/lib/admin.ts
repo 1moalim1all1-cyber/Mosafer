@@ -164,6 +164,7 @@ export interface WalletRequestRow {
   method?: string | null
   accountNumber?: string | null
   senderNumber?: string | null
+  transactionReference?: string | null
   createdAt: Date
 }
 
@@ -182,6 +183,7 @@ export function subscribePendingWalletRequests(callback: (items: WalletRequestRo
           method: data.method ?? null,
           accountNumber: data.accountNumber ?? null,
           senderNumber: data.senderNumber ?? null,
+          transactionReference: data.transactionReference ?? null,
           createdAt: created?.toDate ? created.toDate() : new Date(),
         }
       }),
@@ -232,6 +234,9 @@ export interface AppSettings {
   supportEmail: string
   depositMethodName: string
   depositPhoneNumber: string
+  depositVodafoneNumber: string
+  depositOrangeNumber: string
+  depositEtisalatNumber: string
   heroImageUrl: string
   heroTitle: string
   heroSubtitle: string
@@ -282,6 +287,9 @@ export async function fetchAppSettings(): Promise<AppSettings> {
     supportEmail: data.supportEmail ?? '',
     depositMethodName: data.depositMethodName ?? 'فودافون كاش',
     depositPhoneNumber: data.depositPhoneNumber ?? '',
+    depositVodafoneNumber: data.depositVodafoneNumber ?? (data.depositMethodName === 'فودافون كاش' ? data.depositPhoneNumber ?? '' : ''),
+    depositOrangeNumber: data.depositOrangeNumber ?? (data.depositMethodName === 'أورنج كاش' ? data.depositPhoneNumber ?? '' : ''),
+    depositEtisalatNumber: data.depositEtisalatNumber ?? (data.depositMethodName === 'اتصالات كاش' ? data.depositPhoneNumber ?? '' : ''),
     heroImageUrl: data.heroImageUrl ?? '',
     heroTitle: data.heroTitle ?? 'رحلتك...\nتبدأ من هنا',
     heroSubtitle: data.heroSubtitle ?? 'احجز رحلتك بين جميع المحافظات بأمان وسهولة وبأفضل الأسعار',
