@@ -173,7 +173,7 @@ function BookingCard({ booking, onRate }: { booking: BookingRow; onRate: () => v
     if (!user) return
     setOpeningChat(true)
     try {
-      const chatId = await getOrCreateChat(booking.passengerId, user.uid)
+      const chatId = await getOrCreateChat(booking.passengerId, user.uid, { bookingId: booking.id })
       navigate(`/chat/${chatId}`)
     } catch {
       alert('تعذر فتح المحادثة، حاول تاني')
