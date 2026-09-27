@@ -179,26 +179,24 @@ export default function AdminSettingsPage() {
         </div>
 
         <h2 className="mb-3 font-bold text-text-primary">{t('settings.depositReceiving')}</h2>
-        <p className="mb-3 text-sm text-text-secondary">{t('settings.depositHint')}</p>
+        <p className="mb-3 text-sm text-text-secondary">أدخل أرقام المحافظ المتاحة. أي محفظة رقمها فارغ لن تظهر للمستخدم.</p>
         <div className="mb-6 flex flex-col gap-3">
-          <div>
-            <label className="mb-1.5 block text-sm font-semibold text-text-primary">{t('settings.depositMethod')}</label>
-            <select
-              value={settings.depositMethodName}
-              onChange={(e) => setSettings({ ...settings, depositMethodName: e.target.value })}
-              className="w-full rounded-xl border-2 border-border bg-card px-4 py-3 focus:border-primary focus:outline-none"
-            >
-              <option value="فودافون كاش">فودافون كاش</option>
-              <option value="إنستاباي">إنستاباي</option>
-              <option value="اتصالات كاش">اتصالات كاش</option>
-              <option value="أورنج كاش">أورنج كاش</option>
-              <option value="تحويل بنكي">تحويل بنكي</option>
-            </select>
-          </div>
           <Input
-            label={t('settings.accountNumber')}
-            value={settings.depositPhoneNumber}
-            onChange={(e) => setSettings({ ...settings, depositPhoneNumber: e.target.value })}
+            label="رقم فودافون كاش"
+            value={settings.depositVodafoneNumber}
+            onChange={(e) => setSettings({ ...settings, depositVodafoneNumber: e.target.value })}
+            dir="ltr"
+          />
+          <Input
+            label="رقم أورنج كاش"
+            value={settings.depositOrangeNumber}
+            onChange={(e) => setSettings({ ...settings, depositOrangeNumber: e.target.value })}
+            dir="ltr"
+          />
+          <Input
+            label="رقم اتصالات كاش"
+            value={settings.depositEtisalatNumber}
+            onChange={(e) => setSettings({ ...settings, depositEtisalatNumber: e.target.value })}
             dir="ltr"
           />
         </div>
