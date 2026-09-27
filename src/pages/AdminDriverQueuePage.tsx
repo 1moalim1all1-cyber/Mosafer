@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { subscribePendingDrivers, subscribeApprovedDrivers, approveDriver, rejectDriver, returnDriverToReview, type PendingDriver } from '../lib/admin'
-import { fetchUserProfile } from '../lib/users'
+import { fetchPrivateUserProfile } from '../lib/users'
 import type { AppUser } from '../types/user'
 import { Button } from '../components/ui/Button'
 
@@ -13,7 +13,7 @@ function DriverRow({ driver, approved = false }: { driver: PendingDriver; approv
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    fetchUserProfile(driver.uid).then(setUser)
+    fetchPrivateUserProfile(driver.uid).then(setUser)
   }, [driver.uid])
 
   async function handleApprove() {
