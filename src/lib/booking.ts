@@ -11,6 +11,7 @@ import {
   Timestamp,
   serverTimestamp,
   addDoc,
+  arrayUnion,
 } from 'firebase/firestore'
 import type { PaymentMethod } from '../types/booking'
 
@@ -105,6 +106,7 @@ export async function createBooking(params: {
         availableSeats: newAvailable,
         status: newAvailable === 0 ? 'full' : 'active',
         lastBookingId: bookingRef.id,
+        participantIds: arrayUnion(uid),
       })
 
       if (appliedCouponRef) {
@@ -124,10 +126,14 @@ export async function createBooking(params: {
         paymentStatus,
         pickupLat: pickupLat ?? null,
         pickupLng: pickupLng ?? null,
-        // كود تحقق من 4 أرقام - السائق بيطلبه من الراكب وقت الاستلام
-        // عشان يتأكد إنه فعلاً الشخص اللي حجز، زي نظام Uber بالظبط
-        startPin: String(Math.floor(1000 + Math.random() * 9000)),
         pinVerified: false,
+        createdAt: serverTimestamp(),
+      })
+      tx.set(doc(db, 'bookingSecrets', bookingRef.id), {
+        bookingId: bookingRef.id,
+        passengerId: uid,
+        driverId: trip.driverId,
+        pin: String(Math.floor(1000 + Math.random() * 9000)),
         createdAt: serverTimestamp(),
       })
     })
