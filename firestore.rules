@@ -47,6 +47,75 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/tripOffers/$(offerId));
     }
 
+    function tripDoc(tripId) {
+      return get(/databases/$(database)/documents/trips/$(tripId));
+    }
+
+    function chatDoc(chatId) {
+      return get(/databases/$(database)/documents/chats/$(chatId));
+    }
+
+    function validUserNotification(targetUserId) {
+      return request.resource.data.userId == targetUserId &&
+        request.resource.data.actorId == request.auth.uid &&
+        request.resource.data.isRead == false &&
+        request.resource.data.type is string &&
+        request.resource.data.title is string &&
+        request.resource.data.title.size() > 0 &&
+        request.resource.data.title.size() <= 120 &&
+        request.resource.data.body is string &&
+        request.resource.data.body.size() <= 500 &&
+        request.resource.data.keys().hasOnly([
+          'userId', 'actorId', 'type', 'title', 'body', 'relatedId', 'sourceId', 'isRead', 'createdAt'
+        ]) &&
+        (
+          (
+            request.resource.data.type == 'new_booking' &&
+            request.resource.data.relatedId is string &&
+            tripDoc(request.resource.data.relatedId).data.driverId == targetUserId &&
+            request.auth.uid in tripDoc(request.resource.data.relatedId).data.get('participantIds', [])
+          ) ||
+          (
+            request.resource.data.type in ['booking_accepted', 'booking_rejected'] &&
+            request.resource.data.relatedId is string &&
+            bookingDoc(request.resource.data.relatedId).data.passengerId == targetUserId &&
+            bookingDoc(request.resource.data.relatedId).data.driverId == request.auth.uid
+          ) ||
+          (
+            request.resource.data.type == 'chat_message' &&
+            request.resource.data.relatedId is string &&
+            (
+              (
+                chatDoc(request.resource.data.relatedId).data.passengerId == request.auth.uid &&
+                chatDoc(request.resource.data.relatedId).data.driverId == targetUserId
+              ) ||
+              (
+                chatDoc(request.resource.data.relatedId).data.driverId == request.auth.uid &&
+                chatDoc(request.resource.data.relatedId).data.passengerId == targetUserId
+              )
+            )
+          ) ||
+          (
+            request.resource.data.type == 'tripOffer' &&
+            request.resource.data.sourceId is string &&
+            offerDoc(request.resource.data.sourceId).data.driverId == request.auth.uid &&
+            offerDoc(request.resource.data.sourceId).data.passengerId == targetUserId &&
+            offerDoc(request.resource.data.sourceId).data.requestId == request.resource.data.relatedId
+          ) ||
+          (
+            request.resource.data.type in ['tripOfferAccepted', 'tripOfferResponse'] &&
+            request.resource.data.sourceId is string &&
+            offerDoc(request.resource.data.sourceId).data.passengerId == request.auth.uid &&
+            offerDoc(request.resource.data.sourceId).data.driverId == targetUserId
+          ) ||
+          (
+            request.resource.data.type == 'trip_status' &&
+            request.resource.data.relatedId is string &&
+            tripDoc(request.resource.data.relatedId).data.driverId == request.auth.uid
+          )
+        );
+    }
+
     // ---- Users ----
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
@@ -67,12 +136,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
 
       match /notifications/{notificationId} {
-        allow read, update, delete: if isOwner(userId) || isAdmin();
-        allow create: if isAdmin() || (
-          isSignedIn() &&
-          request.resource.data.userId == userId &&
-          request.resource.data.actorId == request.auth.uid
+        allow read, delete: if isOwner(userId) || isAdmin();
+        allow update: if isAdmin() || (
+          isOwner(userId) &&
+          changedKeys().hasOnly(['isRead']) &&
+          request.resource.data.isRead is bool
         );
+        allow create: if isAdmin() || (isActiveAccount() && validUserNotification(userId));
       }
     }
 
