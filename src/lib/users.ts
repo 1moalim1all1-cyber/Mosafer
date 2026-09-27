@@ -1,4 +1,4 @@
-import { doc, getDoc, writeBatch } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { db, auth } from './firebase'
 import type { AppUser } from '../types/user'
 import type { DriverProfile } from '../types/booking'
@@ -67,15 +67,13 @@ export async function updateMyProfile(input: { fullName: string; profileImageUrl
   if (!uid) throw new Error('لازم تسجّل دخول الأول')
   const fullName = input.fullName.trim()
   if (fullName.length < 2) throw new Error('اكتب اسم صحيح')
-  const batch = writeBatch(db)
-  batch.update(doc(db, 'users', uid), {
+  await updateDoc(doc(db, 'users', uid), {
     fullName,
     ...(input.profileImageUrl !== undefined ? { profileImageUrl: input.profileImageUrl } : {}),
   })
-  batch.set(doc(db, 'publicProfiles', uid), {
+  await setDoc(doc(db, 'publicProfiles', uid), {
     uid,
     fullName,
     ...(input.profileImageUrl !== undefined ? { profileImageUrl: input.profileImageUrl } : {}),
-  }, { merge: true })
-  await batch.commit()
+  }, { merge: true }).catch(() => undefined)
 }
