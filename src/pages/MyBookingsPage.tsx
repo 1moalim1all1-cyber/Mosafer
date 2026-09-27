@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/useAuth'
-import { subscribePassengerBookings } from '../lib/bookings'
+import { fetchBookingStartPin, subscribePassengerBookings } from '../lib/bookings'
 import { cancelBooking, claimBookingRefund } from '../lib/booking'
 import { hasRated } from '../lib/ratings'
 import type { Booking } from '../types/booking'
@@ -30,6 +30,7 @@ export default function MyBookingsPage() {
   const [cancellingId, setCancellingId] = useState<string | null>(null)
   const [ratingBooking, setRatingBooking] = useState<Booking | null>(null)
   const [openingChatId, setOpeningChatId] = useState<string | null>(null)
+  const [bookingPins, setBookingPins] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (!user) return
@@ -42,6 +43,15 @@ export default function MyBookingsPage() {
     if (pending.length === 0) return
     void Promise.all(pending.map((b) => claimBookingRefund(b.id).catch(() => undefined)))
   }, [bookings, user])
+
+  useEffect(() => {
+    const missing = bookings.filter((booking) => booking.status === 'confirmed' && !booking.pinVerified && !booking.startPin && !bookingPins[booking.id])
+    if (missing.length === 0) return
+    void Promise.all(missing.map(async (booking) => {
+      const pin = await fetchBookingStartPin(booking.id).catch(() => null)
+      if (pin) setBookingPins((current) => ({ ...current, [booking.id]: pin }))
+    }))
+  }, [bookings, bookingPins])
 
   async function openRating(booking: Booking) {
     if (!user) return
@@ -106,11 +116,11 @@ export default function MyBookingsPage() {
             <p className="mb-3 text-text-primary">
               {b.seatsBooked} {t('bookings.seatsCount')} · {b.totalPrice.toFixed(0)} {t('common.currency')}
             </p>
-            {b.status === 'confirmed' && b.startPin && !b.pinVerified && (
+            {b.status === 'confirmed' && (bookingPins[b.id] || b.startPin) && !b.pinVerified && (
               <div className="mb-3 rounded-xl bg-primary-light p-3 text-center">
                 <p className="mb-1 text-xs text-text-secondary">{t('bookings.sayThisCode')}</p>
                 <p dir="ltr" className="text-2xl font-bold tracking-[0.3em] text-primary">
-                  {b.startPin}
+                  {bookingPins[b.id] || b.startPin}
                 </p>
               </div>
             )}
