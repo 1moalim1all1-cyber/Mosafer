@@ -89,7 +89,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
       const snap = await getDoc(doc(db, 'users', fbUser.uid))
-      setUser(snap.exists() ? mapUserDoc(fbUser.uid, snap.data()) : null)
+      const mapped = snap.exists() ? mapUserDoc(fbUser.uid, snap.data()) : null
+      setUser(mapped)
+      if (mapped) {
+        const publicBatch = writeBatch(db)
+        publicBatch.set(doc(db, 'publicProfiles', fbUser.uid), {
+          uid: fbUser.uid, fullName: mapped.fullName, profileImageUrl: mapped.profileImageUrl ?? null,
+          role: mapped.role, trustScore: mapped.trustScore, totalTrips: mapped.totalTrips, avgRating: mapped.avgRating,
+        }, { merge: true })
+        await publicBatch.commit().catch(() => undefined)
+      }
       setLoading(false)
     })
     return unsubscribe
@@ -143,6 +152,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         referralCode: myReferralCode,
         referredByUid,
         createdAt: now,
+      })
+      batch.set(doc(db, 'publicProfiles', uid), {
+        uid, fullName: input.fullName.trim(), profileImageUrl: null, role: input.role,
+        trustScore: 0, totalTrips: 0, avgRating: 0,
       })
       batch.set(doc(db, 'wallets', uid), { balance: welcomeBonus, currency: 'EGP', createdAt: now })
       await batch.commit()
@@ -219,6 +232,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isPhoneVerified: false, isEmailVerified: false, trustScore: 0, totalTrips: 0, avgRating: 0,
       status: 'active', language: 'ar', favoriteTrips: [], referralCode, referredByUid: null, createdAt: now,
     })
+    batch.set(doc(db, 'publicProfiles', current.uid), {
+      uid: current.uid, fullName, profileImageUrl: null, role: recoveredUser.role,
+      trustScore: 0, totalTrips: 0, avgRating: 0,
+    }, { merge: true })
     batch.set(doc(db, 'wallets', current.uid), { balance: 0, currency: 'EGP', createdAt: now }, { merge: true })
     await batch.commit()
     await updateProfile(current, { displayName: fullName })
