@@ -404,6 +404,25 @@ export async function deleteTrip(tripId: string) {
   await deleteDoc(doc(db, 'trips', tripId))
 }
 
+/** يقفل الرحلات القديمة المفتوحة مع الاحتفاظ بسجلها للمراجعة والمحاسبة. */
+export async function expireOldTrips(tripIds: string[]) {
+  if (tripIds.length === 0) return 0
+  let updated = 0
+  for (let offset = 0; offset < tripIds.length; offset += 400) {
+    const batch = writeBatch(db)
+    const chunk = tripIds.slice(offset, offset + 400)
+    chunk.forEach((tripId) => batch.update(doc(db, 'trips', tripId), {
+      status: 'expired',
+      driverLiveLat: null,
+      driverLiveLng: null,
+      driverLiveUpdatedAt: null,
+    }))
+    await batch.commit()
+    updated += chunk.length
+  }
+  return updated
+}
+
 export interface SupportReport {
   id: string
   reporterId: string
