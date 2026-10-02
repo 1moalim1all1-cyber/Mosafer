@@ -178,8 +178,9 @@ export default function TrackTripPage() {
         <MapContainer center={center} zoom={hasLiveDriver ? 14 : 11} style={{ height: '100%', width: '100%' }}>
           <LiveMapViewport points={[driverPoint, passengerPoint, originPoint, destinationPoint].filter((point): point is [number, number] => point !== null)} />
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            maxZoom={19}
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           {passengerPoint && driverPoint && (
             <Polyline positions={[driverPoint, passengerPoint]} color="#7C3AED" weight={3} dashArray="6 8" />

@@ -228,7 +228,11 @@ export default function TripsCommunityPage() {
         {feedType === 'requests' && !loading && requests.length > 0 && view === 'map' && (
           <div className="overflow-hidden rounded-2xl border border-border" style={{ height: 'min(68vh, 680px)' }}>
             <MapContainer center={[26.8, 30.8]} zoom={country === 'saudi' ? 5 : 6} style={{ height: '100%', width: '100%' }}>
-              <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maxZoom={19}
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
               {requests.map((request) => {
                 const coords = request.originLat != null && request.originLng != null
                   ? { lat: request.originLat, lng: request.originLng }

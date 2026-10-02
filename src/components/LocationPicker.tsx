@@ -118,8 +118,9 @@ export function LocationPicker({ title, initialLat, initialLng, onConfirm, onClo
       <div className="relative flex-1">
         <MapContainer center={point ?? EGYPT_CENTER} zoom={point ? 15 : 6} style={{ height: '100%', width: '100%' }}>
           <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            maxZoom={19}
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           {!autoLocate && <ClickHandler onPick={(lat, lng) => setPoint([lat, lng])} />}
           {autoLocate ? (

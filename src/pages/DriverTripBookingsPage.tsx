@@ -84,7 +84,11 @@ function PickupMiniMap({ tripId, pickupLat, pickupLng, passengerLiveLat, passeng
         <div style={{ height: 140 }} className="pointer-events-none">
           <MapContainer center={driverPoint ?? pickupPoint} zoom={13} style={{ height: '100%', width: '100%' }} attributionControl={false}>
             <LiveMapViewport points={[driverPoint, pickupPoint].filter((point): point is [number, number] => point !== null)} />
-            <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              maxZoom={19}
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />
             {driverPoint && <Polyline positions={[driverPoint, pickupPoint]} color="#1E40AF" weight={3} dashArray="6 8" />}
             <Marker position={pickupPoint} icon={pickupIcon} />
             {driverPoint && <Marker position={driverPoint} icon={driverIcon} />}
@@ -113,7 +117,11 @@ function PickupMiniMap({ tripId, pickupLat, pickupLng, passengerLiveLat, passeng
           <div className="flex-1">
             <MapContainer center={driverPoint ?? pickupPoint} zoom={14} style={{ height: '100%', width: '100%' }}>
               <LiveMapViewport points={[driverPoint, pickupPoint].filter((point): point is [number, number] => point !== null)} />
-              <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maxZoom={19}
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
               {driverPoint && <Polyline positions={[driverPoint, pickupPoint]} color="#1E40AF" weight={3} dashArray="6 8" />}
               <Marker position={pickupPoint} icon={pickupIcon} />
               {driverPoint && <Marker position={driverPoint} icon={driverIcon} />}
