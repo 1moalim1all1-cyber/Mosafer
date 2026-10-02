@@ -1,6 +1,7 @@
 import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet'
 import L from 'leaflet'
 import type { Trip } from '../types/trip'
+import { isLiveLocationFresh } from '../lib/geolocation'
 
 const originIcon = new L.DivIcon({
   html: '<div style="background:#22C55E;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>',
@@ -8,12 +9,11 @@ const originIcon = new L.DivIcon({
   iconSize: [16, 16],
 })
 
-const destinationIcon = new L.Icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
+const destinationIcon = new L.DivIcon({
+  html: '<div style="background:#EF4444;width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 10px rgba(239,68,68,.45);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg)">🏁</span></div>',
+  className: '',
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
 })
 
 const driverIcon = new L.DivIcon({
@@ -23,18 +23,12 @@ const driverIcon = new L.DivIcon({
   iconAnchor: [18, 18],
 })
 
-/** بنعتبر الموقع "حي" لو اتحدّث خلال آخر 60 ثانية، زي نسخة Flutter بالظبط */
-function isLiveLocationFresh(updatedAt?: Date | null): boolean {
-  if (!updatedAt) return false
-  return (Date.now() - updatedAt.getTime()) / 1000 < 60
-}
-
 export function TripRouteMap({ trip }: { trip: Trip }) {
   const origin: [number, number] = [trip.originLat, trip.originLng]
   const destination: [number, number] = [trip.destinationLat, trip.destinationLng]
   const center: [number, number] = [(trip.originLat + trip.destinationLat) / 2, (trip.originLng + trip.destinationLng) / 2]
 
-  const hasLiveDriver = isLiveLocationFresh(trip.driverLiveUpdatedAt) && trip.driverLiveLat && trip.driverLiveLng
+  const hasLiveDriver = isLiveLocationFresh(trip.driverLiveUpdatedAt) && trip.driverLiveLat != null && trip.driverLiveLng != null
   const driverPoint: [number, number] | null = hasLiveDriver ? [trip.driverLiveLat!, trip.driverLiveLng!] : null
 
   return (

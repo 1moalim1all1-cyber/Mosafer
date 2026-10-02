@@ -4,4 +4,7 @@
     <string name="title_activity_main">مسافر</string>
     <string name="package_name">app.mosafer.egypt</string>
     <string name="custom_url_scheme">app.mosafer.egypt</string>
+    <string name="capacitor_background_geolocation_notification_channel_name">تتبع رحلة مسافر</string>
+    <string name="capacitor_background_geolocation_notification_icon">mipmap/ic_launcher</string>
+    <string name="capacitor_background_geolocation_notification_color">#2563EB</string>
 </resources>

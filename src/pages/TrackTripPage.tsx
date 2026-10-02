@@ -7,6 +7,8 @@ import { subscribeBooking } from '../lib/bookings'
 import { subscribeToTrip, fetchLocationHistory } from '../lib/trips'
 import { fetchUserProfile } from '../lib/users'
 import { calculateDistanceKm, estimateEtaMinutes } from '../lib/geo'
+import { isLiveLocationFresh } from '../lib/geolocation'
+import { stopPersistentLocationWatcher } from '../lib/locationWatcher'
 import { EmergencyButton } from '../components/EmergencyButton'
 import { PassengerLiveLocationToggle } from '../components/PassengerLiveLocationToggle'
 import { LiveMapViewport } from '../components/LiveMapViewport'
@@ -37,11 +39,6 @@ const destinationIcon = new L.DivIcon({
   className: '', iconSize: [38, 38], iconAnchor: [19, 38],
 })
 
-function isLiveLocationFresh(updatedAt?: Date | null): boolean {
-  if (!updatedAt) return false
-  return (Date.now() - updatedAt.getTime()) / 1000 < 60
-}
-
 export default function TrackTripPage() {
   const { bookingId } = useParams<{ bookingId: string }>()
   const navigate = useNavigate()
@@ -49,6 +46,12 @@ export default function TrackTripPage() {
   const [booking, setBooking] = useState<Booking | null | undefined>(undefined)
   const [trip, setTrip] = useState<Trip | null>(null)
   const [driver, setDriver] = useState<AppUser | null>(null)
+  const [now, setNow] = useState(Date.now())
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 15_000)
+    return () => window.clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     if (!bookingId) return
@@ -65,12 +68,19 @@ export default function TrackTripPage() {
     fetchUserProfile(booking.driverId).then(setDriver)
   }, [booking?.driverId])
 
+  useEffect(() => {
+    if (!booking || booking.status === 'confirmed') return
+    const sharingKey = `mosafer:passenger-location:${booking.id}`
+    sessionStorage.removeItem(sharingKey)
+    void stopPersistentLocationWatcher(sharingKey).catch(() => undefined)
+  }, [booking])
+
   const hasPickup = booking?.pickupLat != null && booking?.pickupLng != null
-  const hasLiveDriver = trip ? isLiveLocationFresh(trip.driverLiveUpdatedAt) && trip.driverLiveLat != null && trip.driverLiveLng != null : false
+  const hasLiveDriver = trip ? isLiveLocationFresh(trip.driverLiveUpdatedAt, now) && trip.driverLiveLat != null && trip.driverLiveLng != null : false
 
   const pickupPoint: [number, number] | null = hasPickup ? [booking!.pickupLat!, booking!.pickupLng!] : null
   const driverPoint: [number, number] | null = hasLiveDriver ? [trip!.driverLiveLat!, trip!.driverLiveLng!] : null
-  const hasLivePassenger = isLiveLocationFresh(booking?.passengerLiveUpdatedAt) && booking?.passengerLiveLat != null && booking?.passengerLiveLng != null
+  const hasLivePassenger = isLiveLocationFresh(booking?.passengerLiveUpdatedAt, now) && booking?.passengerLiveLat != null && booking?.passengerLiveLng != null
   const passengerPoint: [number, number] | null = hasLivePassenger ? [booking!.passengerLiveLat!, booking!.passengerLiveLng!] : pickupPoint
   const originPoint: [number, number] | null = trip?.originLat != null && trip?.originLng != null ? [trip.originLat, trip.originLng] : null
   const destinationPoint: [number, number] | null = trip?.destinationLat != null && trip?.destinationLng != null ? [trip.destinationLat, trip.destinationLng] : null
@@ -199,6 +209,20 @@ export default function TrackTripPage() {
           <span className="rounded-full bg-purple-600/10 px-3 py-1.5 text-purple-500">👤 الراكب مباشر</span>
           <span className="rounded-full bg-red-600/10 px-3 py-1.5 text-red-500">🏁 وجهة الرحلة</span>
         </div>
+        {(driverPoint || passengerPoint) && (
+          <div className="mx-auto mb-3 flex max-w-3xl flex-wrap justify-center gap-2">
+            {driverPoint && passengerPoint && (
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&origin=${driverPoint[0]},${driverPoint[1]}&destination=${passengerPoint[0]},${passengerPoint[1]}&travelmode=driving`}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-xl bg-primary px-4 py-2 text-xs font-bold text-white"
+              >
+                🧭 فتح الطريق الفعلي على Google Maps
+              </a>
+            )}
+          </div>
+        )}
         <div className="mx-auto mb-4 grid max-w-3xl grid-cols-3 gap-2 text-center text-xs font-semibold">
           <div className={`rounded-xl p-2 ${trip.status === 'driver_arriving' ? 'bg-primary text-white' : 'bg-primary-light text-primary'}`}>السائق في الطريق</div>
           <div className={`rounded-xl p-2 ${trip.status === 'in_progress' ? 'bg-primary text-white' : 'bg-primary-light text-primary'}`}>الرحلة بدأت</div>
@@ -220,7 +244,7 @@ export default function TrackTripPage() {
             <span className="text-sm font-semibold text-primary">{t('track.driverOnWay')}</span>
             {distanceKm != null && etaMinutes != null && (
               <span className="text-sm font-bold text-primary">
-                {t('track.distanceEta', { km: distanceKm.toFixed(1), min: etaMinutes })}
+                تقريبًا: {t('track.distanceEta', { km: distanceKm.toFixed(1), min: etaMinutes })}
               </span>
             )}
           </div>

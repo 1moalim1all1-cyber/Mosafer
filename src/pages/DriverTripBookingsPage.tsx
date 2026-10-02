@@ -6,6 +6,8 @@ import L from 'leaflet'
 import { subscribeTripBookings, respondToBooking, markTripCompleted, verifyPassengerPin, updateTripStatus } from '../lib/driverActions'
 import { subscribeToTrip } from '../lib/trips'
 import { calculateDistanceKm, estimateEtaMinutes } from '../lib/geo'
+import { isLiveLocationFresh } from '../lib/geolocation'
+import { stopPersistentLocationWatcher } from '../lib/locationWatcher'
 import { fetchUserProfile } from '../lib/users'
 import { useAuth } from '../contexts/useAuth'
 import type { AppUser } from '../types/user'
@@ -29,11 +31,6 @@ const driverIcon = new L.DivIcon({
   iconSize: [34, 34],
   iconAnchor: [17, 17],
 })
-
-function isLiveLocationFresh(updatedAt?: Date | null): boolean {
-  if (!updatedAt) return false
-  return (Date.now() - updatedAt.getTime()) / 1000 < 60
-}
 
 interface BookingRow {
   id: string
@@ -74,7 +71,7 @@ function PickupMiniMap({ tripId, pickupLat, pickupLng, passengerLiveLat, passeng
 
   const passengerIsLive = isLiveLocationFresh(passengerLiveUpdatedAt) && passengerLiveLat != null && passengerLiveLng != null
   const pickupPoint: [number, number] = passengerIsLive ? [passengerLiveLat!, passengerLiveLng!] : [pickupLat, pickupLng]
-  const driverPoint: [number, number] | null = isFresh && driverLat && driverLng ? [driverLat, driverLng] : null
+  const driverPoint: [number, number] | null = isFresh && driverLat != null && driverLng != null ? [driverLat, driverLng] : null
   const distanceKm = driverPoint ? calculateDistanceKm(driverPoint[0], driverPoint[1], pickupLat, pickupLng) : null
 
   return (
@@ -124,7 +121,15 @@ function PickupMiniMap({ tripId, pickupLat, pickupLng, passengerLiveLat, passeng
           </div>
           {distanceKm != null && (
             <div className="border-t border-border bg-card p-4 text-center font-semibold text-primary">
-              {t('driver.distanceEta', { km: distanceKm.toFixed(1), min: estimateEtaMinutes(distanceKm) })}
+              <p className="mb-3">تقريبًا: {t('driver.distanceEta', { km: distanceKm.toFixed(1), min: estimateEtaMinutes(distanceKm) })}</p>
+              <a
+                href={`https://www.google.com/maps/dir/?api=1&destination=${pickupPoint[0]},${pickupPoint[1]}&travelmode=driving`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white"
+              >
+                🧭 افتح الطريق للراكب
+              </a>
             </div>
           )}
         </div>
@@ -285,6 +290,13 @@ export default function DriverTripBookingsPage() {
     return subscribeToTrip(tripId, setTrip)
   }, [tripId])
 
+  useEffect(() => {
+    if (!tripId || !trip || !['completed', 'cancelled', 'expired'].includes(trip.status)) return
+    const sharingKey = `mosafer:driver-location:${tripId}`
+    sessionStorage.removeItem(sharingKey)
+    void stopPersistentLocationWatcher(sharingKey).catch(() => undefined)
+  }, [trip, tripId])
+
   async function changeStatus(status: Trip['status']) {
     if (!tripId) return
     setChangingStatus(true)
@@ -303,6 +315,8 @@ export default function DriverTripBookingsPage() {
     setCompleting(true)
     try {
       await markTripCompleted(tripId)
+      sessionStorage.removeItem(`mosafer:driver-location:${tripId}`)
+      await stopPersistentLocationWatcher(`mosafer:driver-location:${tripId}`).catch(() => undefined)
       navigate('/driver')
     } catch {
       alert('حصل خطأ، حاول تاني')
@@ -336,7 +350,7 @@ export default function DriverTripBookingsPage() {
             {trip.status === 'in_progress' && <Button className="mt-3" onClick={handleComplete} loading={completing}>إنهاء الرحلة</Button>}
           </div>
         )}
-        {tripId && <LiveLocationToggle tripId={tripId} />}
+        {tripId && trip && !['completed', 'cancelled', 'expired'].includes(trip.status) && <LiveLocationToggle tripId={tripId} />}
         {bookings.length === 0 && <p className="py-12 text-center text-text-secondary">{t('driver.noBookingsYet')}</p>}
         <div className="grid gap-4 lg:grid-cols-2">
         {bookings.map((b) => (

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import { Button } from './ui/Button'
+import { highAccuracyPositionOptions, locationAccuracyLabel, mapGeolocationError, normalizePosition } from '../lib/geolocation'
 
 // إصلاح مشكلة شهيرة: Vite بيكسر مسارات أيقونات Leaflet الافتراضية،
 // فبنحددها يدويًا من CDN عام
@@ -24,7 +25,7 @@ function ClickHandler({ onPick }: { onPick: (lat: number, lng: number) => void }
   return null
 }
 
-function LocateButton({ onLocate }: { onLocate: (lat: number, lng: number) => void }) {
+function LocateButton({ onLocate, onError }: { onLocate: (lat: number, lng: number, accuracy: number) => void; onError: (message: string) => void }) {
   const map = useMap()
   const [loading, setLoading] = useState(false)
 
@@ -32,12 +33,17 @@ function LocateButton({ onLocate }: { onLocate: (lat: number, lng: number) => vo
     setLoading(true)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const { latitude, longitude } = pos.coords
-        onLocate(latitude, longitude)
-        map.setView([latitude, longitude], 15)
+        const position = normalizePosition(pos)
+        if (!position) return onError('وصلتنا إحداثيات غير صحيحة. حاول تاني')
+        onLocate(position.lat, position.lng, position.accuracy)
+        map.setView([position.lat, position.lng], 15)
         setLoading(false)
       },
-      () => setLoading(false),
+      (error) => {
+        onError(mapGeolocationError(error))
+        setLoading(false)
+      },
+      highAccuracyPositionOptions,
     )
   }
 
@@ -61,7 +67,7 @@ interface LocationPickerProps {
   autoLocate?: boolean
 }
 
-function AutoLocator({ onLocate, onError }: { onLocate: (lat: number, lng: number) => void; onError: (message: string) => void }) {
+function AutoLocator({ onLocate, onError }: { onLocate: (lat: number, lng: number, accuracy: number) => void; onError: (message: string) => void }) {
   const map = useMap()
   const locate = useCallback(() => {
     if (!navigator.geolocation) {
@@ -70,16 +76,13 @@ function AutoLocator({ onLocate, onError }: { onLocate: (lat: number, lng: numbe
     }
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const { latitude, longitude } = position.coords
-        onLocate(latitude, longitude)
-        map.setView([latitude, longitude], 16)
+        const current = normalizePosition(position)
+        if (!current) return onError('وصلتنا إحداثيات غير صحيحة. حاول تاني')
+        onLocate(current.lat, current.lng, current.accuracy)
+        map.setView([current.lat, current.lng], 16)
       },
-      (error) => {
-        if (error.code === error.PERMISSION_DENIED) onError('فعّل إذن الموقع GPS من إعدادات المتصفح وحاول تاني')
-        else if (error.code === error.TIMEOUT) onError('تحديد الموقع أخد وقت طويل. افتح GPS واضغط إعادة المحاولة')
-        else onError('تعذر تحديد موقعك. تأكد إن GPS شغال')
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
+      (error) => onError(mapGeolocationError(error)),
+      { ...highAccuracyPositionOptions, maximumAge: 0 },
     )
   }, [map, onError, onLocate])
 
@@ -94,9 +97,11 @@ export function LocationPicker({ title, initialLat, initialLng, onConfirm, onClo
   const initialPoint = initialLat != null && initialLng != null ? [initialLat, initialLng] as [number, number] : null
   const [point, setPoint] = useState<[number, number] | null>(autoLocate ? null : initialPoint ?? EGYPT_CENTER)
   const [locationError, setLocationError] = useState('')
+  const [accuracy, setAccuracy] = useState<number | null>(null)
   const [locateAttempt, setLocateAttempt] = useState(0)
-  const handleAutoLocate = useCallback((lat: number, lng: number) => {
+  const handleAutoLocate = useCallback((lat: number, lng: number, currentAccuracy: number) => {
     setLocationError('')
+    setAccuracy(currentAccuracy)
     setPoint([lat, lng])
   }, [])
   const handleAutoError = useCallback((message: string) => setLocationError(message), [])
@@ -124,7 +129,11 @@ export function LocationPicker({ title, initialLat, initialLng, onConfirm, onClo
               onError={handleAutoError}
             />
           ) : (
-            <LocateButton onLocate={(lat, lng) => setPoint([lat, lng])} />
+            <LocateButton onLocate={(lat, lng, currentAccuracy) => {
+              setPoint([lat, lng])
+              setAccuracy(currentAccuracy)
+              setLocationError('')
+            }} onError={setLocationError} />
           )}
           {point && <Marker position={point} icon={markerIcon} />}
         </MapContainer>
@@ -141,9 +150,12 @@ export function LocationPicker({ title, initialLat, initialLng, onConfirm, onClo
       <div className="border-t border-border p-4">
         <p className="mb-3 text-center text-sm text-text-secondary">
           {autoLocate
-            ? point ? 'تم تحديد موقعك الحالي تلقائيًا' : locationError || 'افتح GPS ووافق على إذن الموقع'
+            ? point ? `تم تحديد موقعك تلقائيًا — ${locationAccuracyLabel(accuracy ?? 0)}` : locationError || 'افتح GPS ووافق على إذن الموقع'
             : 'دوس في أي مكان على الخريطة لتحديد النقطة بالظبط'}
         </p>
+        {accuracy != null && accuracy > 100 && (
+          <p className="mb-3 rounded-xl bg-warning/10 p-2 text-center text-xs font-semibold text-warning">الدقة ضعيفة. استنى ثواني في مكان مفتوح واضغط زر الموقع تاني قبل التأكيد.</p>
+        )}
         {autoLocate && locationError && (
           <Button variant="secondary" onClick={() => {
             setLocationError('')

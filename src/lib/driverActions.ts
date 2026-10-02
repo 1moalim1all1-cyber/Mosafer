@@ -144,10 +144,20 @@ export async function markTripCompleted(tripId: string) {
       const trip = tripSnap.data()
       if (trip.driverId !== uid) throw new Error('الرحلة دي مش بتاعتك')
 
-      tx.update(tripRef, { status: 'completed' })
+      tx.update(tripRef, {
+        status: 'completed',
+        driverLiveLat: null,
+        driverLiveLng: null,
+        driverLiveUpdatedAt: null,
+      })
 
       for (const bookingDoc of bookingsSnap.docs) {
-        tx.update(bookingDoc.ref, { status: 'completed' })
+        tx.update(bookingDoc.ref, {
+          status: 'completed',
+          passengerLiveLat: null,
+          passengerLiveLng: null,
+          passengerLiveUpdatedAt: null,
+        })
       }
     })
     await notifyPassengerIds(

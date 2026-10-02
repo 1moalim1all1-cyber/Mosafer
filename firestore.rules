@@ -329,7 +329,12 @@ service cloud.firestore {
             (
               resource.data.status == 'confirmed' &&
               request.resource.data.status == 'completed' &&
-              changedKeys().hasOnly(['status'])
+              changedKeys().hasOnly([
+                'status', 'passengerLiveLat', 'passengerLiveLng', 'passengerLiveUpdatedAt'
+              ]) &&
+              request.resource.data.passengerLiveLat == null &&
+              request.resource.data.passengerLiveLng == null &&
+              request.resource.data.passengerLiveUpdatedAt == null
             )
           )
         );

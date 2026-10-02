@@ -7,6 +7,10 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: 'https',
   },
+  android: {
+    // مطلوب لاستمرار قناة التتبع الأصلية عند تصغير التطبيق لفترة طويلة.
+    useLegacyBridge: true,
+  },
 }
 
 export default config
