@@ -159,3 +159,9 @@ button:not(:disabled), a {
 .animate-shadow-pulse {
   animation: shadow-pulse 4s ease-in-out infinite;
 }
+
+/* Shared visual background for all signed-in screens; guest pages remain unchanged. */
+.authenticated-background { position: relative; min-height: 100vh; isolation: isolate; }
+.authenticated-background-image { position: fixed; inset: 0; z-index: -1; pointer-events: none; background-position: center 30%; background-size: cover; background-repeat: no-repeat; }
+.authenticated-background-content { position: relative; z-index: 0; }
+.authenticated-background .min-h-screen.bg-bg { background-color: transparent; }
