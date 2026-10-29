@@ -200,7 +200,7 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-bg text-white">
+    <div className="min-h-screen bg-tertiary text-white">
       {/* ---- Navbar ---- */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-tertiary/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
@@ -267,7 +267,7 @@ export default function LandingPage() {
       </header>
 
       {/* ---- Hero ---- */}
-      <section id="home" className="relative scroll-mt-20 min-h-[560px] overflow-hidden bg-gradient-to-br from-primary to-secondary sm:min-h-[640px]">
+      <section id="home" className="relative scroll-mt-20 min-h-[560px] overflow-hidden bg-tertiary sm:min-h-[640px]">
         <aside className="absolute left-4 top-8 z-20 hidden w-24 overflow-hidden rounded-2xl border border-purple-400/25 bg-[#071038]/80 text-center backdrop-blur lg:block">
           {[
             [Search, 'البحث عن رحلة', '/login'], [CarFront, 'رحلاتي', '/login'], [TicketCheck, 'حجوزاتي', '/login'],
@@ -282,10 +282,11 @@ export default function LandingPage() {
         <img
           src={heroImageUrl}
           alt=""
-          className="absolute inset-0 h-full w-full object-cover opacity-10"
+          className="absolute inset-0 h-full w-full object-cover"
           style={{ objectPosition: 'center 30%' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-bg/45 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-tertiary/70 via-tertiary/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-tertiary via-transparent to-transparent" />
 
         <div className="relative flex min-h-[420px] flex-col justify-center px-5 pt-14 sm:min-h-[480px] sm:px-10 sm:pt-20 lg:px-16">
           <div className="max-w-xl mr-auto">
