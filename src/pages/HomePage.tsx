@@ -43,6 +43,7 @@ export default function HomePage() {
   const [requestsLoading, setRequestsLoading] = useState(true)
   const [completedCount, setCompletedCount] = useState(0)
   const [driverStatus, setDriverStatus] = useState<string | null>(null)
+  const [heroImageUrl, setHeroImageUrl] = useState(`${import.meta.env.BASE_URL}hero-clean.png`)
   const [services, setServices] = useState({
     emergencyTitle: 'الإنقاذ السريع',
     emergencySubtitle: 'اطلب سيارة إنقاذ من مكانك',
@@ -57,6 +58,7 @@ export default function HomePage() {
 
   useEffect(() => {
     fetchAppSettings().then((settings) => {
+      if (settings.heroImageUrl) setHeroImageUrl(settings.heroImageUrl)
       setServices({
         emergencyTitle: settings.emergencyTitle,
         emergencySubtitle: settings.emergencySubtitle,
@@ -133,8 +135,11 @@ export default function HomePage() {
         </div>
       </header>
 
-      <div className="bg-gradient-to-br from-primary to-secondary px-4 pb-16 pt-8 text-white">
-        <div className="mx-auto max-w-7xl">
+      <div className="relative overflow-hidden bg-tertiary px-4 pb-16 pt-8 text-white">
+        <img src={heroImageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: 'center 30%' }} />
+        <div className="absolute inset-0 bg-gradient-to-r from-tertiary/70 via-tertiary/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-tertiary via-transparent to-transparent" />
+        <div className="relative mx-auto max-w-7xl">
           <h2 className="mb-1 text-2xl font-bold">{t('home.whereTo')}</h2>
           <p className="text-sm text-white/70">{t('home.heroSubtitle')}</p>
           {completedCount >= 5 && (
