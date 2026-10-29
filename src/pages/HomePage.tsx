@@ -9,7 +9,7 @@ import { subscribeUnreadCount } from '../lib/notifications'
 import { subscribeAvailableTrips, subscribeCompletedTripsCount } from '../lib/trips'
 import type { Trip } from '../types/trip'
 import { Animated3DCar } from '../components/Animated3DCar'
-import { Users2, Bell, MapPin, ArrowLeftRight, Users, Search, CarFront, Siren, ExternalLink, Handshake, CalendarDays, Clock3, ArrowLeft } from 'lucide-react'
+import { Users2, Bell, MapPin, ArrowLeftRight, Users, Search, CarFront, Siren, ExternalLink, Handshake, CalendarDays, Clock3, ArrowLeft, UserRound, Navigation2, Wallet, Headphones, MapPinned } from 'lucide-react'
 import { fetchAppSettings } from '../lib/admin'
 import { subscribeDriverStatus } from '../lib/driverActions'
 import { useCountry } from '../hooks/useCountry'
@@ -42,6 +42,7 @@ export default function HomePage() {
   const [tripRequests, setTripRequests] = useState<TripRequest[]>([])
   const [requestsLoading, setRequestsLoading] = useState(true)
   const [completedCount, setCompletedCount] = useState(0)
+  const [homeStats, setHomeStats] = useState({ drivers: '+500', trips: '+50K', users: '+100K', cities: '+27' })
   const [driverStatus, setDriverStatus] = useState<string | null>(null)
   const [heroImageUrl, setHeroImageUrl] = useState(`${import.meta.env.BASE_URL}hero-clean.png`)
   const [services, setServices] = useState({
@@ -59,6 +60,7 @@ export default function HomePage() {
   useEffect(() => {
     fetchAppSettings().then((settings) => {
       if (settings.heroImageUrl) setHeroImageUrl(settings.heroImageUrl)
+      setHomeStats({ drivers: settings.statDrivers, trips: settings.statTrips, users: settings.statUsers, cities: settings.statCities })
       setServices({
         emergencyTitle: settings.emergencyTitle,
         emergencySubtitle: settings.emergencySubtitle,
@@ -321,6 +323,42 @@ export default function HomePage() {
         )}
         </section>
       </main>
+
+
+      {/* نفس كروت المميزات والإحصائيات الموجودة في الصفحة العامة، ولكن في الرئيسية بعد الدخول فقط */}
+      <section className="mx-auto w-full max-w-7xl px-4 pb-8" aria-label="مميزات مسافر وإحصائيات المنصة">
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-6">
+          {[
+            { icon: UserRound, title: t('landing.featWomenDrivers'), desc: t('landing.featWomenDriversDesc') },
+            { icon: Users2, title: t('landing.featShared'), desc: t('landing.featSharedDesc') },
+            { icon: Navigation2, title: t('landing.featTracking'), desc: t('landing.featTrackingDesc') },
+            { icon: Wallet, title: t('landing.featPayment'), desc: t('landing.featPaymentDesc') },
+            { icon: Headphones, title: t('landing.featSupport'), desc: t('landing.featSupportDesc') },
+          ].map((feature) => (
+            <div key={feature.title} className="flex min-h-24 items-center gap-3 rounded-xl border border-purple-400/20 bg-[#071038]/90 p-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-purple-500/15 text-purple-400"><feature.icon size={24} /></div>
+              <div><p className="text-sm font-bold text-white">{feature.title}</p><p className="mt-1 text-[10px] leading-4 text-white/60">{feature.desc}</p></div>
+            </div>
+          ))}
+          <button type="button" onClick={() => services.emergencyActionUrl ? window.open(externalUrl(services.emergencyActionUrl), '_blank', 'noopener,noreferrer') : navigate('/support')} className="flex min-h-24 items-center gap-3 rounded-xl border border-red-400/30 bg-red-950/40 p-3 text-right">
+            {services.emergencyLogoUrl ? <img src={services.emergencyLogoUrl} alt="" className="h-12 w-12 object-contain" /> : <span className="text-3xl">🚨</span>}
+            <div><p className="text-sm font-bold text-red-300">{services.emergencyTitle}</p><p className="mt-1 text-[10px] leading-4 text-white/65">{services.emergencySubtitle}</p></div>
+          </button>
+        </div>
+        <div className="mt-3 grid grid-cols-2 overflow-hidden rounded-xl border border-purple-400/20 bg-[#071038]/90 sm:grid-cols-4">
+          {[
+            { key: 'drivers' as const, label: t('landing.statDrivers'), icon: UserRound },
+            { key: 'trips' as const, label: t('landing.statTrips'), icon: CarFront },
+            { key: 'users' as const, label: t('landing.statUsers'), icon: Users2 },
+            { key: 'cities' as const, label: t('landing.statCities'), icon: MapPinned },
+          ].map((stat) => (
+            <div key={stat.key} className="flex items-center justify-center gap-3 border-white/10 p-3 sm:border-l">
+              <stat.icon className="text-purple-400" />
+              <div><p className="font-extrabold text-purple-400">{homeStats[stat.key]}</p><p className="text-xs text-white/65">{stat.label}</p></div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {services.partners.length > 0 && (
         <section className="mx-auto w-full max-w-7xl px-4 pb-28 lg:pb-10">
