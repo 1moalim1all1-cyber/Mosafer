@@ -1,4 +1,5 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { fetchAppSettings } from './lib/admin'
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { ProtectedRoute, GuestOnlyRoute } from './routes/guards'
@@ -95,6 +96,16 @@ export default function App() {
  */
 function AppShell() {
   const { loading, firebaseUser } = useAuth()
+  const [backgroundUrl, setBackgroundUrl] = useState(`${import.meta.env.BASE_URL}hero-clean.png`)
+
+  useEffect(() => {
+    if (!firebaseUser) return
+    let active = true
+    fetchAppSettings().then((settings) => {
+      if (active && settings.heroImageUrl) setBackgroundUrl(settings.heroImageUrl)
+    }).catch(() => undefined)
+    return () => { active = false }
+  }, [firebaseUser])
 
   // لو التطبيق شغّال تمام (مفيش خطأ)، بنصفّي علامة "حصل Refresh قبل
   // كده" عشان لو تحديث تاني حصل بعدين ولسه نفس التاب مفتوح، آلية
@@ -107,6 +118,11 @@ function AppShell() {
 
   return (
     <HashRouter>
+      <div className={firebaseUser ? 'authenticated-background' : undefined}>
+        {firebaseUser && (
+          <div className="authenticated-background-image" aria-hidden="true" style={{ backgroundImage: `linear-gradient(rgba(2, 11, 45, .66), rgba(2, 11, 45, .82)), url(${JSON.stringify(backgroundUrl).slice(1,-1)})` }} />
+        )}
+        <div className="authenticated-background-content">
         {firebaseUser && <DesktopNav />}
         <WhatsAppButton />
         <PageTransition>
@@ -432,6 +448,8 @@ function AppShell() {
         </Suspense>
         </ChunkErrorBoundary>
         </PageTransition>
+        </div>
+      </div>
       </HashRouter>
   )
 }
