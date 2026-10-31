@@ -17,6 +17,9 @@ import { db, auth } from './firebase'
 import { uploadImageToCloudinary } from './cloudinary'
 import type { Trip } from '../types/trip'
 import type { DriverVehicle } from '../types/booking'
+import { fetchAppSettings } from './admin'
+import { calculateDistanceKm } from './geo'
+import { getFareQuote } from './farePricing'
 
 export async function submitDriverDocuments(params: {
   uid: string
@@ -116,6 +119,15 @@ export function subscribeDriverTrips(driverId: string, callback: (trips: Trip[])
 }
 
 export async function createTrip(trip: Omit<Trip, 'id'>): Promise<string> {
+  if (!Number.isFinite(trip.pricePerSeat) || trip.pricePerSeat <= 0) throw new Error('سعر المقعد غير صالح')
+  const settings = await fetchAppSettings()
+  if (settings.pricingEnabled) {
+    const distance = calculateDistanceKm(trip.originLat, trip.originLng, trip.destinationLat, trip.destinationLng)
+    const quote = getFareQuote(distance, settings)
+    if (!quote || trip.pricePerSeat < quote.minimum || trip.pricePerSeat > quote.maximum) {
+      throw new Error('سعر المقعد خارج حدود التسعير المعتمدة')
+    }
+  }
   const docRef = await addDoc(collection(db, 'trips'), {
     ...trip,
     createdAt: new Date(),
