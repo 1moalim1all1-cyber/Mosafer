@@ -40,6 +40,7 @@ import { DesktopNav } from './components/DesktopNav'
 import { ChunkErrorBoundary } from './components/ChunkErrorBoundary'
 import { WhatsAppButton } from './components/WhatsAppButton'
 import { PageTransition } from './components/PageTransition'
+import { SafeBackButton } from './components/SafeBackButton'
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const RoleSelectionPage = lazy(() => import('./pages/RoleSelectionPage'))
@@ -124,6 +125,7 @@ function AppShell() {
         )}
         <div className="authenticated-background-content">
         {firebaseUser && <DesktopNav />}
+        {firebaseUser && <SafeBackButton />}
         <WhatsAppButton />
         <PageTransition>
         <ChunkErrorBoundary>
