@@ -130,6 +130,7 @@ function RequestWithOffers({ request, statusConfig, onCancel, initiallyExpanded 
         {request.preferredTime && ` · ${request.preferredTime}`} · {request.seatsNeeded} {t('bookings.seatsCount')}
       </p>
 
+      {request.proposedPricePerSeat !== undefined && <p className="mb-2 text-sm text-primary">السعر المقترح للمقعد: {request.proposedPricePerSeat}</p>}
       <button onClick={() => setExpanded(!expanded)} className="mb-2 flex w-full items-center justify-between text-sm font-semibold text-primary">
         {t('community.offersReceived', { count: offers.length })}
         <ChevronDown size={16} className={`transition-transform ${expanded ? 'rotate-180' : ''}`} />
