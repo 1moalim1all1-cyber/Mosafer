@@ -513,9 +513,29 @@ service cloud.firestore {
          resource.data.driverId == request.auth.uid);
       allow create: if isApprovedDriver() &&
         request.resource.data.driverId == request.auth.uid;
-      allow update: if isSignedIn() &&
-        resource.data.passengerId == request.auth.uid &&
-        changedKeys().hasOnly(['status']);
+      allow update: if isSignedIn() && (
+        (resource.data.passengerId == request.auth.uid &&
+         changedKeys().hasOnly(['status']) &&
+         resource.data.status == 'pending' &&
+         request.resource.data.status in ['accepted', 'rejected'] &&
+         (request.resource.data.status != 'accepted' || resource.data.get('lastPriceBy', 'driver') == 'driver'))
+        ||
+        (resource.data.status == 'pending' &&
+         changedKeys().hasOnly(['counterPrice', 'lastPriceBy']) &&
+         request.resource.data.counterPrice is number &&
+         request.resource.data.counterPrice > 0 &&
+         request.resource.data.counterPrice <= 1000000 &&
+         (
+           (resource.data.passengerId == request.auth.uid &&
+            resource.data.get('lastPriceBy', 'driver') == 'driver' &&
+            request.resource.data.lastPriceBy == 'passenger')
+           ||
+           (resource.data.driverId == request.auth.uid &&
+            isApprovedDriver() &&
+            resource.data.get('lastPriceBy', 'driver') == 'passenger' &&
+            request.resource.data.lastPriceBy == 'driver')
+         ))
+      );
       allow delete: if isAdmin();
     }
 
