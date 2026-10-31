@@ -228,6 +228,10 @@ export async function resolveWalletRequest(userId: string, txId: string, approve
 export interface AppSettings {
   commissionStandardPercent: number
   commissionReturnEmptyPercent: number
+  pricingEnabled: boolean
+  pricingBaseFare: number
+  pricingPerKm: number
+  pricingTolerancePercent: number
   welcomeBonusAmount: number
   referralBonusAmount: number
   whatsappNumber: string
@@ -281,6 +285,10 @@ export async function fetchAppSettings(): Promise<AppSettings> {
   return {
     commissionStandardPercent: data.commissionStandardPercent ?? 10,
     commissionReturnEmptyPercent: data.commissionReturnEmptyPercent ?? 5,
+    pricingEnabled: data.pricingEnabled === true,
+    pricingBaseFare: data.pricingBaseFare ?? 0,
+    pricingPerKm: data.pricingPerKm ?? 0,
+    pricingTolerancePercent: data.pricingTolerancePercent ?? 20,
     welcomeBonusAmount: data.welcomeBonusAmount ?? 20,
     referralBonusAmount: data.referralBonusAmount ?? 15,
     whatsappNumber: data.whatsappNumber ?? '',

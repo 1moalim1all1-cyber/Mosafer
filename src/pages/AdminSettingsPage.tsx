@@ -47,6 +47,10 @@ export default function AdminSettingsPage() {
 
   async function handleSave() {
     if (!settings) return
+    if (![settings.pricingBaseFare, settings.pricingPerKm, settings.pricingTolerancePercent].every(Number.isFinite) || settings.pricingBaseFare < 0 || settings.pricingPerKm < 0 || settings.pricingTolerancePercent < 0 || settings.pricingTolerancePercent > 100 || (settings.pricingEnabled && settings.pricingBaseFare + settings.pricingPerKm <= 0)) {
+      alert('راجع إعدادات التسعير: أدخل أرقامًا صحيحة ونسبة سماح من 0 إلى 100%')
+      return
+    }
     setSaving(true)
     setSaved(false)
     try {
@@ -91,6 +95,14 @@ export default function AdminSettingsPage() {
           />
         </div>
 
+        <h2 className="mb-3 font-bold text-text-primary">التسعير المقترح للسائق</h2>
+        <div className="mb-6 flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
+          <label className="flex items-center gap-2 text-text-primary"><input type="checkbox" checked={settings.pricingEnabled} onChange={(e) => setSettings({ ...settings, pricingEnabled: e.target.checked })} />تفعيل اقتراح السعر وحدوده</label>
+          <Input label="سعر بداية الرحلة (بالعملة المحلية)" type="number" value={settings.pricingBaseFare} onChange={(e) => setSettings({ ...settings, pricingBaseFare: Number(e.target.value) })} />
+          <Input label="السعر لكل كيلومتر (بالعملة المحلية)" type="number" value={settings.pricingPerKm} onChange={(e) => setSettings({ ...settings, pricingPerKm: Number(e.target.value) })} />
+          <Input label="نسبة السماح للسائق أعلى وأقل من المقترح (%)" type="number" value={settings.pricingTolerancePercent} onChange={(e) => setSettings({ ...settings, pricingTolerancePercent: Number(e.target.value) })} />
+          <p className="text-xs text-text-secondary">الحساب باستخدام المسافة الجوية التقريبية، وليس مسافة الطريق. الإعدادات مشتركة بين الدول حاليًا؛ راجع العملة والقيم قبل التفعيل. لا تُفعّل النظام إلا بعد تحديد قيم مناسبة لكل دولة.</p>
+        </div>
         <h2 className="mb-3 font-bold text-text-primary">{t('settings.marketingPrograms')}</h2>
         <div className="mb-6 flex flex-col gap-3">
           <Input
