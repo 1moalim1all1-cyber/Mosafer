@@ -198,7 +198,7 @@ service cloud.firestore {
         request.resource.data.totalSeats > 0 &&
         request.resource.data.totalSeats <= 50 &&
         request.resource.data.pricePerSeat is number &&
-        request.resource.data.pricePerSeat >= 0);
+        request.resource.data.pricePerSeat >= 0));
 
       allow update: if isAdmin() ||
         (
