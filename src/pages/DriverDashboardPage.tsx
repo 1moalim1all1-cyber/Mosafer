@@ -6,7 +6,7 @@ import { subscribeDriverTrips, subscribeDriverStatus } from '../lib/driverAction
 import type { Trip } from '../types/trip'
 import { Button } from '../components/ui/Button'
 import { Armchair, Users, Plus } from 'lucide-react'
-import { subscribeDriverOffers } from '../lib/tripOffers'
+import { subscribeDriverOffers, counterTripOffer } from '../lib/tripOffers'
 import { getOrCreateChat } from '../lib/chat'
 import type { TripOffer } from '../types/tripOffer'
 import { MessageCircle } from 'lucide-react'
@@ -54,6 +54,14 @@ export default function DriverDashboardPage() {
     ).catch(() => setChatError('في عرض مقبول لكن تعذر تجهيز المحادثة. اضغط «تواصل مع الراكب» وحاول تاني.'))
   }, [offers])
 
+  async function respondPrice(offer: TripOffer, price: number) {
+    try {
+      await counterTripOffer(offer, price)
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'تعذر الرد على السعر')
+    }
+  }
+
   async function contactPassenger(offer: TripOffer) {
     try {
       setChatError('')
@@ -90,6 +98,7 @@ export default function DriverDashboardPage() {
             {offers.map((offer) => <div key={offer.id} className="rounded-2xl border border-border bg-card p-4">
               <div className="flex justify-between gap-2"><span className="font-semibold text-text-primary">عرضك: {offer.seatsOffered} مقعد · {offer.pricePerSeat} ج.م للمقعد</span><span className={`text-sm font-bold ${offer.status === 'accepted' ? 'text-success' : offer.status === 'rejected' ? 'text-danger' : 'text-warning'}`}>{offer.status === 'accepted' ? 'الراكب وافق' : offer.status === 'rejected' ? 'تم الاعتذار' : 'بانتظار رد الراكب'}</span></div>
               <p className="mt-2 text-sm text-text-secondary">الساعة {offer.departureTime}</p>
+              {offer.status === 'pending' && offer.lastPriceBy === 'passenger' && <div className="mt-3 rounded-xl border border-primary/30 p-3"><p className="mb-2 text-sm font-semibold">الراكب اقترح {offer.counterPrice} للمقعد</p><div className="flex flex-wrap gap-2"><button onClick={() => respondPrice(offer, offer.counterPrice ?? offer.pricePerSeat)} className="rounded-lg bg-success px-3 py-2 text-xs font-bold text-white">أوافق على سعر الراكب</button><button onClick={() => { const value = prompt('اكتب سعرك الجديد للمقعد', String(offer.counterPrice ?? offer.pricePerSeat)); if (value !== null) respondPrice(offer, Number(value)) }} className="rounded-lg bg-primary px-3 py-2 text-xs font-bold text-white">اقترح سعر تاني</button></div><p className="mt-1 text-xs text-text-secondary">بعد موافقتك، الراكب يؤكد الاتفاق النهائي.</p></div>}
               {offer.status === 'accepted' && <button onClick={() => contactPassenger(offer)} className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-2.5 font-semibold text-white"><MessageCircle size={18} /> تواصل مع الراكب</button>}
             </div>)}
           </div>
