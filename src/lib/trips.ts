@@ -19,6 +19,7 @@ function mapTripDoc(id: string, data: DocumentData): Trip {
   return {
     id,
     driverId: data.driverId ?? '',
+    isDemo: data.isDemo === true,
     status: data.status ?? 'pending',
     country: data.country ?? 'egypt',
     originCity: data.originCity ?? '',
