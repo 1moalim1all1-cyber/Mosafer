@@ -69,6 +69,7 @@ export async function createBooking(params: {
       const tripSnap = await tx.get(tripRef)
       if (!tripSnap.exists()) throw new Error('الرحلة دي مش موجودة')
       const trip = tripSnap.data()
+      if (trip.isDemo === true) throw new Error('دي رحلة تجريبية ومينفعش تحجز فيها')
       bookedDriverId = trip.driverId as string
 
       if (trip.status !== 'active') throw new Error('الرحلة دي مش متاحة للحجز حاليًا')
