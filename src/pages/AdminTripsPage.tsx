@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Search, Trash2, Clock3 } from 'lucide-react'
-import { subscribeAllTrips, deleteTrip, expireOldTrips, type ManagedTrip } from '../lib/admin'
+import { subscribeAllTrips, deleteTrip, expireOldTrips, createAdminDemoTrip, type ManagedTrip } from '../lib/admin'
 
 function getStatusConfig(t: (key: string) => string): Record<string, { label: string; color: string }> {
   return {
@@ -25,6 +25,7 @@ export default function AdminTripsPage() {
   const [search, setSearch] = useState('')
   const [busyId, setBusyId] = useState<string | null>(null)
   const [cleaning, setCleaning] = useState(false)
+  const [creatingDemo, setCreatingDemo] = useState(false)
 
   useEffect(() => subscribeAllTrips(setTrips), [])
 
@@ -32,6 +33,19 @@ export default function AdminTripsPage() {
     if (!search.trim()) return trips
     return trips.filter((t) => t.originCity.includes(search.trim()) || t.destinationCity.includes(search.trim()))
   }, [trips, search])
+
+  async function handleDemoTrip() {
+    if (!confirm('إنشاء رحلة تجريبية ظاهرة للمستخدمين، لكنها غير قابلة للحجز؟')) return
+    setCreatingDemo(true)
+    try {
+      await createAdminDemoTrip()
+      alert('تم إنشاء رحلة تجريبية. تقدر تحذفها من هنا في أي وقت.')
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'فشل إنشاء الرحلة التجريبية. راجع صلاحيات Firestore.')
+    } finally {
+      setCreatingDemo(false)
+    }
+  }
 
   async function handleDelete(trip: ManagedTrip) {
     if (!confirm(t('admin.confirmDeleteTrip', { from: trip.originCity, to: trip.destinationCity }))) return
@@ -89,6 +103,9 @@ export default function AdminTripsPage() {
       <main className="mx-auto w-full max-w-7xl px-4 py-6">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-text-secondary">{filtered.length} {t('admin.tripsCountLabel')}</p>
+          <button onClick={handleDemoTrip} disabled={creatingDemo} className="rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white disabled:opacity-50">
+            {creatingDemo ? 'جاري الإنشاء…' : '+ إنشاء رحلة تجريبية بضغطة'}
+          </button>
           <button
             onClick={handleExpireOldTrips}
             disabled={cleaning}
@@ -105,6 +122,7 @@ export default function AdminTripsPage() {
           <div key={trip.id} className="mb-3 rounded-2xl border border-border bg-card p-4">
             <div className="mb-2 flex items-center justify-between">
               <p className="font-semibold text-text-primary">
+                {trip.isDemo && <span className="ml-2 rounded bg-warning/20 px-2 py-1 text-xs text-warning">تجريبية — غير قابلة للحجز</span>}
                 {trip.originCity} → {trip.destinationCity}
               </p>
               <span className={`text-sm font-semibold ${STATUS_CONFIG[trip.status]?.color ?? 'text-text-secondary'}`}>

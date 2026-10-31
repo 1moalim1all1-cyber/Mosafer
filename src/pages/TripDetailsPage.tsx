@@ -50,6 +50,7 @@ export default function TripDetailsPage() {
 
   async function handleBook() {
     if (!trip || !user) return
+    if (trip.isDemo) { setError('دي رحلة تجريبية ومش متاحة للحجز'); return }
     if (!pickupPoint) {
       setError(t('tripDetails.pickupRequired'))
       return
@@ -156,6 +157,7 @@ export default function TripDetailsPage() {
           </div>
         )}
 
+        {trip.isDemo && <div className="mb-4 rounded-xl border border-warning bg-warning/10 p-4 font-bold text-warning">رحلة تجريبية من الإدارة — للعرض فقط، مش متاحة للحجز أو الدفع.</div>}
         <h2 className="mb-1 text-xl font-bold text-text-primary">
           {trip.originCity} → {trip.destinationCity}
         </h2>
@@ -239,7 +241,7 @@ export default function TripDetailsPage() {
 
         {error && <p className="mb-4 text-sm text-danger">{error}</p>}
 
-        <Button onClick={handleBook} loading={loading} disabled={trip.availableSeats < 1 || !pickupPoint}>
+        <Button onClick={handleBook} loading={loading} disabled={trip.isDemo || trip.availableSeats < 1 || !pickupPoint}>
           {t('tripDetails.bookNow')}
         </Button>
       </main>

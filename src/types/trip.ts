@@ -3,6 +3,7 @@ export type TripStatus = 'pending' | 'active' | 'full' | 'driver_arriving' | 'in
 export interface Trip {
   id: string
   driverId: string
+  isDemo?: boolean
   status: TripStatus
   country: string
   originCity: string

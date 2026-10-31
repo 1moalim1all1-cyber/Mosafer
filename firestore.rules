@@ -181,7 +181,16 @@ service cloud.firestore {
       allow read: if resource.data.isWomenOnly == false ||
         (isSignedIn() && (userGender() == 'female' || isAdmin()));
 
-      allow create: if isApprovedDriver() &&
+      allow create: if (
+        (isAdmin() &&
+         request.resource.data.isDemo == true &&
+         request.resource.data.driverId == request.auth.uid &&
+         request.resource.data.status == 'active' &&
+         request.resource.data.totalSeats == 3 &&
+         request.resource.data.availableSeats == 3 &&
+         request.resource.data.pricePerSeat == 100) ||
+        (isApprovedDriver() &&
+        request.resource.data.get('isDemo', false) == false &&
         request.resource.data.driverId == request.auth.uid &&
         request.resource.data.status == 'active' &&
         request.resource.data.totalSeats is int &&
@@ -189,7 +198,7 @@ service cloud.firestore {
         request.resource.data.totalSeats > 0 &&
         request.resource.data.totalSeats <= 50 &&
         request.resource.data.pricePerSeat is number &&
-        request.resource.data.pricePerSeat >= 0;
+        request.resource.data.pricePerSeat >= 0);
 
       allow update: if isAdmin() ||
         (
@@ -264,6 +273,7 @@ service cloud.firestore {
          isAdmin());
 
       allow create: if isActiveAccount() &&
+        get(/databases/$(database)/documents/trips/$(request.resource.data.tripId)).data.get('isDemo', false) == false &&
         request.resource.data.passengerId == request.auth.uid &&
         request.resource.data.driverId ==
           get(/databases/$(database)/documents/trips/$(request.resource.data.tripId)).data.driverId &&
