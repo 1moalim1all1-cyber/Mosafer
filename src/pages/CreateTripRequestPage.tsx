@@ -11,6 +11,8 @@ import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { LocationPicker } from '../components/LocationPicker'
 import { calculateDistanceKm, estimateEtaMinutes } from '../lib/geo'
+import { fetchAppSettings } from '../lib/admin'
+import { useEffect } from 'react'
 
 export default function CreateTripRequestPage() {
   const navigate = useNavigate()
@@ -27,6 +29,9 @@ export default function CreateTripRequestPage() {
   const [preferredTime, setPreferredTime] = useState('')
   const [seats, setSeats] = useState('1')
   const [notes, setNotes] = useState('')
+  const [passengerBudgetEnabled, setPassengerBudgetEnabled] = useState(false)
+  const [proposedPrice, setProposedPrice] = useState('')
+  useEffect(() => { fetchAppSettings().then(s => setPassengerBudgetEnabled(s.passengerBudgetEnabled)).catch(() => setPassengerBudgetEnabled(false)) }, [])
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [matches, setMatches] = useState<MatchedTrip[] | null>(null)
@@ -54,6 +59,10 @@ export default function CreateTripRequestPage() {
       return
     }
 
+    if (passengerBudgetEnabled && proposedPrice.trim() && (!Number.isFinite(Number(proposedPrice)) || Number(proposedPrice) <= 0)) {
+      setError('اكتب سعر مقترح صحيح للمقعد')
+      return
+    }
     setLoading(true)
     setError(null)
     try {
@@ -68,6 +77,7 @@ export default function CreateTripRequestPage() {
         travelDate,
         preferredTime: preferredTime || undefined,
         seatsNeeded: Number(seats),
+        ...(passengerBudgetEnabled && proposedPrice.trim() ? { proposedPricePerSeat: Number(proposedPrice) } : {}),
         notes: notes || undefined,
       })
 
@@ -193,6 +203,7 @@ export default function CreateTripRequestPage() {
           onChange={(e) => setPreferredTime(e.target.value)}
         />
         <Input label={t('driver.availableSeatsCount')} type="number" min={1} value={seats} onChange={(e) => setSeats(e.target.value)} />
+        {passengerBudgetEnabled && <div className="md:col-span-2"><Input label={`السعر اللي تقترحه للمقعد (${COUNTRIES[country].currencyAr}) — اختياري`} type="number" min={1} value={proposedPrice} onChange={(e) => setProposedPrice(e.target.value)} /><p className="mt-1 text-xs text-text-secondary">ده مجرد عرض منك للسائق، مش سعر حجز نهائي. السائق يقدر يقدم عرض مختلف وتختار توافق أو ترفض.</p></div>}
 
         <div className="md:col-span-2">
           <label className="mb-1.5 block text-sm font-semibold text-text-primary">{t('community.notesOptional')}</label>
