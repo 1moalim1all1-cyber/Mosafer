@@ -18,7 +18,7 @@ import {
   writeBatch,
   serverTimestamp,
 } from 'firebase/firestore'
-import { db } from './firebase'
+import { db, auth } from './firebase'
 
 export interface PendingDriver {
   uid: string
@@ -392,6 +392,7 @@ export interface ManagedTrip {
   totalSeats: number
   availableSeats: number
   pricePerSeat: number
+  isDemo: boolean
 }
 
 export function subscribeAllTrips(callback: (trips: ManagedTrip[]) => void, count = 100) {
@@ -411,10 +412,42 @@ export function subscribeAllTrips(callback: (trips: ManagedTrip[]) => void, coun
           totalSeats: data.totalSeats ?? 0,
           availableSeats: data.availableSeats ?? 0,
           pricePerSeat: data.pricePerSeat ?? 0,
+          isDemo: data.isDemo === true,
         }
       }),
     )
   })
+}
+
+/** Demo listings are clearly marked, expire automatically and cannot be booked. */
+export async function createAdminDemoTrip(): Promise<string> {
+  const uid = auth.currentUser?.uid
+  if (!uid) throw new Error('لازم تدخل بحساب الإدارة')
+  const now = Date.now()
+  const ref = await addDoc(collection(db, 'trips'), {
+    driverId: uid,
+    status: 'active',
+    isDemo: true,
+    country: 'egypt',
+    originCity: 'القاهرة (تجربة)',
+    originGovernorate: 'القاهرة',
+    destinationCity: 'الجيزة (تجربة)',
+    destinationGovernorate: 'الجيزة',
+    originLat: 0,
+    originLng: 0,
+    destinationLat: 0,
+    destinationLng: 0,
+    departureTime: new Date(now + 24 * 60 * 60 * 1000),
+    estimatedDurationMinutes: 60,
+    pricePerSeat: 100,
+    totalSeats: 3,
+    availableSeats: 3,
+    carType: 'تجريبية',
+    isReturnEmptyTrip: false,
+    isWomenOnly: false,
+    createdAt: serverTimestamp(),
+  })
+  return ref.id
 }
 
 /** حذف رحلة نهائيًا - الأدمن بس اللي يقدر يعمل كده لأي رحلة (السائق بيقدر يحذف بس رحلته هو) */
