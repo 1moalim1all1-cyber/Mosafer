@@ -67,6 +67,7 @@ function RequestCard({ request, canSendOffer }: { request: TripRequest; canSendO
         {request.preferredTime && <span>🕐 {request.preferredTime}</span>}
         <span>👥 {request.seatsNeeded} {t('bookings.seatsCount')}</span>
       </div>
+      {request.proposedPricePerSeat !== undefined && <p className="mb-2 text-sm font-bold text-primary">💰 السعر اللي الراكب مقترحه للمقعد: {request.proposedPricePerSeat}</p>}
       {request.notes && <p className="mb-3 text-sm text-text-secondary">"{request.notes}"</p>}
 
       {!isOwnRequest && canSendOffer && (

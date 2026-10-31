@@ -70,6 +70,7 @@ export function SendOfferModal({ request, onClose }: { request: TripRequest; onC
             <h3 className="mb-4 text-lg font-bold text-text-primary">{t('community.sendOfferTitle')}</h3>
             <div className="flex flex-col gap-3">
               <Input label={t('driver.time')} type="time" value={departureTime} onChange={(e) => setDepartureTime(e.target.value)} />
+              {request.proposedPricePerSeat !== undefined && <p className="text-sm text-primary">الراكب مقترح {request.proposedPricePerSeat} للمقعد — تقدر تبعت عرضك بالسعر اللي يناسبك.</p>}
               <Input label={t('community.pricePerSeatShort')} type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
               <Input
                 label={t('driver.availableSeatsCount')}

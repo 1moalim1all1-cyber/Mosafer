@@ -13,6 +13,7 @@ export interface TripRequest {
   travelDate: string // YYYY-MM-DD
   preferredTime?: string // HH:mm، اختياري
   seatsNeeded: number
+  proposedPricePerSeat?: number
   notes?: string
   status: TripRequestStatus
   createdAt: Date

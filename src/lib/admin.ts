@@ -228,6 +228,7 @@ export async function resolveWalletRequest(userId: string, txId: string, approve
 export interface AppSettings {
   commissionStandardPercent: number
   commissionReturnEmptyPercent: number
+  passengerBudgetEnabled: boolean
   pricingEnabled: boolean
   pricingBaseFare: number
   pricingPerKm: number
@@ -285,6 +286,7 @@ export async function fetchAppSettings(): Promise<AppSettings> {
   return {
     commissionStandardPercent: data.commissionStandardPercent ?? 10,
     commissionReturnEmptyPercent: data.commissionReturnEmptyPercent ?? 5,
+    passengerBudgetEnabled: data.passengerBudgetEnabled === true,
     pricingEnabled: data.pricingEnabled === true,
     pricingBaseFare: data.pricingBaseFare ?? 0,
     pricingPerKm: data.pricingPerKm ?? 0,
