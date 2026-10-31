@@ -95,6 +95,10 @@ export default function AdminSettingsPage() {
           />
         </div>
 
+        <div className="mb-5 rounded-xl border border-border bg-card p-4">
+          <label className="flex items-center gap-2 text-text-primary"><input type="checkbox" checked={settings.passengerBudgetEnabled} onChange={(e) => setSettings({ ...settings, passengerBudgetEnabled: e.target.checked })} />السماح للراكب باقتراح سعر للمقعد عند طلب رحلة</label>
+          <p className="mt-2 text-xs text-text-secondary">السعر المقترح اختياري وغير ملزم للسائق. لا يتم تعديل سعر حجز مؤكد بدون موافقة الطرفين.</p>
+        </div>
         <h2 className="mb-3 font-bold text-text-primary">التسعير المقترح للسائق</h2>
         <div className="mb-6 flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
           <label className="flex items-center gap-2 text-text-primary"><input type="checkbox" checked={settings.pricingEnabled} onChange={(e) => setSettings({ ...settings, pricingEnabled: e.target.checked })} />تفعيل اقتراح السعر وحدوده</label>
