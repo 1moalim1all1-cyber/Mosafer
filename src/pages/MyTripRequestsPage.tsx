@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { PlusCircle, ChevronDown } from 'lucide-react'
 import { useAuth } from '../contexts/useAuth'
 import { subscribeMyTripRequests, cancelTripRequest } from '../lib/tripRequests'
-import { subscribeOffersForRequest, respondToTripOffer } from '../lib/tripOffers'
+import { subscribeOffersForRequest, respondToTripOffer, counterTripOffer } from '../lib/tripOffers'
 import type { TripRequest } from '../types/tripRequest'
 import type { TripOffer } from '../types/tripOffer'
 import { BottomNav } from '../components/BottomNav'
@@ -25,6 +25,7 @@ function OfferRow({ offer }: { offer: TripOffer }) {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [newPrice, setNewPrice] = useState('')
 
   useEffect(() => {
     if (offer.status !== 'accepted') return
@@ -46,6 +47,17 @@ function OfferRow({ offer }: { offer: TripOffer }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  async function negotiate() {
+    setLoading(true)
+    setError('')
+    try {
+      await counterTripOffer(offer, Number(newPrice))
+      setNewPrice('')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'تعذر إرسال السعر')
+    } finally { setLoading(false) }
   }
 
   async function openChat() {
@@ -74,8 +86,11 @@ function OfferRow({ offer }: { offer: TripOffer }) {
       </p>
       {offer.message && <p className="mb-2 text-xs text-text-secondary">"{offer.message}"</p>}
 
+      <p className="mb-2 text-sm font-semibold text-primary">السعر الحالي للتفاوض: {offer.counterPrice ?? offer.pricePerSeat} {t('common.currency')} للمقعد</p>
+      {offer.status === 'pending' && (offer.lastPriceBy ?? 'driver') === 'driver' && <div className="mb-2 flex gap-2"><input aria-label="سعرك المقترح" type="number" min="1" value={newPrice} onChange={e => setNewPrice(e.target.value)} placeholder="اقترح سعر تاني" className="min-w-0 flex-1 rounded-lg border border-border bg-card px-3 py-2"/><button onClick={negotiate} disabled={loading || !(Number(newPrice) > 0)} className="rounded-lg bg-primary px-3 py-2 text-white disabled:opacity-40">فاوض على السعر</button></div>}
+      {offer.status === 'pending' && offer.lastPriceBy === 'passenger' && <p className="mb-2 text-xs text-warning">مستنيين رد السائق على السعر اللي اقترحته.</p>}
       {error && <p className="mb-2 text-sm text-danger">{error}</p>}
-      {offer.status === 'pending' ? (
+      {offer.status === 'pending' && (offer.lastPriceBy ?? 'driver') === 'driver' ? (
         <div className="flex gap-2">
           <button
             onClick={() => handle(false)}
