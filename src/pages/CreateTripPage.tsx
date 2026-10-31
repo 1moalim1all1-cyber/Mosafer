@@ -242,7 +242,13 @@ export default function CreateTripPage() {
           <p className="font-bold">سعر مسافر المقترح للمقعد: {fareQuote.suggested} {COUNTRIES[country].currencyAr}</p>
           <p>مسموح من {fareQuote.minimum} إلى {fareQuote.maximum} {COUNTRIES[country].currencyAr}</p>
           <p className="mt-1 text-xs text-text-secondary">سعر تقديري حسب المسافة المستقيمة، وقد يختلف عن مسافة الطريق الفعلية.</p>
-          <button type="button" className="mt-2 rounded-lg bg-primary px-3 py-2 text-white" onClick={() => setPrice(String(fareQuote.suggested))}>استخدم السعر المقترح</button>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button type="button" aria-label="تقليل سعر المقعد" disabled={Number(price || fareQuote.suggested) <= fareQuote.minimum} onClick={() => setPrice(String(Math.max(fareQuote.minimum, Number(price || fareQuote.suggested) - 1)))} className="rounded-lg border border-border bg-card px-4 py-2 font-bold text-white disabled:opacity-40">−</button>
+            <span className="min-w-20 text-center font-bold">{Number(price || fareQuote.suggested)} {COUNTRIES[country].currencyAr}</span>
+            <button type="button" aria-label="زيادة سعر المقعد" disabled={Number(price || fareQuote.suggested) >= fareQuote.maximum} onClick={() => setPrice(String(Math.min(fareQuote.maximum, Number(price || fareQuote.suggested) + 1)))} className="rounded-lg border border-border bg-card px-4 py-2 font-bold text-white disabled:opacity-40">+</button>
+            <span className="text-xs text-text-secondary">{Number(price || fareQuote.suggested) === fareQuote.suggested ? 'مطابق للسعر المقترح' : Number(price || fareQuote.suggested) > fareQuote.suggested ? 'زيادة +' + (Number(price || fareQuote.suggested) - fareQuote.suggested) : 'خصم −' + (fareQuote.suggested - Number(price || fareQuote.suggested))}</span>
+            <button type="button" className="rounded-lg bg-primary px-3 py-2 text-white" onClick={() => setPrice(String(fareQuote.suggested))}>إعادة للسعر المقترح</button>
+          </div>
         </div>}
         <Input label={t('driver.availableSeatsCount')} type="number" value={seats} onChange={(e) => setSeats(e.target.value)} />
         <div>
