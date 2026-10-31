@@ -9,6 +9,8 @@ import { Input } from '../components/ui/Input'
 import { LocationPicker } from '../components/LocationPicker'
 import { COUNTRIES, DEFAULT_COUNTRY, type CountryCode } from '../lib/countries'
 import { calculateDistanceKm, estimateEtaMinutes } from '../lib/geo'
+import { fetchAppSettings, type AppSettings } from '../lib/admin'
+import { getFareQuote } from '../lib/farePricing'
 
 export default function CreateTripPage() {
   const { user } = useAuth()
@@ -25,6 +27,7 @@ export default function CreateTripPage() {
   const [date, setDate] = useState(todayStr)
   const [time, setTime] = useState('')
   const [price, setPrice] = useState('')
+  const [pricingSettings, setPricingSettings] = useState<AppSettings | null>(null)
   const [seats, setSeats] = useState('3')
   const [duration, setDuration] = useState('60')
   const [isReturnEmptyTrip, setIsReturnEmptyTrip] = useState(false)
@@ -41,6 +44,11 @@ export default function CreateTripPage() {
     ? calculateDistanceKm(originPoint.lat, originPoint.lng, destinationPoint.lat, destinationPoint.lng)
     : null
   const calculatedDuration = routeDistanceKm == null ? null : estimateEtaMinutes(routeDistanceKm)
+  const fareQuote = pricingSettings && routeDistanceKm != null ? getFareQuote(routeDistanceKm, pricingSettings) : null
+
+  useEffect(() => {
+    fetchAppSettings().then(setPricingSettings).catch(() => setPricingSettings(null))
+  }, [])
 
   useEffect(() => {
     if (calculatedDuration != null) setDuration(String(calculatedDuration))
@@ -75,11 +83,15 @@ export default function CreateTripPage() {
     }
     const priceNum = Number(price)
     const seatsNum = Number(seats)
-    if (!priceNum || priceNum <= 0) {
+    if (!Number.isFinite(priceNum) || priceNum <= 0) {
       setError('أدخل سعر صحيح للمقعد')
       return
     }
-    if (!seatsNum || seatsNum <= 0) {
+    if (pricingSettings?.pricingEnabled && (!fareQuote || priceNum < fareQuote.minimum || priceNum > fareQuote.maximum)) {
+      setError('السعر خارج الحدود المسموحة من مسافر، راجع السعر المقترح')
+      return
+    }
+    if (!Number.isInteger(seatsNum) || seatsNum <= 0) {
       setError('أدخل عدد مقاعد صحيح')
       return
     }
@@ -226,6 +238,12 @@ export default function CreateTripPage() {
           value={price}
           onChange={(e) => setPrice(e.target.value)}
         />
+        {fareQuote && <div className="rounded-xl border border-primary/40 bg-primary/10 p-3 text-sm text-text-primary lg:col-span-2">
+          <p className="font-bold">سعر مسافر المقترح للمقعد: {fareQuote.suggested} {COUNTRIES[country].currencyAr}</p>
+          <p>مسموح من {fareQuote.minimum} إلى {fareQuote.maximum} {COUNTRIES[country].currencyAr}</p>
+          <p className="mt-1 text-xs text-text-secondary">سعر تقديري حسب المسافة المستقيمة، وقد يختلف عن مسافة الطريق الفعلية.</p>
+          <button type="button" className="mt-2 rounded-lg bg-primary px-3 py-2 text-white" onClick={() => setPrice(String(fareQuote.suggested))}>استخدم السعر المقترح</button>
+        </div>}
         <Input label={t('driver.availableSeatsCount')} type="number" value={seats} onChange={(e) => setSeats(e.target.value)} />
         <div>
           <Input label={t('driver.estimatedDuration')} type="number" value={duration} onChange={(e) => setDuration(e.target.value)} />
