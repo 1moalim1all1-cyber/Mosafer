@@ -8,6 +8,8 @@ export interface TripOffer {
   driverName: string
   departureTime: string // HH:mm
   pricePerSeat: number
+  counterPrice?: number
+  lastPriceBy?: 'driver' | 'passenger'
   seatsOffered: number
   pickupPoint?: string
   message?: string
