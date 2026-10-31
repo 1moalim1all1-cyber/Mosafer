@@ -13,6 +13,8 @@ function mapDoc(id: string, data: Record<string, unknown>): TripOffer {
     driverName: data.driverName as string,
     departureTime: data.departureTime as string,
     pricePerSeat: data.pricePerSeat as number,
+    counterPrice: typeof data.counterPrice === 'number' ? data.counterPrice : undefined,
+    lastPriceBy: (data.lastPriceBy as TripOffer['lastPriceBy']) ?? 'driver',
     seatsOffered: data.seatsOffered as number,
     pickupPoint: (data.pickupPoint as string) ?? undefined,
     message: (data.message as string) ?? undefined,
@@ -61,6 +63,31 @@ export async function sendTripOffer(input: {
   return docRef.id
 }
 
+/** A new proposal is not an agreement; only the opposite party can respond.
+ * The original driver fare stays untouched for audit; counterPrice is the latest proposed fare.
+ */
+export async function counterTripOffer(offer: TripOffer, nextPrice: number): Promise<void> {
+  const uid = auth.currentUser?.uid
+  if (!uid || (uid !== offer.passengerId && uid !== offer.driverId)) throw new Error('غير مصرح لك بالتفاوض')
+  if (!Number.isFinite(nextPrice) || nextPrice <= 0 || nextPrice > 1000000) throw new Error('أدخل سعر صحيح')
+  const actor = uid === offer.passengerId ? 'passenger' : 'driver'
+  await runTransaction(db, async (tx) => {
+    const ref = doc(db, 'tripOffers', offer.id)
+    const snap = await tx.get(ref)
+    if (!snap.exists() || snap.data().status !== 'pending') throw new Error('العرض لم يعد قابلًا للتفاوض')
+    if ((snap.data().lastPriceBy ?? 'driver') === actor) throw new Error('استنى رد الطرف التاني الأول')
+    tx.update(ref, { counterPrice: nextPrice, lastPriceBy: actor })
+  })
+  const other = actor === 'driver' ? offer.passengerId : offer.driverId
+  await addDoc(collection(db, 'users', other, 'notifications'), {
+    userId: other, actorId: uid, type: 'tripOfferResponse',
+    title: 'وصلك سعر جديد للتفاوض',
+    body: `الطرف التاني اقترح ${nextPrice} للمقعد. راجع العرض ورد عليه.`,
+    relatedId: offer.requestId, sourceId: offer.id,
+    isRead: false, createdAt: Timestamp.now(),
+  }).catch(() => undefined)
+}
+
 /** كل العروض اللي وصلت لطلب معيّن (بيستخدمها الراكب) */
 export function subscribeOffersForRequest(requestId: string, callback: (offers: TripOffer[]) => void) {
   const q = query(collection(db, 'tripOffers'), where('requestId', '==', requestId))
@@ -81,6 +108,7 @@ export async function respondToTripOffer(offer: TripOffer, accept: boolean): Pro
     if (!offerSnap.exists() || !requestSnap.exists()) throw new Error('الطلب أو العرض لم يعد موجودًا')
     if (offerSnap.data().passengerId !== uid || requestSnap.data().passengerId !== uid || offerSnap.data().requestId !== offer.requestId) throw new Error('لا يمكنك الرد على هذا العرض')
     if (offerSnap.data().status !== 'pending' || requestSnap.data().status !== 'active') throw new Error('تم الرد على الطلب بالفعل')
+    if (accept && (offerSnap.data().lastPriceBy ?? 'driver') !== 'driver') throw new Error('السائق لازم يوافق على السعر المقترح قبل الاتفاق النهائي')
     route = `${requestSnap.data().originCity} → ${requestSnap.data().destinationCity}`
     tx.update(offerRef, { status: accept ? 'accepted' : 'rejected' })
     if (accept) tx.update(requestRef, { status: 'matched' })
