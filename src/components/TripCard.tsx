@@ -28,6 +28,7 @@ export function TripCard({ trip }: { trip: Trip }) {
 
   return (
     <Card hoverable onClick={() => navigate(`/trip/${trip.id}`)} className="mb-4">
+      {trip.isDemo && <div className="mb-3 rounded-lg border border-warning/50 bg-warning/10 px-3 py-2 text-xs font-bold text-warning">تجربة من الإدارة — غير قابلة للحجز</div>}
       {(trip.isReturnEmptyTrip || trip.isWomenOnly) && (
         <div className="mb-3 flex gap-2">
           {trip.isReturnEmptyTrip && (
