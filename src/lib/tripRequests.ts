@@ -1,6 +1,7 @@
 import { collection, doc, addDoc, updateDoc, deleteDoc, query, where, onSnapshot, Timestamp } from 'firebase/firestore'
 import { db, auth } from './firebase'
 import type { TripRequest } from '../types/tripRequest'
+import { fetchAppSettings } from './admin'
 
 function mapDoc(id: string, data: Record<string, unknown>): TripRequest {
   const created = data.createdAt as { toDate?: () => Date }
@@ -17,6 +18,7 @@ function mapDoc(id: string, data: Record<string, unknown>): TripRequest {
     travelDate: data.travelDate as string,
     preferredTime: (data.preferredTime as string) ?? undefined,
     seatsNeeded: (data.seatsNeeded as number) ?? 1,
+    proposedPricePerSeat: typeof data.proposedPricePerSeat === 'number' ? data.proposedPricePerSeat : undefined,
     notes: (data.notes as string) ?? undefined,
     status: (data.status as TripRequest['status']) ?? 'active',
     createdAt: created?.toDate ? created.toDate() : new Date(),
@@ -45,11 +47,17 @@ export async function createTripRequest(input: {
   travelDate: string
   preferredTime?: string
   seatsNeeded: number
+  proposedPricePerSeat?: number
   notes?: string
 }): Promise<string> {
   const uid = auth.currentUser?.uid
   if (!uid) throw new Error('لازم تسجّل دخول الأول')
 
+  if (input.proposedPricePerSeat !== undefined) {
+    const settings = await fetchAppSettings()
+    if (!settings.passengerBudgetEnabled) throw new Error('الإدارة لم تفعّل اقتراح سعر الراكب')
+    if (!Number.isFinite(input.proposedPricePerSeat) || input.proposedPricePerSeat <= 0) throw new Error('أدخل سعر مقترح صحيح')
+  }
   const requestedTime = new Date(`${input.travelDate}T${input.preferredTime || '23:59:59'}`)
   if (Number.isNaN(requestedTime.getTime()) || requestedTime.getTime() <= Date.now()) {
     throw new Error('اختار تاريخ ووقت لسه مجاش')
